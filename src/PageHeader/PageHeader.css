@@ -1,0 +1,64 @@
+
+.page-header{
+    height: 50px;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    padding: 4px 20px 4px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    position: sticky;
+    top: 0;
+    margin-bottom: 1vh;
+    background-color: whitesmoke;
+    justify-content: space-between;
+}
+
+.navigation-menu{
+    background-color: transparent;
+    width: calc(100% - 200px);
+}
+
+.navigation-drawer{
+    float: left;
+    align-items: center;
+}
+
+.user-datapool-navigation{
+    float: right;
+}
+
+.navigation-bar-datapools-select{
+    width: 250px;
+    align-items: center;
+}
+
+.navigation-bar-datapools-select-spin{
+    width: 250px;
+}
+
+.ant-select-selection-item{
+    color: gray;
+}
+
+.navigation-bar-user-avatar{
+    background-color: deepskyblue;
+}
+
+.navigation-bar-user-avatar:hover{
+    background-color: rgba(0, 191, 255, 0.8);
+}
+
+.navigation-bar-notification-avatar{
+    background-color: deepskyblue;
+}
+
+.navigation-bar-notification-avatar:hover{
+    background-color: rgba(0, 191, 255, 0.8);
+}
+
+.app-logo{
+    height: 43px;
+    width: 150px;
+    object-fit: contain;
+    float: left;
+}
