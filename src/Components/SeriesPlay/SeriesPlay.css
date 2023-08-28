@@ -1,0 +1,85 @@
+.series-play-top-header{
+    align-items: flex-start;
+    display: flex;
+}
+
+.series-play-total-play-time-word{
+    color: #777;
+    line-height: 0;
+}
+
+.series-play-final-page-item-container-base{
+    margin-bottom: 1vw;
+
+}
+
+.series-play-final-page-item-container{
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 0.25em;
+    margin: 1vmin;
+    height: 100%;
+}
+
+.series-play-final-page-item-container-inner{
+    padding: 1vmin;
+    flex-direction: column;
+    display: flex;
+    align-items: flex-start;
+}
+
+.series-play-final-page-item-header{
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.series-play-final-page-item-code{
+    margin-bottom: 0.5vmin;
+}
+
+.series-play-final-page-item-code:hover{
+    background-color: whitesmoke;
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+    cursor: pointer;
+    width: fit-content;
+    color: blue;
+    border-radius: 0.25em;
+}
+
+.series-play-final-page-item-statistics-section{
+    align-items: flex-start;
+}
+
+.series-play-final-page-item-statistics-score-time{
+    flex-direction: column;
+    display: flex;
+    align-items: flex-start;
+}
+
+.series-play-final-page-item-img{
+    width: 10vw;
+    height: auto;
+    object-fit: contain;
+}
+
+.series-play-final-page-item-correct{
+    color: green;
+}
+
+.series-play-final-page-item-incorrect{
+    color: red;
+}
+
+.series-play-final-page-item-xp{
+    color: orange;
+}
+
+.series-play-final-page-item-success-rate{
+    color: green;
+}
+
+.series-play-final-page-item-gray-word{
+    color: #777;
+}

@@ -12,7 +12,7 @@ export function Dashboard(){
             
             <Space direction="vertical" align="center">
                 <QRCode
-                    value={currentPlayerKey}
+                    value={currentPlayerKey||'-'}
                 />
                 <Input
                     value={currentPlayerKey}

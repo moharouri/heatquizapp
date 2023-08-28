@@ -1,0 +1,59 @@
+.navigation-bar-click-trees-select{
+    width: 25vw;
+}
+
+.click-tree-item-container{
+    flex-direction: row;
+    display: flex;
+}
+
+.click-tree-head-container{
+    width: 15vw;
+    flex-direction: column;
+    display: flex;
+}
+
+.click-tree-leaf-container{
+    width: 80vw;
+    overflow-x: scroll;
+    flex-direction: row;
+    display: flex;
+}
+
+.click-tree-leaf{
+    width: 10vw;
+}
+
+.click-tree-head-img{
+    width: 10vw;
+    object-fit: contain;
+}
+
+.click-tree-leaf-img{
+    width: 8vw;
+}
+
+.click-tree-head-title{
+    color: #0275d8;
+    width: fit-content;
+}
+
+.click-tree-usage-times{
+    color: #777;
+    margin-bottom: 0.5vh;
+}
+
+.click-tree-leaf-title{
+    width: fit-content;
+    margin-bottom: 0.5vh;
+}
+
+
+.click-tree-clickable-title:hover{
+    cursor: pointer;
+    background-color: whitesmoke;
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+    border-radius: 0.5em;
+    color: #0275d8;
+}

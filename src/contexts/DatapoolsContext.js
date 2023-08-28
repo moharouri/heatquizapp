@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
-import { useQuery } from "react-query"
 import { getCurrentDatapool, getDatapools, setCurrentDatapool } from "../services/Datapools"
+import { useAsyncFn } from "../hooks/useAsync"
 
 const Context = React.createContext()
 
@@ -10,7 +10,7 @@ export function useDatapools(){
 
 export function DatapoolsProvider ({children}){
     //Fetch datapools from API
-    const {data: datapools, error, isLoading} = useQuery('datapools', () => getDatapools())
+    const {value: datapools, errorGetDatapools, loading:isLoadingDatapools, execute: getAllDatapools} = useAsyncFn(() => getDatapools())
     const [selectedDatapool, setSelectedDatapool] = useState(null)
 
     function changeDatapool(datapool){
@@ -23,28 +23,28 @@ export function DatapoolsProvider ({children}){
     }
 
     useEffect(() => {
-        //Get datapool saved on local storage
-        const currentDatapool = getCurrentDatapool()
+        getAllDatapools().then((data) => {
+            //Get datapool saved on local storage
+            const currentDatapool = getCurrentDatapool()
 
-        //when daatapools are received from the database (API)
-        if(datapools && datapools.length){
-            //see if datapool exists
-            const corrospondingDatapool = datapools.filter((d) => d.Id === currentDatapool)[0]
+            //when daatapools are received from the database (API)
+            if(data && data.length){
+                //see if datapool exists
+                const corrospondingDatapool = data.filter((d) => d.Id === currentDatapool)[0]
 
-            if(corrospondingDatapool) setSelectedDatapool(corrospondingDatapool.NickName);
+                if(corrospondingDatapool) setSelectedDatapool(corrospondingDatapool.NickName);
 
-            //if datapool saved in local storage is not in the list, default it to null
-            else setCurrentDatapool({value:null});
-        }
-       
-
-    }, [datapools])
+                //if datapool saved in local storage is not in the list, default it to null
+                else setCurrentDatapool({value:null});
+            }
+        })
+    }, [])
 
     return(
         <Context.Provider value = {{
             datapools,
-            error, 
-            isLoading, 
+            errorGetDatapools, 
+            isLoadingDatapools, 
             selectedDatapool,
             changeDatapool
         }}>

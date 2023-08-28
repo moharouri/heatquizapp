@@ -1,31 +1,57 @@
 import './App.css';
 import React from 'react';
-import {Route, Routes } from 'react-router-dom';
-import { Settings } from './Pages/Settings';
 import { Content } from 'antd/es/layout/layout';
-import { NotFoundPage } from './Pages/StatusPages/NotFoundPage';
-import { Login } from './Pages/Login';
 import { DatapoolsProvider } from './contexts/DatapoolsContext';
-import { useAuth } from './contexts/AuthContext';
-import { Dashboard } from './Pages/Dashboard';
+import { UsersProvider } from './contexts/UsersContext';
+import { CoursesProvider } from './contexts/CoursesContext';
+import { StudentFeedbackProvider } from './contexts/StudentFeedbackContext';
+import { ReportsProvider } from './contexts/ReportsContext';
+import { TopicsProvider } from './contexts/TopicsContext';
+import { ClickTreesProvider } from './contexts/ClickTreesContext';
+import { InterpretedTreesProvider } from './contexts/InterpretedTreesContext';
+import { LevelsOfDifficultyProvider } from './contexts/LevelOfDifficultyContext';
+import { QuestionsProvider } from './contexts/QuestionsContext';
+import { KeyboardProvider } from './contexts/KeyboardContext';
+import { SeriesProvider } from './contexts/SeriesContext';
+
+import { MapsProvider } from './contexts/MapsContext';
+import { SelectRoutes } from './SelectRoutes';
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
-  const {playerKey, token, username} = useAuth()
 
   return (
     <div className="App">
           <Content>
-
-              <Routes>
-                <Route path="/Login" exact element={
-                  <DatapoolsProvider>
-                    <Login />
-                  </DatapoolsProvider>
-                }/>
-                <Route path="/" exact element={<Dashboard />}/>
-                <Route path="/settings" element={<Settings />}/>
-                <Route path="*" exact element={<NotFoundPage />}/>
-              </Routes>
+            <AuthProvider>
+            <DatapoolsProvider>
+            <UsersProvider>
+            <CoursesProvider>
+            <StudentFeedbackProvider>
+            <ReportsProvider>
+            <TopicsProvider>
+            <ClickTreesProvider>
+            <InterpretedTreesProvider>
+            <LevelsOfDifficultyProvider>
+            <QuestionsProvider>
+            <KeyboardProvider>
+            <SeriesProvider>
+            <MapsProvider>
+                <SelectRoutes/>
+            </MapsProvider>
+            </SeriesProvider>
+            </KeyboardProvider>
+            </QuestionsProvider>
+            </LevelsOfDifficultyProvider>
+            </InterpretedTreesProvider>
+            </ClickTreesProvider>
+            </TopicsProvider>
+            </ReportsProvider>
+            </StudentFeedbackProvider>
+            </CoursesProvider>
+            </UsersProvider>
+            </DatapoolsProvider>
+            </AuthProvider>
           </Content>
      </div>
   );

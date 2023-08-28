@@ -8,9 +8,11 @@
     
 }
 
-.pages-wrapper-card{
-    height:100%;
+.pages-wrapper-card {
+    margin-top: 60px;
     margin-left: 0.75%;
     margin-right: 0.75%;
     margin-bottom: 0.5%;
+    height: 100%;
+    overflow-y: scroll;
 }

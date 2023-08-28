@@ -1,0 +1,14 @@
+.map-element-modal-img{
+    width: 6vw;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.map-required-element-modal-click:hover{
+    cursor: pointer;
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+    background-color: whitesmoke;
+    border-radius: 0.25em;
+    color: blue;
+}

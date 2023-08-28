@@ -1,12 +1,12 @@
 
 .page-header{
     height: 50px;
-    width: 100vw;
+    width: 100%;
     display: flex;
     align-items: center;
     padding: 4px 20px 4px 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-    position: sticky;
+    position: fixed;
     top: 0;
     margin-bottom: 1vh;
     background-color: whitesmoke;
@@ -28,7 +28,7 @@
 }
 
 .navigation-bar-datapools-select{
-    width: 250px;
+    width: 15vw;
     align-items: center;
 }
 
@@ -58,7 +58,7 @@
 
 .app-logo{
     height: 43px;
-    width: 150px;
+    width: '100%';
     object-fit: contain;
     float: left;
 }

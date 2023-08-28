@@ -3,8 +3,6 @@ import './PageHeader.css';
 import React from 'react';
 import NavigationDrawer from './NavigationDrawer';
 import UserDrawer from './UserDrawer';
-import { DatapoolsProvider } from '../contexts/DatapoolsContext';
-
 
 const PageHeader = () => {
 
@@ -23,9 +21,7 @@ const PageHeader = () => {
             />
 
            <div className='user-datapool-navigation'>     
-                <DatapoolsProvider>
                     <UserDrawer />                    
-                </DatapoolsProvider>   
            </div>
         </Layout.Header>
     )

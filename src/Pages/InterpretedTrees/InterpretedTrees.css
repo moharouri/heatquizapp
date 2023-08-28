@@ -1,0 +1,91 @@
+.navigation-bar-interpreted-trees-select{
+    width: 25vw;
+}
+
+
+.interpreted-tree-item-container{
+    flex-direction: row;
+    display: flex;
+}
+
+.interpreted-tree-head-container{
+    margin: 2vmin;
+
+    width: 100%;
+    flex-direction: column;
+    display: flex;
+}
+
+.interpreted-tree-head-img{
+    width: 10vw;
+    object-fit: contain;
+}
+
+.interpreted-tree-head-title{
+    color: #0275d8;
+    width: fit-content;
+}
+
+.interpreted-tree-usage-times{
+    color: #777;
+    margin-bottom: 0.5vh;
+}
+
+.interpreted-tree-clickable-title:hover{
+    cursor: pointer;
+    background-color: whitesmoke;
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+    border-radius: 0.5em;
+    color: #0275d8;
+}
+
+.interpreted-tree-values-list{
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+}
+
+.interpreted-tree-values-type{
+    color: #777;
+    padding-right: 0.5vw;
+}
+
+.tree-picture-uploader{
+    width: 35vh;
+    height: 35vh;
+}
+
+.new-tree-picture{
+    width: 32vh;
+    height: 32vh;
+    object-fit: contain;
+}
+
+.add-image-tree-tree-word{
+    color: #777;
+}
+
+.tree-name-add-image-tree{
+    color: #0275d8;
+    margin-right: 1vw;
+}
+
+.tree-picture-uploader{
+    width: 35vh;
+    height: 35vh;
+}
+
+
+.edit-image-tree-node-word{
+    color: #777;
+}
+
+.edit-image-tree-node-code{
+    color: #0275d8;
+    margin-right: 1vw;
+}
+
+.add-interpreted-images-values-bar{
+    width: 5vw;
+}

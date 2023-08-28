@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react"
-import { checkAuthData, getAuthData, login, setPlayerKey } from "../services/Auth"
-import { useQuery } from "react-query"
+import { checkAuthData, getAuthData, getIsStudent_LS, setIsStudent_LS, setUserFullname_LS, setUsername_LS } from "../services/Auth"
 import { useNavigate } from "react-router-dom"
+import { useAsyncFn } from "../hooks/useAsync"
 
 const Context = React.createContext()
 
@@ -12,45 +12,61 @@ export function useAuth(){
 export function AuthProvider ({children}){
     const [currentPlayerKey, setCurrentPlayerKey] = useState('')
 
-    const [isLogging, setIsLogging] = useState(false)
-    const [loginError, setLoginError] = useState('')
-
-    const [isStudent, setIsStudent] = useState(false)
     const [username, setUsername] = useState('')
-    const [currentToken, setCurrentToken] = useState('')
+    const [userfullname, setUserfullname] = useState('')
+    const [roles, setRoles] = useState([])
+    const [profilePicture, setProfilePicture] = useState(null)
     
+    const [isStudent, setIsStudent] = useState(false)    
+
+    const {execute: authenticateToken} = useAsyncFn(() => checkAuthData(), [])
+
     const navigate = useNavigate()
 
     useEffect(() => {
-        
-        try{
-            //Authenticate the token saved to LS
-            useQuery('AuthDataValid', () => checkAuthData())
-        }
-        catch{
-            //navigate('/Login')
-        }
-        const {token, playerKey} = getAuthData()
+        const isStudent = getIsStudent_LS()
+        const {playerKey, username, user} = getAuthData()
 
-        setCurrentToken(token)
-        setCurrentPlayerKey(playerKey)
+        if(!isStudent){
+            authenticateToken().then((res) => {
+
+                if(!res) navigate('/login')
+                else {
+                    const {name, username, userProfile, roles} = res
+                    setProfilePicture(userProfile)
+                    setUsername_LS(username)
+                    setUserFullname_LS(name)
+    
+                    setRoles(roles)
+                }
+            })
+    
+            setUsername(user)
+            setUserfullname(username)
+            setCurrentPlayerKey(playerKey)
+
+            return
+        }
+        else{
+            setIsStudent(true)
+            setUsername('student')
+            setUserfullname('student')
+            setProfilePicture(null)
+            setCurrentPlayerKey(playerKey)
+            return
+        }
     }, [])
 
 
 
-    function attemptLogin(username, password, datapoolId){
-        const {data: userInfo, isLoading, error} = useQuery('Login',() => login(username, password, datapoolId))
-
-        setIsLogging(isLoading)
-        setLoginError(error)
-
-        if(!error && !isLoading){
-
-        }
-    }
-
     function playAsStudent(){
+        setIsStudent_LS(true)
+
         setIsStudent(true)
+        setUsername('student')
+        setUserfullname('student')
+        setProfilePicture(null)
+
         navigate('/')
 
     }
@@ -59,16 +75,20 @@ export function AuthProvider ({children}){
         <Context.Provider value = {{
             currentPlayerKey,
 
-            isLogging,
-            loginError,
-
             username,
-            currentToken,
+            userfullname,
+            profilePicture,
+            roles, 
 
             isStudent,
             
-            playAsStudent,
-            attemptLogin
+            setIsStudent,
+            setUsername,
+            setUserfullname,
+            setProfilePicture,
+            setRoles,
+
+            playAsStudent
         }}>
             {children}
         </Context.Provider>

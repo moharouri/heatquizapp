@@ -4,6 +4,7 @@ import './PagesWrapper.css'
 import PageHeader from "../PageHeader";
 
 export function PagesWrapper({children}){
+
     return(
         <div className="pages-wrapper">
             <PageHeader />

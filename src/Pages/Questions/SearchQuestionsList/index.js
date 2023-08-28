@@ -1,0 +1,81 @@
+import React, { useState } from "react";
+import {Empty, Row, Skeleton, Space } from "antd";
+import { useQuestions } from "../../../contexts/QuestionsContext";
+import {QuestionsSearchTool} from "../List/QuestionsSearchTool"
+
+import './SearchQuestionsList.css'
+import { CompactQuestionComponent } from "./CompactQuestionComponent";
+
+export function SearchQuestionsList({selectedQuestions, onSelectQuestions, forbiddenQuestions}){
+
+    const {questions, isLoadingQuestions, questionsByIds, isLoadingQuestionsByIds} = useQuestions()
+
+    const [firstIndex, setFirstIndex] = useState(0)
+
+
+    const handleSelectQuestion = (q) => {
+        const questionIsSelected = selectedQuestions.map(a => a.Id).includes(q.Id)
+
+        let _selectedQuestions = [...selectedQuestions]
+
+        if(questionIsSelected){
+            _selectedQuestions = _selectedQuestions.filter(a => a.Id !== q.Id)
+        }
+        else{
+            _selectedQuestions.push(q)
+        }
+
+        onSelectQuestions(_selectedQuestions)
+    }
+
+    const renderQuestions = () => {
+        let Questions = []
+        if(questions){
+            Questions = questions.Questions
+        }
+
+        if(questionsByIds){
+            Questions = questionsByIds
+        }
+
+        Questions = Questions.filter(q => !forbiddenQuestions.includes(q.Id))
+        
+        return(
+           <div>
+                {Questions.length ? 
+                <Row
+                    gutter={[12, 12]}
+                >
+                    {Questions.map((q, qi) => (
+                        <CompactQuestionComponent 
+                            q={q}
+                            selectedQuestions={selectedQuestions}
+                            qi={qi}
+                            firstIndex={firstIndex}
+                            
+                            onRenderCode={(q, i) => (
+                                <p className="series-edit-view-element-code" onClick={() => handleSelectQuestion(q)}>{i}{' '}{q.Code}</p>
+                            )}
+                        />
+                    ))}
+                </Row>
+                :
+                <Space
+                    align="center"
+                >
+                    <Empty/>
+                </Space>}    
+            </div>
+        )
+    }
+
+    return(
+        <div>
+            <QuestionsSearchTool onSetFirstIndex = {(i) => setFirstIndex(i)}/>
+            <br/>
+            {(isLoadingQuestions || isLoadingQuestionsByIds) && <Skeleton />}
+            {(!(isLoadingQuestions || isLoadingQuestionsByIds) && questions) && renderQuestions()}
+
+        </div>
+    )
+}

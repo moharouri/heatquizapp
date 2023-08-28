@@ -2,10 +2,16 @@ import React from 'react';
 import {Avatar, Badge, Button, Dropdown, Select, Space, Spin } from 'antd';
 import {UserOutlined, BellOutlined, LogoutOutlined} from '@ant-design/icons';
 import { useDatapools } from '../contexts/DatapoolsContext';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { getShortenedName } from '../services/Auxillary';
 
 
 const UserDrawer = () => {
-  const {datapools, isLoading , error, selectedDatapool, changeDatapool} = useDatapools()
+  const {datapools, errorGetDatapools, isLoadingDatapools, selectedDatapool, changeDatapool} = useDatapools()
+  const {username, userfullname, profilePicture, isStudent} = useAuth()
+
+  const navigate = useNavigate()
 
   const onChangeDataPool = (option) => {
     changeDatapool(option)
@@ -16,13 +22,13 @@ const UserDrawer = () => {
   }
 
   const onLogout = () => {
-
+    navigate('/login')
   }
 
   const userDropdownList = [
     {
       key: 'username',
-      label: <span>Mohannad Alarouri</span>,
+      label: <span>{username}</span>,
       icon: <UserOutlined/>,
       onClick: onUserClick
     },
@@ -38,48 +44,49 @@ const UserDrawer = () => {
     <Space
       
     >
+      {!isStudent && 
       <div>
 
-        {!(isLoading || error) && 
+        {!(isLoadingDatapools || errorGetDatapools) && 
         <Select
           onChange={(v, option) => onChangeDataPool(option)}
           defaultValue={'please select'}
           value={selectedDatapool}
           className='navigation-bar-datapools-select'
-          options={datapools.map((d) => ({
+          options={(datapools || []).map((d) => ({
               value: d.Id,
               label: d.NickName
             }))}
         />}
 
-        {isLoading && 
+        {isLoadingDatapools && 
         <div className='navigation-bar-datapools-select-spin'>
           <Spin />
         </div>}
-      </div>
+      </div>}
 
       <Space >
         
           <Dropdown
           menu={{
             items:userDropdownList,
-            title:'Mohannad Alarouri'
+            title:userfullname
           }}
           > 
           <Avatar 
                 className='navigation-bar-user-avatar'
-                src = 'http://167.86.98.171:6001/Files//Users/User_ProfWilko/iahahawd.twq.jpg'
+                src = {profilePicture}
                 >
-                    MA
+                     {getShortenedName(userfullname)}
                 </Avatar>
           </Dropdown>
            
-          <Button
+          {!isStudent && <Button
             type="light"
             onClick = {() => {}}
             icon = {
                 <Badge
-                    count={9}
+                    count={0}
                 >
                 <Avatar 
                     className='navigation-bar-notification-avatar'
@@ -87,7 +94,7 @@ const UserDrawer = () => {
                 </Badge>
             }
           >
-          </Button>
+          </Button>}
           
       </Space>
     </Space>

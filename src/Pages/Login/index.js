@@ -1,38 +1,76 @@
-import React, { useState } from "react"
+import React, {useState } from "react"
 import './Login.css';
 
 import { Alert, Button, Form, Input, Select, Space, Spin } from "antd";
 import {RocketTwoTone } from '@ant-design/icons';
 import {useDatapools } from "../../contexts/DatapoolsContext";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { login, setIsStudent_LS, setToken_LS, setUserFullname_LS, setUsername_LS } from "../../services/Auth";
+import {useAsyncFn} from '../../hooks/useAsync'
+import {useNavigate } from "react-router-dom";
 
 export function Login(){
-    const navigate = useNavigate()
+
     const {datapools, isLoading , error} = useDatapools()
+
+    const navigate = useNavigate()
+
     const {
-        playAsStudent, attemptLogin,
-        isLogging,loginError
-    } = useAuth()
+        setIsStudent,
+        setUsername,
+        setUserfullname,
+        setProfilePicture,
+        setRoles,
+        playAsStudent} = useAuth()
+
+    const { loading: isLogging, value: loginResponse, error: loginResponseError, execute: loginAttempt } = useAsyncFn(login, [])
 
     const [loginInfo, setloginInfo] = useState({
         username:'',
         password:'',
         datapoolId:0
     })
-   
 
+    const [loginError, setLoginError] = useState('')
+   
     const onValuesChange = (v) => {
         setloginInfo(prev => ({...prev, ...v}))
     }
 
     const onLogin = () => {
-        attemptLogin({...loginInfo, username: loginInfo.username.trim()})
+        //const {value: userInfo, isLoading, error} = useAsync(() => 
+        loginAttempt({...loginInfo, username: loginInfo.username.trim()}).then(() => {
+
+            if(loginResponse){
+                const {name, username,  access_token, profilePicture, roles} = loginResponse
+                setUsername(username)
+                setUserfullname(name)
+
+                setUsername_LS(username)
+                setUserFullname_LS(name)
+
+                setToken_LS(access_token)
+
+                setProfilePicture(profilePicture)
+                setRoles(roles)
+
+                setIsStudent_LS(false)
+                setIsStudent(false)
+
+                setLoginError('')
+                navigate('/')
+            }   
+            else {
+                setLoginError('Failed login')
+            }
+        })
+        
     }
 
     const onStudentLogin = () => {
         playAsStudent()
     }
+
 
     return(
         <div className="login-container">
@@ -84,7 +122,7 @@ export function Login(){
                     >
                         {!(isLoading || error) && 
                             <Select
-                            options={datapools.map((d) => ({
+                            options={(datapools||[]).map((d) => ({
                                         value: d.Id,
                                         label: d.NickName
                                     }))}
@@ -115,7 +153,7 @@ export function Login(){
                     </Form.Item>
                     {loginError && 
                     <Form.Item>
-                        <Alert message={loginError} type="error" />
+                        <Alert message={loginError + ": " + (loginResponseError || '')} type="error" />
                     </Form.Item>}
                 </Form>
                 <div className="login-welcome">

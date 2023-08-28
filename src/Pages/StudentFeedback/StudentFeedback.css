@@ -1,0 +1,141 @@
+
+.qr-search-line{
+    margin-left: 3vw;
+}
+.qr-code-input{
+    width: 15vw;
+    min-width: 120px;    
+    flex-direction: column;
+    display: flex;
+}
+
+.search-btn{
+    margin-top: 1vmin;
+    width: 7vw;
+    min-width: 120px;
+}
+
+.qr-code-explanation{
+    font-size: 1em;
+    font-family: sans-serif;
+    margin-left: 1vw;
+    margin-right: 1vw;
+}
+
+.feedback-search-input{
+    flex-direction: column;
+    display: flex;
+    width: 15vw;
+    min-width: 180px; 
+}
+
+.search-btn{
+    margin-top: 1vmin;
+    width: 7vw;
+    min-width: 120px;
+}
+
+.feedback-box {
+    padding: 0px 0;
+    background-color: rgb(253, 253, 253);
+    border: 1px #F0F0F0 solid;
+    border-radius: 0.5em;
+}
+
+.feedback-box-internal{
+    margin: 0.5vmin;
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+}
+
+.question-info-section{
+    width: 100%;
+}
+
+.question-code{
+    color: blue;
+    font-size: small;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 0.5vh;
+}
+
+.question-adder{
+    font-size: small;
+    font-weight: 800;
+}
+
+.question-feedback-image{
+    width: 10vw;
+    object-fit: contain;
+}
+
+.sample-feedback-section{
+    padding-top: 1%;
+    width: 98%;
+    cursor: pointer;
+    border-radius: 0.5em;
+}
+
+.sample-feedback-section:hover{
+    background-color: whitesmoke;
+
+}
+
+.sample-feedback-icon{
+    margin-left: 0.25vw;
+}
+
+.sample-feedback{
+    padding-right: 0.25vw;
+    color:#777;
+    width: 17vw;
+    margin-left: 0.25vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: smaller;
+}
+
+.comment-player-name{
+    font-size: small;
+    color: blue;
+}
+
+.comment-player-date{
+    font-size: small;
+    padding-left: 0.25vw;
+}
+
+.footer-section{
+    flex-direction: row;
+    display: flex;
+}
+
+.question-identity-card{
+    width: 80%;
+}
+
+.question-actions-card{
+    width: 20%;
+    flex-direction: column;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+}
+
+.add-comment-player-name{
+    font-size: small;
+    color: #777;
+}
+
+.add-comment-player-name-bold{
+    font-weight: bold;
+    padding-left: 0.25vw;
+}
+
+.question-feedback-add-comment-text-input{
+    height: 10vw;
+}
