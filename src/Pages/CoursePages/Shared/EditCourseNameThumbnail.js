@@ -1,12 +1,18 @@
-import {Button, Divider, Drawer, Form, Input, Spin, Upload } from "antd";
+import {Button, Divider, Drawer, Form, Input, Spin, Upload, message } from "antd";
 import React, { useEffect, useState } from "react";
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
-import { ALLOWED_IMAGE_EXTENSIONS, MAX_ALLOWED_COURSE_CODE, MAX_ALLOWED_COURSE_NAME, dummyRequest, getBase64 } from "../../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, MAX_ALLOWED_COURSE_CODE, MAX_ALLOWED_COURSE_NAME, dummyRequest, getBase64, handleResponse } from "../../../services/Auxillary";
 
 import './AddNewCourse.css'
+import { useCourses } from "../../../contexts/CoursesContext";
 const { Dragger } = Upload;
 
 export function EditCourseNameThumbnail({open, onClose, selectedCourse}){  
+
+  if(!open) return <div/>;
+
+  const { loadingEditCourse, editCourse} = useCourses()
+
   const [loadingImage, setLoadingImage] = useState(false);
   const [newImage, setNewImage] = useState(null);
   const [newImageURL, setNewImageURL] = useState(null);
@@ -14,10 +20,15 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
   const [newName, setNewName] = useState(null)
   const [newCode, setNewCode] = useState(null)
 
+  const [api, contextHolder] = message.useMessage()
+
   useEffect(() => {
-    setNewImageURL(selectedCourse.URL)
-    setNewName(selectedCourse.Name)
-    setNewCode(selectedCourse.Code)
+    const {URL, Name, Code} = selectedCourse
+
+    setNewImageURL(URL)
+    setNewName(Name)
+    setNewCode(Code)
+
   }, [selectedCourse])
 
   const handleChange = (info) => {
@@ -27,7 +38,7 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
     }
 
     if (info.file.status === 'done') {
-      console.log(info.file.originFileObj)
+
       getBase64(info.file.originFileObj, (url) => {
         setLoadingImage(false);
         setNewImageURL(url);
@@ -36,9 +47,10 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
     }
   };
 
-
   return(
-        <Drawer
+    <div>
+      {contextHolder}
+      <Drawer
         title={"Edit course"}
         width={'50%'}
         onClose={onClose}
@@ -76,11 +88,48 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
     </div>
     <Button 
           type="primary" 
+          size="small"
           onClick={() => {
-            let data = new FormData()
-            data.append('picture', newImage)
+            if(!newImage){
+              api.destroy()
+              api.warning("Please add an image")
+              return
+            }
+
+            const {Name, Code, Id} = selectedCourse
+
+            const data = new FormData()
+            data.append('Picture', newImage)
+            data.append('Name', Name)
+            data.append('Code',Code)
+            data.append('CourseId', Id)
+            data.append('SameImage',  false)
+
+            editCourse(data)
+            .then(
+              (r) => {
+                console.log(r)
+                handleResponse(
+                  r,
+                    
+                  () => {
+                    api.destroy()
+                    api.success('Course edited successfully', 1)
+                    .then(() => {
+                          onClose()
+                    })
+                  },
+                  
+                  () => {
+                    api.destroy()
+                      api.error(r)
+                  }
+                )
+          })
+
+            
           }}
-          loading = {false}
+          loading = {loadingEditCourse}
           >
             Edit thumbnail
     </Button>
@@ -111,14 +160,51 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
         </Form>
         <Button 
           type="primary" 
+          size="small"
           onClick={() => {
-            let data = new FormData()
-            data.append('picture', newImage)
+            if(!newName.trim() || !newCode.trim())
+            { 
+              api.destroy()
+              api.warning("Please add a name and code for the new course")
+              return 
+            }
+            
+            const {Id} = selectedCourse
+
+            const data = new FormData()
+            data.append('Name', newName)
+            data.append('Code',newCode)
+            data.append('CourseId', Id)
+            data.append('SameImage',  true)
+
+            editCourse(data)
+            .then(
+              (r) => {
+                handleResponse(
+                  r,
+                    
+                  () => {
+                    api.destroy()
+                    api.success('Course edited successfully', 1)
+                    .then(() => {
+                          onClose()
+                    })
+                  },
+                  
+                  () => {
+                    api.destroy()
+                      api.error(r)
+                  }
+                )
+          })
           }}
-          loading = {false}
+          loading = {loadingEditCourse}
           >
             Edit name/code
         </Button>
     </div>
-  </Drawer>)
+  </Drawer>
+    </div>  
+    
+    )
 }

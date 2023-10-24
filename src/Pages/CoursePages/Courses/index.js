@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Divider, Dropdown, Row, Space, Spin } from "antd";
-import {EditOutlined, ReconciliationOutlined, MoreOutlined, PlusOutlined} from '@ant-design/icons';
+import { Button, Col, Divider, Dropdown, Row, Skeleton, Space } from "antd";
+import {EditOutlined, ReconciliationOutlined, PlusOutlined} from '@ant-design/icons';
 
 import './Courses.css'
 import { useDatapools } from "../../../contexts/DatapoolsContext";
@@ -9,6 +9,7 @@ import {EditCourseNameThumbnail} from '../Shared/EditCourseNameThumbnail'
 import {AddNewCourse} from '../Shared/AddNewCourse'
 import { useCourses } from "../../../contexts/CoursesContext";
 import { useNavigate } from "react-router-dom";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
 
 export function Courses(){
 
@@ -33,9 +34,13 @@ export function Courses(){
 
     const [showAllCourses, setShowAllCourses] = useState(true)
 
-    useEffect(() => {
+    const loadData = () => {
         if(showAllCourses) getCourses()
         else getOwnedCourses()
+    }
+
+    useEffect(() => {
+        loadData()
         
     }, [selectedDatapool])
 
@@ -103,7 +108,17 @@ export function Courses(){
             </Divider>
 
             <br/>
-            {isLoading && <Spin tip="Loading..."/>}
+            {isLoading && <Skeleton />}
+
+            {loadingError && !isLoading &&
+             
+                <ErrorComponent 
+                    error={loadingError}
+                    
+                    onReload={() =>  loadData()}
+                />
+            }
+
             {!(isLoading || loadingError) && coursesList && 
             <Row gutter={[16, 32]}>
                 {coursesList.map((c, ci) => 
@@ -115,34 +130,34 @@ export function Courses(){
                 key={c.Id}>
                     <div className="course-box">
                         <div className="course-box-internal">
-                            <div className="course-index-section">
+                            <Space
+                                align="start"
+                            >
                                 <p>{ci+1}</p>
-                            </div>
-                            <div className="course-info-section">
-                                <p  className="course-title" onClick={() => naviagate('/viewcourse/'+c.Id)}>{c.Name}</p>
+                                <div>
+                                    <Dropdown
+                                        menu={{
+                                            items:actionsDropdownList(c),
+                                            title:'Actions'
+                                        }}
+                                    >
+                                        <p  className="default-title hoverable" onClick={() => naviagate('/viewcourse/'+c.Id)}>{c.Name}</p>
+                                    </Dropdown>
 
-                                <p className="course-code">{c.Code}</p>
+                                    <p className="course-code">{c.Code}</p>
 
-                                <br/>
+                                    <br/>
 
-                                <p className="course-adder">{c.AddedByName}</p>
-                                <p className="course-date-created">{c.DateCreated.substring(0,10)}</p>
-                            </div>
-                            <div className="course-action-section">
-                             <Dropdown
-                                 menu={{
-                                    items:actionsDropdownList(c),
-                                    title:'Actions'
-                                }}
-                             >
-                                <MoreOutlined />
-                             </Dropdown>
-                            </div>                          
+                                    <p className="course-adder">{c.AddedByName}</p>
+                                    <p className="course-date-created">{c.DateCreated.substring(0,10)}</p>
+                                </div>
+                            </Space>
                         </div>
                         <img 
                             src={c.URL}
                             alt="course logo"
                             className="course-logo"
+                            onClick={() => naviagate('/viewcourse/'+c.Id)}
                         />
                     </div>
                 </Col>
@@ -161,9 +176,7 @@ export function Courses(){
 
             <AddNewCourse 
                 open={showAddCourseModal}
-                onClose={() => {
-                    setShowAddCourseModal(false)
-                }}
+                onClose={() => setShowAddCourseModal(false)}
             />
         </PagesWrapper>
     

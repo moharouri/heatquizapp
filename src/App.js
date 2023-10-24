@@ -17,6 +17,8 @@ import { SeriesProvider } from './contexts/SeriesContext';
 import { MapsProvider } from './contexts/MapsContext';
 import { SelectRoutes } from './SelectRoutes';
 import { AuthProvider } from './contexts/AuthContext';
+import { CommentsProvider } from './contexts/CommentsContext';
+import { DefaultValuesProvider } from './contexts/DefaultValuesContext';
 
 function App() {
 
@@ -37,7 +39,11 @@ function App() {
             <KeyboardProvider>
             <SeriesProvider>
             <MapsProvider>
-                <SelectRoutes/>
+            <CommentsProvider>
+            <DefaultValuesProvider>
+              <SelectRoutes/>
+            </DefaultValuesProvider>
+            </CommentsProvider>
             </MapsProvider>
             </SeriesProvider>
             </KeyboardProvider>

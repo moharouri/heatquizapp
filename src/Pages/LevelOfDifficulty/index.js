@@ -2,27 +2,31 @@ import React, { useState } from "react";
 import { PagesWrapper } from "../../PagesWrapper"
 import { useLevelsOfDifficulty } from "../../contexts/LevelOfDifficultyContext";
 import { useEffect } from "react";
-import { Button, Col, ColorPicker, Divider, Dropdown, Empty,  Input,  Row, Skeleton, Space, message, notification } from "antd";
+import { Button, Col, Divider, Dropdown, Empty,  Row, Skeleton, Space, message } from "antd";
 import {EditOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons';
 
 import './LevelOfDifficulty.css'
+import { AddLevelOfDifficulty } from "./AddLevelOfDifficulty";
+import { EditLevelOfDifficulty } from "./EditLevelOfDifficulty";
+import { ViewLevelOfDifficultyQuestions } from "./ViewLevelOfDifficultyQuestions";
 
 export function LevelOfDifficulty(){
     
     const {isLoadingLODsExtended, errorGetLODsExtended, LODsExtended, getAllLODsExtended,
+        getLODQuestions,
         isLoadingAddLOD, addLODResult, errorAddLOD, addLOD
     } = useLevelsOfDifficulty()
 
     const [messageApi, contextHolder] = message.useMessage()
-    const [notificationApi, notificationHolder] = notification.useNotification()
 
-    const [code, setCode] = useState('')
-    const [color, setColor] = useState('blue')
+    const [showAddLODModal, setShowAddLODModal] = useState(false)
+    const [showEditLODModal, setShowEditLODModal] = useState(false)
+    const [showViewLODQuestionsModal, setShowViewLODQuestionsModal] = useState(false)
+    const [selectedLOD, setSelectedLOD] = useState(false)
 
     useEffect(() => {
         getAllLODsExtended()
-        setCode('')
-        setColor('blue')
+    
     }, [])
 
     useEffect(() => {
@@ -47,69 +51,8 @@ export function LevelOfDifficulty(){
         label: 'Edit name / color',
         icon: <EditOutlined/>,
         onClick: () => {
-            const {Name, HexColor} = lod
-            
-            notificationApi.destroy()
-
-            notificationApi.open({
-                message: 'Add level of difficulty',
-                description:
-                <Space
-                    align='end'
-                    size={'large'}
-                >
-                    <div>
-                        <small>Name</small>
-                        <Input 
-                            type="text"
-                            value={code}
-                            onChange={(v) => setCode(v.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <small>Color</small>
-                        <ColorPicker 
-                        defaultValue={HexColor}
-                        size="small" 
-                        showText={true} onChange={(v, h) => {
-                            setColor(h)
-                        }}/>
-                    </div>
-                    <div>
-                        <Button
-                            size='small'
-                            type='primary'
-                            onClick={() => {
-                                if(!code.trim()){
-                                    messageApi.destroy()
-                                    messageApi.warning('Please add a name')
-                                    return
-                                }
-
-                                const VM =({
-                                    Name: code,
-                                    HexColor: color
-                                })
-
-                                /*addLOD(VM).then(() => {
-                                    getAllLODsExtended()
-                                })*/
-                            }}
-
-                            loading={isLoadingAddLOD}
-                        >
-                            Update
-                        </Button>
-                    </div>
-                </Space>,
-                 duration: 0,
-                 placement:'topRight'
-            })
-            
-            setTimeout(() => {
-                setColor(HexColor)
-                setCode(Name)
-            }, 100)
+            setShowEditLODModal(true)
+            setSelectedLOD(lod)
         }
     },
     {
@@ -118,6 +61,12 @@ export function LevelOfDifficulty(){
         icon: <DeleteOutlined/> ,
         onClick: () => {}
     }]
+
+    const viewQuestions = (lod) => {
+        setShowViewLODQuestionsModal(true)
+        setSelectedLOD(lod)
+        getLODQuestions(lod.Id)
+    }
 
     const renderLODs = () => {
 
@@ -155,7 +104,9 @@ export function LevelOfDifficulty(){
 
                                     {colorLine(HexColor)}
                                     <br/>
-                                    <p className="lod-edit-view-element-used-questions">{NUsedQuestions} questions</p>
+                                    <p 
+                                    onClick={() => viewQuestions(lod)}
+                                    className="lod-edit-view-element-used-questions">{NUsedQuestions} questions</p>
                                 </div>
                             </Col>)
                     })
@@ -166,7 +117,6 @@ export function LevelOfDifficulty(){
     return(
         <PagesWrapper>
             {contextHolder}
-            {notificationHolder}
             <Divider
                 orientation="left"
             >
@@ -175,68 +125,7 @@ export function LevelOfDifficulty(){
 
                     <Button
                         size="small"
-                        onClick={() => {
-                            setColor('blue')
-                            setCode('')
-
-                            notificationApi.destroy()
-
-                            notificationApi.open({
-                                message: 'Add level of difficulty',
-                                description:
-                                <Space
-                                    align='end'
-                                    size={'large'}
-                                >
-                                    <div>
-                                        <small>Name</small>
-                                        <Input 
-                                            type="text"
-                                            value={code}
-                                            onChange={(v) => setCode(v.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <small>Color</small>
-                                        <ColorPicker 
-                                        defaultValue={'blue'}
-                                        size="small" 
-                                        showText={true} onChange={(v, h) => {
-                                            setColor(h)
-                                        }}/>
-                                    </div>
-                                    <div>
-                                        <Button
-                                            size='small'
-                                            type='primary'
-                                            onClick={() => {
-                                                if(!code.trim()){
-                                                    messageApi.destroy()
-                                                    messageApi.warning('Please add a name')
-                                                    return
-                                                }
-
-                                                const VM =({
-                                                    Name: code,
-                                                    HexColor: color
-                                                })
-
-                                                /*addLOD(VM).then(() => {
-                                                    getAllLODsExtended()
-                                                })*/
-                                            }}
-
-                                            loading={isLoadingAddLOD}
-                                        >
-                                            Add
-                                        </Button>
-                                    </div>
-                                </Space>,
-                                 duration: 0,
-                                 placement:'topRight'
-                            })
-
-                        }}
+                        onClick={() => setShowAddLODModal(true)}
                         icon={<PlusOutlined style={{color:'green'}}/>}
                     >
                         
@@ -247,6 +136,23 @@ export function LevelOfDifficulty(){
             </Divider>
             {isLoadingLODsExtended && <Skeleton/>}
             {(!isLoadingLODsExtended && LODsExtended) && renderLODs()}
+
+            <AddLevelOfDifficulty 
+                open={showAddLODModal}
+                onClose={() => setShowAddLODModal(false)}
+            />
+
+            <EditLevelOfDifficulty 
+                open={showEditLODModal}
+                onClose={() => setShowEditLODModal(false)}
+                LOD={selectedLOD}
+            />
+
+            <ViewLevelOfDifficultyQuestions 
+                open={showViewLODQuestionsModal}
+                onClose={() => setShowViewLODQuestionsModal(false)}
+                LOD={selectedLOD}
+            />
         </PagesWrapper>
     )
 }

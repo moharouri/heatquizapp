@@ -1,9 +1,12 @@
-import {Button, Divider, Drawer, Space, Spin } from "antd";
+import {Avatar, Button, Divider, Drawer, Space, Spin } from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { LatexRenderer } from "../../Components/LatexRenderer";
+import { beautifyDatetime, getShortenedName } from "../../services/Auxillary";
 
 export function ViewFeedbackList({open, onClose, question, loading, error, data}){
+
+    console.log(question, data)
 
     return(
         <Drawer
@@ -34,21 +37,37 @@ export function ViewFeedbackList({open, onClose, question, loading, error, data}
           </Space>
       </div>}
     >   
-        {loading && <Spin tip="loading ..."/>}
+        {loading && <Spin/>}
         {!loading && data && 
         data.map((d, di) => 
-          <div 
-            key={di}
-          >
-            
-            <Space>
-              <p className="comment-player-name">{d.Player}</p>
-              <p className="comment-player-date">{`${d.DateCreated.substring(0,10)} ${d.DateCreated.substring(11,19)}`}</p>
-            </Space>
-            
-            <p>{d.FeedbackContent}</p>
-            <Divider/>
-          </div>)
+          {
+            const {Player, DateCreated, FeedbackContent} = d
+
+            const shortenedName = getShortenedName(Player)
+            return(
+              <div 
+                key={di}
+              >
+                <Space
+                  size={'large'}
+                >
+                  <Space
+                    size={'small'}
+                  >
+                    <Avatar 
+                      className='commenter-avatar'
+                    >
+                      {shortenedName}
+                    </Avatar>
+                    <p>{Player}</p>
+                  </Space>
+
+                  <p>{beautifyDatetime(DateCreated)}</p>
+                </Space>
+                <p>{d.FeedbackContent}</p>
+                <Divider/>
+              </div>)
+          })
         }
 
         <br/>

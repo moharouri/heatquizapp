@@ -11,7 +11,8 @@ import {useNavigate } from "react-router-dom";
 
 export function Login(){
 
-    const {datapools, isLoading , error} = useDatapools()
+    const {datapools, isLoadingDatapools , errorGetDatapools} = useDatapools()
+    console.log(errorGetDatapools)
 
     const navigate = useNavigate()
 
@@ -38,7 +39,7 @@ export function Login(){
     }
 
     const onLogin = () => {
-        //const {value: userInfo, isLoading, error} = useAsync(() => 
+    
         loginAttempt({...loginInfo, username: loginInfo.username.trim()}).then(() => {
 
             if(loginResponse){
@@ -120,7 +121,7 @@ export function Login(){
                         },
                     ]}
                     >
-                        {!(isLoading || error) && 
+                        {!(isLoadingDatapools || errorGetDatapools) && 
                             <Select
                             options={(datapools||[]).map((d) => ({
                                         value: d.Id,
@@ -128,7 +129,9 @@ export function Login(){
                                     }))}
                             />}
 
-                        {isLoading && <Spin />}
+                        {isLoadingDatapools && <Spin />}
+
+                        {errorGetDatapools && !isLoadingDatapools && <p>{errorGetDatapools}</p>}
                     </Form.Item>
                                 
                     <Form.Item >

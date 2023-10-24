@@ -68,41 +68,6 @@
     padding-left: 1%;
 }
 
-.pages-single-col{
-    border: 1px solid rgb(235, 235, 235);
-    border-radius: 0.125em;
-    margin-right: 0.25vw;
-    margin-top: 0.25vw;
-    background-color: white;
-    color: #777;
-}
-
-.pages-single-col-selected{
-    border: 1px solid lightgreen;
-    border-radius: 0.125em;
-    margin-right: 0.25vw;
-    margin-top: 0.25vw;
-    background-color: #ebffe6;
-    color: green;
-    cursor: pointer;
-
-}
-
-.pages-single-col:hover{
-    color: #0275d8;
-    background-color: aliceblue;
-    cursor: pointer;
-}
-
-.pages-single-value{
-    padding: 0.25vi;
-}
-
-.search-result{
-    color: #777;
-    padding-left: 1%;
-}
-
 .question-list-item-container-0{
     width: 49%;
     margin-right: 0.4%;
@@ -149,6 +114,11 @@
 .question-list-item-code-adder-date-stats{
     color: #777;
 }
+
+.question-list-item-code-adder-date-stats-red{
+    color:red;
+}
+
 
 .question-list-item-img{
     height: 25vh;

@@ -4,13 +4,15 @@ import { Button, Col, Divider, List, Row, Skeleton, Space, message } from "antd"
 import { FixURL } from "../../../../services/Auxillary";
 
 import { useAuth } from "../../../../contexts/AuthContext";
-import {FilePdfOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import {CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 
 import './Play.css'
 import { ClickableChartComponent } from "./ClickableChartComponent";
 import { useInterpretedTrees } from "../../../../contexts/InterpretedTreesContext";
+import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
+import { NextButton } from "../../../../Components/NextButton";
 
-export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolution}){
+export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction}){
     const {
         clickableQuestionPlay, errorGetClickableQuestionPlay, isLoadingClickableQuestionPlay, getClickableQuestionPlay,
         postQuestionStatistic
@@ -45,7 +47,7 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
     const [startTime, setStartTime] = useState(0)
 
     useEffect(() => {
-        getClickableQuestionPlay(Id)
+        if(!deadLoad) getClickableQuestionPlay(Id);
         getAllInterpretedValues()
 
         let _offset = 0
@@ -143,7 +145,7 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
     const renderCorrectSolution = () => {
         const {Question} = clickableQuestionPlay
         const {Code, BackgroundImageURL, BackgroundImageHeight, BackgroundImageWidth, ClickImages, ClickCharts} = Question
-        const imageWidth = window.innerWidth * 0.30
+        const imageWidth = window.innerWidth * 0.45
         const imageHeight = (BackgroundImageHeight/BackgroundImageWidth) * imageWidth
 
         const backgroundImageStyle = ({
@@ -236,6 +238,7 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
     const renderQuestion = () => {
         const {Question} = clickableQuestionPlay
         const{PDFURL} = Question
+        const correctAnswer = elementAnswersStatus.filter(a => a).length
 
         return(
             <div>
@@ -277,13 +280,14 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
                             Show correct solution
                         </Button>}
                         {PDFURL && 
-                        <Button
-                            size="small"
-                            onClick={() => window.open(PDFURL)}
-                            icon={<FilePdfOutlined />}
-                        >
-                            Solution
-                        </Button>}
+                        <ViewSolutionComponent 
+                        question={clickableQuestionPlay.Question}
+                        correct={correctAnswer}
+                      />}
+
+                    {nextAction && <NextButton 
+                        nextAction={() => nextAction()}
+                      />}
                     </Space>    
                 </div>}
             </div>
@@ -291,6 +295,8 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
     }
 
     const onClickImage = (n, ni) => {
+        if(showScore) return;
+
         setSelectedNode(n)
         setSelectedNodeIndex(ni)
         setShowPickAnswers(true)
@@ -298,6 +304,8 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
     }
 
     const onChartImage = (n, ni) => {
+        if(showScore) return;
+
         setSelectedNode(n)
         setSelectedNodeIndex(ni)
         setShowPickAnswers(false)
@@ -315,7 +323,7 @@ export function ClickableQuestionPlay({Id, onUpdateSeriesPlayElements, showSolut
     const renderQuestionPlaySection = () => {
         const {Question} = clickableQuestionPlay
         const {Code, BackgroundImageURL, BackgroundImageHeight, BackgroundImageWidth, ClickImages, ClickCharts} = Question
-        const imageWidth = window.innerWidth * 0.30
+        const imageWidth = window.innerWidth * 0.45
         const imageHeight = (BackgroundImageHeight/BackgroundImageWidth) * imageWidth
 
         const backgroundImageStyle = ({

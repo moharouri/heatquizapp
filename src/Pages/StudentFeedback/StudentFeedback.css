@@ -139,3 +139,8 @@
 .question-feedback-add-comment-text-input{
     height: 10vw;
 }
+
+.feedback-avatar{
+    background-color: whitesmoke;
+    color: blue;
+}

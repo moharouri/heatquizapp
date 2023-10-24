@@ -1,24 +1,28 @@
-import {Button, Drawer, Dropdown, Row, Space} from "antd";
+import {Button, Drawer, Dropdown, Row, Space, message} from "antd";
 import React, { useEffect, useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { CompactQuestionComponent } from "../../Questions/SearchQuestionsList/CompactQuestionComponent";
+import { useSeries } from "../../../contexts/SeriesContext";
 
-export function AssignQuestionsToPool({open, onClose, Series}){
+export function AssignQuestionsToPool({open, onClose, Series, reloadSeries}){
+
+    if(!open) return <div/>;
+
+    const {isLoadingAssignQuestionsToPool, assignQuestionsToPool} = useSeries()
 
     const [selectedPool, setSelectedPool] = useState(1)
     const [selectedQuestions, setSelectedQuestions] = useState([])
 
-
+    const [api, contextHolder] = message.useMessage()
+  
     useEffect(() => {
       setSelectedPool(1)
       setSelectedQuestions([])
     }, [open])
 
-    if(!open) return <div/>;
-
     const {Elements} = Series
 
-    let questions = Elements.filter(a => a.PoolNumber !== selectedPool) .map(e => e.Question) 
+    let questions = Elements.filter(a => (a.PoolNumber) !== selectedPool).map(e => ({...e.Question, ElementId: e.Id})) 
     const {Stats} = Series
 
     if(Stats){
@@ -26,7 +30,7 @@ export function AssignQuestionsToPool({open, onClose, Series}){
         ...q,
         MedianPlayTime: Stats[Elements[qi].Id].MedianPlayTime,
         TotalGames: Stats[Elements[qi].Id].TotalPlay,
-        TotalCorrectGames:Stats[Elements[qi].Id].TotalSuccessPlay
+        TotalCorrectGames:Stats[Elements[qi].Id].TotalSuccessPlay,
       }))
     }
 
@@ -81,6 +85,8 @@ export function AssignQuestionsToPool({open, onClose, Series}){
     }
 
     return(
+      <div>
+        {contextHolder}
         <Drawer
         title={
           <Space 
@@ -93,7 +99,34 @@ export function AssignQuestionsToPool({open, onClose, Series}){
             <Button
               size="small"
               type="primary"
-              onClick={() => {}}
+              loading={isLoadingAssignQuestionsToPool}
+              onClick={() => {
+                const VM = ({
+                  SelectedElements: selectedQuestions.map(q => q.ElementId),
+                  Pool: selectedPool
+                })
+
+                assignQuestionsToPool(VM)
+                .then(
+                  (r) => {
+                      const {Id} = r
+                      
+                      if(Id){
+                          api.destroy()
+                          api.success('Questions assigned successfully', 1)
+                          .then(() => {
+                              reloadSeries()
+                              onClose()
+                          })
+                      }
+                      else{
+                          api.destroy()
+                          api.error(r)
+                      }
+              })
+
+
+              }}
             >
               Update assignment
             </Button> : <div/>}
@@ -131,7 +164,7 @@ export function AssignQuestionsToPool({open, onClose, Series}){
                                   
                                   <p  
                                     onClick={() => handleSelectQuestion(q)}
-                                    className="series-edit-view-element-code">
+                                    className="hoverable-plus">
                                     
                                     {i}{' '}{q.Code}
                                   </p>
@@ -141,5 +174,6 @@ export function AssignQuestionsToPool({open, onClose, Series}){
                     )}
                 </Row>
         </Drawer>
+      </div>
     )
 }

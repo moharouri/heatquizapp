@@ -3,8 +3,59 @@
 export const HTTP_OK_REQUEST = 200
 
 export const ALLOWED_IMAGE_EXTENSIONS = ".png, .jpg, .gif, .jpeg"
+export const ALLOWED_PDF_EXTENSIONS = ".pdf"
 export const MAX_ALLOWED_COURSE_NAME = 70
 export const MAX_ALLOWED_COURSE_CODE = 30
+
+//Function to handle api request response
+export const handleResponse = (r, onSuccess, onError) => {
+    if(!r){
+
+      return
+    }
+
+    const {Id} = r.data
+
+    if(Id){
+      onSuccess()
+    }
+    else{
+      onError()
+    }
+
+}
+
+//Function to open a new window with a certain path
+export const goToPageRelativePath = (relativePath) => {
+  const WEBSITE_URL = document.location.origin
+
+  const url = WEBSITE_URL + '/' + relativePath
+  
+  window.open(url)
+}
+
+//Function to open a new window with for a certin question
+export const goToQuestionViewEdit = (q) => {
+  const {Id, Type} = q
+
+  goToPageRelativePath('question_view_edit/'+Id+'/'+Type)
+}
+
+
+//Function to open a new window with for a certin series
+export const goToSeriesViewEdit = (s) => {
+  const {Code} = s
+
+  goToPageRelativePath('series_edit_view/'+Code)
+}
+
+//Function to open a new window with for a certin map play
+export const goToMapPlay = (m) => {
+  const {Id} = m
+
+  goToPageRelativePath('playcoursemap/'+Id)
+}
+
 
 //Function to convert user name to short letters
 export const getShortenedName = (name) => {
@@ -150,5 +201,5 @@ return A
 
 //Function to fix URL 
 export function FixURL(url){
-  return url.replaceAll("\\", '/')
+  return url.replaceAll("\\", '/').replaceAll(' ', '%20')
 }

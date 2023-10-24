@@ -3,6 +3,7 @@ import './PageHeader.css';
 import React from 'react';
 import NavigationDrawer from './NavigationDrawer';
 import UserDrawer from './UserDrawer';
+import logo from '../Sources/heatquizlogo_transparent.png'; 
 
 const PageHeader = () => {
 
@@ -15,13 +16,13 @@ const PageHeader = () => {
                 <NavigationDrawer />
             </div>
             <img 
-                src='heatquizlogo_transparent.png'
+                src={logo}
                 className="app-logo"
                 alt='Heat quiz app logo'
             />
 
            <div className='user-datapool-navigation'>     
-                    <UserDrawer />                    
+                <UserDrawer />                    
            </div>
         </Layout.Header>
     )

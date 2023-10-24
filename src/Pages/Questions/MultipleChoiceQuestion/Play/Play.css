@@ -16,10 +16,24 @@
     border-radius: 0.25em;
 }
 
+.multiple-choice-question-play-choice-container-final-page{
+    margin: 0.5vmin;
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 0.25em;
+}
+
 .multiple-choice-question-play-choice-container-selected{
     margin: 0.5vmin;
     border-radius: 0.25em;
-    border: 1px solid blue;
+    border: 1px solid #0275d8;
+    background-color: whitesmoke;
+
+}
+
+.multiple-choice-question-play-choice-container-selected-final-page{
+    margin: 0.5vmin;
+    border-radius: 0.25em;
+    border: 1px solid #0275d8;
     background-color: whitesmoke;
 
 }
@@ -34,7 +48,7 @@
 .multiple-choice-question-play-choice-container:hover{
     background-color: whitesmoke;
     cursor: pointer;
-    color: blue;
+    color: #0275d8;
 }
 
 .multiple-choice-question-play-choice-container-inner{

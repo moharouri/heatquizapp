@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Col, Divider, Row, Skeleton, Space, message } from "antd";
-
-import { FilePdfOutlined } from '@ant-design/icons';
+import { Button, Col, Divider, Skeleton, Space, message } from "antd";
 
 import './Play.css'
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
+import { NextButton } from "../../../../Components/NextButton";
 
-export function MultipleChoiceQuestion({Id, onUpdateSeriesPlayElements, showSolution}){
+export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction}){
 
     const {multipleChoiceQuestionPlay, errorGetMultipleChoiceQuestionPlay, isLoadingMultipleChoiceQuestionPlay, getMultipleChoiceQuestionPlay, postQuestionStatistic} = useQuestions()
     const {currentPlayerKey} = useAuth()
@@ -23,7 +23,8 @@ export function MultipleChoiceQuestion({Id, onUpdateSeriesPlayElements, showSolu
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
-        getMultipleChoiceQuestionPlay(Id)
+        if(!deadLoad) getMultipleChoiceQuestionPlay(Id);
+        
         setShowScore(false)
         setIsScoreCorrect(false)
         setRandomChoices([])
@@ -79,7 +80,8 @@ export function MultipleChoiceQuestion({Id, onUpdateSeriesPlayElements, showSolu
                     />
                 </Space>
                 <Divider orientation="left">
-                    {!showScore  && <Button
+                    {!showScore  && 
+                    <Button
                         size="small"
                         type="primary"
                         onClick={() => {
@@ -146,16 +148,17 @@ export function MultipleChoiceQuestion({Id, onUpdateSeriesPlayElements, showSolu
                         }</p>  
 
                       {PDFURL && 
-                      <Button
-                        size="small"
-                        onClick={() => window.open(PDFURL)}
-                        icon={<FilePdfOutlined />}
-                      >
-                        Solution
-                      </Button>}
+                      <ViewSolutionComponent 
+                        question={multipleChoiceQuestionPlay}
+                        correct={isScoreCorrect}
+                      />}
+
+                    {nextAction && <NextButton 
+                        nextAction={() => nextAction()}
+                    />}
                     </Space>}
                 </Divider>
-                <Row>
+                <Space direction="vertical">
                     {randomChoices.map((c, ci) => {
                     const {ImageURL, Latex, Id, Correct} = c
                     const isSelected = selectedChoices.map(a => a.Id).includes(Id)
@@ -202,7 +205,7 @@ export function MultipleChoiceQuestion({Id, onUpdateSeriesPlayElements, showSolu
                             </div>
                         </Col>)
                 })}
-                </Row>
+                </Space>
                 
             </div>
         )

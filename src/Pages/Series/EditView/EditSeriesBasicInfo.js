@@ -3,16 +3,23 @@ import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useState } from "react";
 import { useEffect } from "react";
+import { MAX_SERIES_CODE } from "./Constants";
+import { useSeries } from "../../../contexts/SeriesContext";
+import { useNavigate } from "react-router-dom";
 
 export function EditSeriesBasicInfo({open, onClose, Series}){
 
     if(!open) return <div/>;
 
+    const {editQuestionsInfo, isLoadingEditQuestionsInfo} = useSeries()
+
+    const navigate = useNavigate()
+
     const [code, setCode] = useState('')
     const [isRandom, setIsRandom] = useState(false)
     const [randomSize, setRandomSize] = useState(0)
     const [messageApi, contextHolder] = message.useMessage();
-
+    
     useEffect(() => {
         const {Code, IsRandom, RandomSize} = Series
         
@@ -41,9 +48,11 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
                     <Form.Item>
                         <small>Code</small>
                         <Input 
-                        placeholder="New course code"
-                        value={code}
-                        onChange={(v) => setCode(v.target.value)}
+                            placeholder="New course code"
+                            value={code}
+                            onChange={(v) => setCode(v.target.value)}
+                            maxLength={MAX_SERIES_CODE}
+                            showCount
                         />
                     </Form.Item>
                     <Form.Item>
@@ -80,8 +89,34 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
                         messageApi.warning('Code cannot be empty')
                         return
                     }
+
+                    const VM = ({
+                        Id: Series.Id,
+                        Code: code,
+                        IsRandom: isRandom,
+                        RandomSize: randomSize,
+                      })
+      
+                      editQuestionsInfo(VM)
+                      .then(
+                        (r) => {
+                            const {Id} = r
+                            
+                            if(Id){
+                                messageApi.destroy()
+                                messageApi.success('Series info updated successfully', 1)
+                                .then(() => {
+                                    navigate('/series_edit_view/'+code)
+                                    onClose()
+                                })
+                            }
+                            else{
+                                messageApi.destroy()
+                                messageApi.error(r)
+                            }
+                    })
                 }}
-                loading = {false}
+                loading = {isLoadingEditQuestionsInfo}
                 >
                     Update
                 </Button>

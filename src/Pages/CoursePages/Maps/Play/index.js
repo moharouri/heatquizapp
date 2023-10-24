@@ -3,15 +3,15 @@ import { PagesWrapper } from "../../../../PagesWrapper";
 import { useParams } from "react-router-dom";
 import { useMaps } from "../../../../contexts/MapsContext";
 import { useEffect } from "react";
-import { Button, FloatButton, Result, Skeleton, Space, message, notification } from "antd";
+import { Button, FloatButton, Input, Modal, Result, Skeleton, Space, message, notification } from "antd";
 import { useState } from "react";
-import { ZoomInOutlined, ZoomOutOutlined, FlagTwoTone, LockTwoTone } from '@ant-design/icons';
+import { ZoomInOutlined, ZoomOutOutlined, FlagTwoTone, LockTwoTone, PushpinOutlined } from '@ant-design/icons';
 import { MAP_SCALE_REDUCTION } from "./constants";
 import { SeriesPlay } from "../../../../Components/SeriesPlay";
-import { FixURL } from "../../../../services/Auxillary";
+import { FixURL, goToMapPlay } from "../../../../services/Auxillary";
 
 import './Play.css'
-import { getMapPlayStatisticsRequest_LS, updateMapPlayStatisticsRequest_LS } from "../../../../services/Maps";
+import { getMapKey_LS, getMapPlayStatisticsRequest_LS, updateMapKey_LS, updateMapPlayStatisticsRequest_LS } from "../../../../services/Maps";
 
 export function MapPlay(){
     const {
@@ -35,7 +35,11 @@ export function MapPlay(){
     const [selectedMapElement, setSelectedMapElement] = useState(null)
     const [selectedPlaySeries, setSelectedPlaySeries] = useState(null)
 
-    useEffect(() => {
+    const [localMapKey, setLocalMapKey] = useState(null)
+    const [showSetLocalKey, setShowSetLocalKey] = useState(false)
+    const [newKey, setNewKey] = useState(null)
+
+    const initialize = () => {
         getMap(id)
         
         //Get map play statistics on this device
@@ -44,6 +48,14 @@ export function MapPlay(){
 
         setPlaySeries(false)
         setSelectedPlaySeries(null)
+
+        const key = getMapKey_LS(id)
+
+        setLocalMapKey(key)
+    }
+
+    useEffect(() => {
+        initialize()
     }, [id])
 
     useEffect(() => {
@@ -121,7 +133,7 @@ export function MapPlay(){
         notificationApi.destroy()
         setSelectedMapElement(e)
 
-        const {QuestionSeries, PDFURL, ExternalVideoLink, VideoURL, RequiredElement, Threshold} = e
+        const {QuestionSeries, PDFURL, ExternalVideoLink, VideoURL, RequiredElement, Threshold, MapAttachment} = e
 
         if(RequiredElement){
             let existingElementIndex = playStats.ElementsProgress.map((a, ai) => a.Id === e.Id ? (ai) : null)[0]
@@ -144,25 +156,25 @@ export function MapPlay(){
         }
 
         //Only question series 
-        if(QuestionSeries && !(PDFURL || ExternalVideoLink || VideoURL)){
+        if(QuestionSeries && !(PDFURL || ExternalVideoLink || VideoURL || MapAttachment)){
             playSeriesActivate(QuestionSeries)
             return
         }
 
         //Only pdf
-        if(PDFURL && !(QuestionSeries || ExternalVideoLink || VideoURL)){
+        if(PDFURL && !(QuestionSeries || ExternalVideoLink || VideoURL|| MapAttachment)){
             window.open(PDFURL)
             return
         }   
 
         //Only link
-        if(ExternalVideoLink && !(PDFURL || QuestionSeries || VideoURL)){
+        if(ExternalVideoLink && !(PDFURL || QuestionSeries || VideoURL|| MapAttachment)){
             window.open(ExternalVideoLink)
             return
         }
 
         //Only video
-        if(VideoURL && !(PDFURL || QuestionSeries || ExternalVideoLink)){
+        if(VideoURL && !(PDFURL || QuestionSeries || ExternalVideoLink|| MapAttachment)){
             window.open(VideoURL)
             return
         }
@@ -232,6 +244,17 @@ export function MapPlay(){
                     src={videoImage}
                     onClick={() => window.open(VideoURL)}
                 />)}
+
+            {MapAttachment && 
+                <Space direction="vertical" align="center">
+                    <img 
+                        alt="map"
+                        className="map-element-modal-img"
+                        src={MapAttachment.Map.LargeMapURL}
+                        onClick={() => goToMapPlay(MapAttachment.Map)}
+                    />
+                    <small className="default-gray">{MapAttachment.Map.Title}</small>
+                </Space>}
              </Space>,
              duration: 0,
              placement:'top',
@@ -400,9 +423,47 @@ export function MapPlay(){
             right: 94,
         }}
         >
+        <FloatButton
+            tooltip={(localMapKey ? localMapKey : "click to set a local key for this map")}
+            onClick={() => setShowSetLocalKey(true)} icon={<PushpinOutlined />} 
+        />
         <FloatButton onClick={() => ZoomOut()} icon={<ZoomInOutlined  />} />
         <FloatButton onClick={() => ZoomIn()} icon={<ZoomOutOutlined />} />
     </FloatButton.Group>)
+
+const setLocalKey = () => {
+        
+    return(
+        <Modal
+            open={showSetLocalKey}
+            footer={null}
+            onCancel={() => setShowSetLocalKey(false)}
+        >
+            <small className="default-gray">Key</small>
+            <Input
+                placeholder="Local key"
+                type="text"
+                onChange={(v) => setNewKey(v.target.value)}
+                value={newKey}
+            />
+            <br/>
+            <br/>
+            <Button
+                size="small"
+                type="primary"
+                onClick={() => {
+                    updateMapKey_LS(id, newKey)
+                    
+                    initialize()
+                    setShowSetLocalKey(false)
+                }}
+            >
+                Update
+            </Button>
+          
+        </Modal>
+    )
+}
 
     return(
         <PagesWrapper>
@@ -462,6 +523,8 @@ export function MapPlay(){
                         }}
                     />
                 }
+
+                {setLocalKey()}
             </div>
         </PagesWrapper>
     )

@@ -19,6 +19,13 @@ import { PlaySeriesPage } from "./Pages/Series/Play";
 import { SeriesEditViewPage } from "./Pages/Series/EditView";
 import { NotFoundPage } from "./Pages/StatusPages/NotFoundPage";
 import { LevelOfDifficulty } from "./Pages/LevelOfDifficulty";
+import { Datapools } from "./Pages/Datapools";
+import { QuestionEditView} from "./Pages/Questions/Shared/QuestionEditView";
+import { AddMutlipleChoiceQuestion } from "./Pages/Questions/MultipleChoiceQuestion/Add";
+import { AddKeyboardQuestion } from "./Pages/Questions/KeyboardQuestion/Add";
+import { AddSeries } from "./Pages/Series/Add";
+import { AddMap } from "./Pages/CoursePages/Maps/Add";
+import { MapEditView } from "./Pages/CoursePages/Maps/EditView";
 
 export function SelectRoutes({}){
     const {roles, isStudent,} = useAuth()
@@ -43,6 +50,7 @@ export function SelectRoutes({}){
                 <Route path="/Login" exact element={<Login />}/>
                 <Route path="/" exact element={<Dashboard />}/>
                 <Route path="/level_of_difficulty" exact element={<LevelOfDifficulty />}/>
+                <Route path="/datapools" exact element={<Datapools />}/>
                 <Route path="*" exact element={<NotFoundPage />}/>
             </Routes>
         )
@@ -61,16 +69,28 @@ export function SelectRoutes({}){
                 <Route path="/courses" element={<Courses />}/>
                 <Route path="/viewcourse/:id" exact element={<CourseView />}/>
                 <Route path="/playcoursemap/:id" element={<MapPlay />}/>
+                <Route path="/add_map" element={<AddMap />}/>
+                <Route path="/edit_view_map/:id" element={<MapEditView />}/>
 
                 <Route path="/feedback" element={<StudentFeedback />}/>
+
                 <Route path="/reports" element={<Reports />}/>
+
                 <Route path="/topics" element={<Topics />}/>
+
                 <Route path="/click_trees" element={<ClickTrees />}/>
                 <Route path="/interpreted_trees" element={<InterpretedTrees />}/>
+
                 <Route path="/questions_list" element={<QuestionList />}/>
+                <Route path="/question_view_edit/:id/:type" element={<QuestionEditView />}/>
+
+                <Route path="/add_series" element={<AddSeries />}/>
                 <Route path="/series_list" element={<SeriesList />}/>
                 <Route path="/series_play/:id" element={<PlaySeriesPage />}/>
                 <Route path="/series_edit_view/:code" element={<SeriesEditViewPage />}/>
+                
+                <Route path="/add_mc_q" element={<AddMutlipleChoiceQuestion />}/>
+                <Route path="/add_k_q" element={<AddKeyboardQuestion />}/>
 
                 <Route path="*" exact element={<NotFoundPage />}/>
             </Routes>

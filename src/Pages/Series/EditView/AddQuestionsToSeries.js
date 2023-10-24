@@ -1,4 +1,4 @@
-import { Button, Divider, Drawer, Dropdown, Empty, Row, Space } from "antd";
+import { Button, Divider, Drawer, Dropdown, Empty, Row, Space, message } from "antd";
 import React, {useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { SearchQuestionsList } from "../../Questions/SearchQuestionsList";
@@ -6,16 +6,20 @@ import {ForwardOutlined} from '@ant-design/icons';
 import { CompactQuestionComponent } from "../../Questions/SearchQuestionsList/CompactQuestionComponent";
 import {DeleteOutlined} from '@ant-design/icons';
 import { QUESTION_TYPES_SEARCH_NAMES } from "../../Questions/List/constants";
+import { useSeries } from "../../../contexts/SeriesContext";
 
-export function AddQuestionsToSeries({open, onClose, Series, selectedQuestions, onSelectQuestions}){
+export function AddQuestionsToSeries({open, onClose, Series, reloadSeries, selectedQuestions, onSelectQuestions}){
+    if(!open) return <div/>;
+
+    const {isLoadingAddQuestionsToSeries, addQuestionsToSeries} = useSeries()
 
     const [selectingQuestions, setSelectingQuestions] = useState(true)
     const [isMovingElements, setIsMovingElements] = useState(false)
     const [movingIndex, setMovingIndex] = useState(null)
 
-    if(!open) return <div/>;
-
     const existingQuestions = Series.Elements.map(e => e.QuestionId)
+
+    const [api, contextHolder] = message.useMessage()
 
     const elementActionList = (q) => [{
         key: 'remove_element',
@@ -160,8 +164,34 @@ export function AddQuestionsToSeries({open, onClose, Series, selectedQuestions, 
                         <Button
                             size="small"
                             type="primary"
+                            loading={isLoadingAddQuestionsToSeries}
                             onClick={() => {
+                                const VM = ({
+                                    ...Series,
+                                    Elements: selectedQuestions.map((q, i) => ({
+                                        Order: i + 1,
+                                        QuestionId: q.Id
+                                    }))
+                                })
 
+                                addQuestionsToSeries(VM)
+                                .then(
+                                    (r) => {
+                                        const {Id} = r
+                                        
+                                        if(Id){
+                                            api.destroy()
+                                            api.success('Series added successfully', 1)
+                                            .then(() => {
+                                                reloadSeries()
+                                                onClose()
+                                            })
+                                        }
+                                        else{
+                                            api.destroy()
+                                            api.error(r)
+                                        }
+                                })
                             }}
                         >
                             Add questions
@@ -193,7 +223,7 @@ export function AddQuestionsToSeries({open, onClose, Series, selectedQuestions, 
                                                     title:'Actions'
                                                 }}
                                             >
-                                                <p className="series-edit-view-element-code">{i}{' '}{q.Code}</p>
+                                                <p className="series-edit-view-element-code hoverable-plus">{i}{' '}{q.Code}</p>
                                             </Dropdown>
                                         )
                                     }
@@ -202,7 +232,7 @@ export function AddQuestionsToSeries({open, onClose, Series, selectedQuestions, 
 
                                         return(
                                         <p 
-                                        className={isSelectedForMoving ? "series-edit-view-element-selected-moving" : "series-edit-view-element-code"} 
+                                        className={isSelectedForMoving ? "series-edit-view-element-selected-moving" : "series-edit-view-element-code hoverable-plus"} 
                                         onClick={() => {
                                             if(movingIndex !== null){
                                                 if(isSelectedForMoving){
@@ -247,51 +277,54 @@ export function AddQuestionsToSeries({open, onClose, Series, selectedQuestions, 
     }
 
     return(
-        <Drawer
-        title={
-            <Space size={'large'}>
-                <p>Add questions to series</p>
+        <div>
+        {contextHolder}
+            <Drawer
+            title={
+                <Space size={'large'}>
+                    <p>Add questions to series</p>
 
-                <Space>
-                    <Button
-                        size='small'
-                        type={selectingQuestions ? 'primary' : 'default'}
-                        onClick={() => {
-                            setIsMovingElements(false)
-                            setMovingIndex(null)
-                            setSelectingQuestions(true)}
-                        }
-                    >
-                        Select questions
-                    </Button>
-                    <Button
-                        size="small"
-                        type={!selectingQuestions ? 'primary' : 'default'}
-                        onClick={() => setSelectingQuestions(false)}
-                    >
-                        {'View questions ('}{selectedQuestions.length}{') '} <ForwardOutlined /> {' Add'}
-                    </Button>
+                    <Space>
+                        <Button
+                            size='small'
+                            type={selectingQuestions ? 'primary' : 'default'}
+                            onClick={() => {
+                                setIsMovingElements(false)
+                                setMovingIndex(null)
+                                setSelectingQuestions(true)}
+                            }
+                        >
+                            Select questions
+                        </Button>
+                        <Button
+                            size="small"
+                            type={!selectingQuestions ? 'primary' : 'default'}
+                            onClick={() => setSelectingQuestions(false)}
+                        >
+                            {'View questions ('}{selectedQuestions.length}{') '} <ForwardOutlined /> {' Add'}
+                        </Button>
+                    </Space>
                 </Space>
-            </Space>
-        }
-        width={'100%'}
-        onClose={onClose}
-        open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
-        closeIcon={<ArrowLeftOutlined />}
-        maskClosable={false}
-        >
-            {selectingQuestions 
-            && 
-            <SearchQuestionsList
-                selectedQuestions={selectedQuestions}
-                onSelectQuestions={onSelectQuestions}
-                forbiddenQuestions = {existingQuestions}
-            />}
+            }
+            width={'100%'}
+            onClose={onClose}
+            open={open}
+            bodyStyle={{
+            paddingBottom: 80,
+            }}
+            closeIcon={<ArrowLeftOutlined />}
+            maskClosable={false}
+            >
+                {selectingQuestions 
+                && 
+                <SearchQuestionsList
+                    selectedQuestions={selectedQuestions}
+                    onSelectQuestions={onSelectQuestions}
+                    forbiddenQuestions = {existingQuestions}
+                />}
 
-            {!selectingQuestions && renderSelectedQuestions()}
-        </Drawer>
+                {!selectingQuestions && renderSelectedQuestions()}
+            </Drawer>
+        </div>
     )
 }

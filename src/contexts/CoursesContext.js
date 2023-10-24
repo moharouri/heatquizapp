@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
-import { getAllCourses, getCourse, getMyCourses } from "../services/Courses"
+import { addCourseRequest, editCourseRequest, getAllCourses, getCourse, getMyCourses } from "../services/Courses"
 import { useDatapools } from "./DatapoolsContext"
 
 const Context = React.createContext()
@@ -15,11 +15,15 @@ export function CoursesProvider ({children}){
     const {loading: loadingCourses, value: courses, error: getCoursesError, execute: getCourses} = useAsyncFn(() => getAllCourses())
     const {loading: loadingMyCourses, value: myCourses, error: getMyCoursesError, execute: getOwnedCourses} = useAsyncFn(() => getMyCourses())
     const {loading: loadingCourse, value: Course, error: getCourseError, execute: getCourseView} = useAsyncFn((Id) => getCourse(Id))
+    const {loading: loadingAddCourse, value: addCourseResult, error: getAddCourseError, execute: addCourse} = useAsyncFn((b) => addCourseRequest(b))
+    const {loading: loadingEditCourse, value: editCourseResult, error: getEditCourseError, execute: editCourse} = useAsyncFn((b) => editCourseRequest(b))
 
     const {selectedDatapool} = useDatapools()
 
+    
+
     useEffect(() => {
-        getOwnedCourses()
+        getCourses()
     }, [selectedDatapool])
 
     return(
@@ -37,7 +41,17 @@ export function CoursesProvider ({children}){
             loadingCourse,
             getCourseError,
             Course,
-            getCourseView
+            getCourseView,
+
+            addCourseResult,
+            loadingAddCourse,
+            getAddCourseError,
+            addCourse,
+
+            editCourseResult,
+            loadingEditCourse,
+            getEditCourseError,
+            editCourse
         }}>
             {children}
         </Context.Provider>

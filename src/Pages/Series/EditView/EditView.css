@@ -8,18 +8,7 @@
 
 .series-edit-view-info-title{
     font-size: large;
-    color: blue;
 }
-
-.series-edit-view-info-title:hover{
-    padding-left: 0.25vw;
-    padding-right: 0.25vw;
-    border-radius: 0.25em;
-    background-color: whitesmoke;
-    cursor: pointer;
-}
-
-
 
 .series-edit-view-info-card{
     flex-direction: column;
@@ -71,20 +60,10 @@
 .series-edit-view-element-code{
     margin-bottom: 1vh;
     color: gray;
-    width: fit-content;
 }
 
 .series-edit-view-element-other-info{
     color: gray;
-}
-
-.series-edit-view-element-code:hover{
-    color: blue;
-    padding-left: 0.25vw;
-    padding-right: 0.25vw;
-    border-radius: 0.25em;
-    background-color: whitesmoke;
-    cursor: pointer;
 }
 
 

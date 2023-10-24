@@ -83,7 +83,7 @@ export function SeriesList(){
                                         title:'Actions'
                                     }}
                                 >
-                                    <p className="series-list-item-code">
+                                    <p className="hoverable-plus">
                                         <span className="series-list-item-index">{firstIndex + qi+1}</span>
                                         {Code}
                                     </p>

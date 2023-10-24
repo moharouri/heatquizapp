@@ -22,23 +22,17 @@
 }
 
 .course-title-view{
-    color: #0099cc;
     font-size: x-large;
-    font-weight: 500;
 }
 
 .map-box{
     padding: 0px 0;
-    background-color: rgb(253, 253, 253);
     border: 1px #F0F0F0 solid;
     border-radius: 0.5em;
 }
 
 .map-box-internal{
     margin: 0.5vmin;
-    flex-direction: row;
-    display: flex;
-    width: 100%;
 }
 
 .map-index-section{
@@ -54,14 +48,13 @@
     margin-right: 2%;
 }
 
-.map-image-small{
-    width: 12vw;
-    height: 100%;
-    object-fit: contain;
-    cursor: pointer;
-}
-
-
 p{
     margin: 0;
+}
+
+.course-view-map-img{
+    height: 40vh;
+    width: 100%;
+    object-fit: contain;
+    cursor: pointer;
 }

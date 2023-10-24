@@ -27,7 +27,8 @@ export function UsersProvider ({children}){
             loadingUsers, 
             users,
             getUserError,
-
+            getUsers,
+            
             loadingEditNameEmail,
             getEditNameEmailError,
             updateUserNameEmail,

@@ -1,0 +1,15 @@
+.clickable-question-edit-view-img{
+    object-fit: contain;
+    width: 100%;
+    border: 1px solid rgb(245, 245, 245);
+}
+
+
+.clickable-question-edit-view-part-img{
+    object-fit: contain;
+    width: 10vw;
+}
+
+.clickable-question-edit-view-answer-btn{
+    width: 100%;
+}

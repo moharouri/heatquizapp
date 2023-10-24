@@ -1,0 +1,33 @@
+.question-relation-line{
+    width: 100%;
+}
+
+.question-relation-map-name{
+    color: blue;
+}
+
+.question-relation-map-name:hover{
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+    border-radius: 0.25em;
+    background-color: whitesmoke;
+    cursor: pointer;
+}
+
+.question-relation-map-img{
+    width: 15vw;
+    object-fit: contain;
+}
+
+.question-relation-series-code{
+    color: green;
+}
+
+.question-relation-series-code:hover{
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+    border-radius: 0.25em;
+    background-color: whitesmoke;
+    cursor: pointer;
+}
+

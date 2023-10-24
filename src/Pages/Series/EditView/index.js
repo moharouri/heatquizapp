@@ -3,7 +3,7 @@ import { PagesWrapper } from "../../../PagesWrapper";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useSeries } from "../../../contexts/SeriesContext";
-import { Button, Col, Divider, Dropdown, Empty, Row, Skeleton, Space, Spin, Statistic, Tooltip } from "antd";
+import { Button, Col, Divider, Dropdown, Empty, Row, Skeleton, Space, Spin, Statistic, Tooltip, message } from "antd";
 import { beautifyDate, beautifyNumber } from "../../../services/Auxillary";
 import {TrophyOutlined, EditOutlined, ApartmentOutlined, PlusOutlined, AreaChartOutlined, ClockCircleOutlined, NotificationOutlined, DeleteOutlined, GroupOutlined} from '@ant-design/icons';
 
@@ -27,7 +27,11 @@ export function SeriesEditViewPage(){
     const { 
         isLoadingSeriesViewEdit: isLoadingSeries, errorGetSeriesViewEdit: errorGetSeries, SeriesViewEdit: Series, getSeriesViewEdit,
         isLoadingSeriesStatistics, errorGetSeriesStatistics, SeriesStatistics, getSeriesStatistics,
-        postSeriesStatistic
+
+        assignQuestionsToPool,
+        deselectQuestionFromSeries,
+        isLoadingDecreasePoolsNumberSeries, decreasePoolsNumberSeries,
+        isLoadingIncreasePoolsNumberSeries, increasePoolsNumberSeries
     } = useSeries()
 
     const { loadingQuestionFeedback, questionFeedback, getQuestionFeedbackError, getQuestionFeedback} = useStudentFeedback()
@@ -48,6 +52,8 @@ export function SeriesEditViewPage(){
     const [showReorderElements, setShowReorderElements] = useState(false)
 
     const [selectedAddQuestions, setSelectedAddQuestions] = useState([])
+
+    const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
         getSeriesViewEdit(code)
@@ -118,7 +124,24 @@ export function SeriesEditViewPage(){
         key: 'remove_element',
         label: 'Remove from series',
         icon: <DeleteOutlined /> ,
-        onClick: () => {}
+        onClick: () => {
+            deselectQuestionFromSeries(e)
+            .then(
+                (r) => {
+
+                    const {Id} = r
+                    
+                    if(Id){
+                        api.destroy()
+                        api.success('Question removed successfully', 1)
+                        .then(() => getSeriesViewEdit(code))
+                    }
+                    else{
+                        api.destroy()
+                        api.error(r)
+                    }
+            })
+        }
     }]
 
     const getPoolNumbersList = (e) => {
@@ -133,7 +156,28 @@ export function SeriesEditViewPage(){
             finalList.push({
                 key: 'pool_number'+(1+i),
                 label: 'Select Pool #' + (1+i),
-                onClick: () => {}
+                onClick: () => {
+                    const VM = ({
+                        SelectedElements: [e.Id],
+                        Pool: (1+i)
+                      })
+      
+                      assignQuestionsToPool(VM)
+                      .then(
+                        (r) => {
+                            const {Id} = r
+                            
+                            if(Id){
+                                api.destroy()
+                                api.success('Question re-assigned successfully', 1)
+                                .then(() => getSeriesViewEdit(code))
+                            }
+                            else{
+                                api.destroy()
+                                api.error(r)
+                            }
+                    })
+                }
             })
         }
 
@@ -175,7 +219,7 @@ export function SeriesEditViewPage(){
                                 }}
                         >
                             <p
-                                className="series-edit-view-element-code"
+                                className="series-edit-view-element-code hoverable-plus"
                             >{ei+1}{' '}{Code}</p>
                         </Dropdown>
 
@@ -310,6 +354,7 @@ export function SeriesEditViewPage(){
 
         return(
             <div>
+                {contextHolder}
                 <Space
                     size={'large'}
                     align="start"
@@ -322,7 +367,7 @@ export function SeriesEditViewPage(){
                                 title:'Actions'
                                 }}
                         >
-                            <p className="series-edit-view-info-title">{Code}</p>
+                            <p className="series-edit-view-info-title default-title hoverable">{Code}</p>
                         </Dropdown>
                         <p className="series-edit-view-info-card-gray">{AddedByName}</p>
                         <p className="series-edit-view-info-card-gray">{beautifyDate(DateCreated)}</p>
@@ -336,12 +381,56 @@ export function SeriesEditViewPage(){
                             <Button
                                 size='small'
                                 style={{color:'green'}}
+                                loading={isLoadingIncreasePoolsNumberSeries}
+                                onClick={() => {
+                                    increasePoolsNumberSeries(({...Series}))
+                                    .then(
+                                        (r) => {
+                                            const {Id} = r
+                                            
+                                            if(Id){
+                                                api.destroy()
+                                                api.success('Successful', 1)
+                                                .then(() => getSeriesViewEdit(code))
+                                            }
+                                            else{
+                                                api.destroy()
+                                                api.error(r)
+                                            }
+                                    })
+                                }}
                             >
                                 +
                             </Button>
                             <Button
                                 size='small'
                                 style={{color:'red'}}
+                                loading={isLoadingDecreasePoolsNumberSeries}
+                                onClick={() => {
+                                    if(NumberOfPools < 2) 
+                                    {
+                                        api.destroy()
+                                        api.warning("Pool mumber should be atleast < 1 >")
+
+                                        return
+                                    }
+
+                                    decreasePoolsNumberSeries(({...Series}))
+                                    .then(
+                                        (r) => {
+                                            const {Id} = r
+                                            
+                                            if(Id){
+                                                api.destroy()
+                                                api.success('Successful', 1)
+                                                .then(() => getSeriesViewEdit(code))
+                                            }
+                                            else{
+                                                api.destroy()
+                                                api.error(r)
+                                            }
+                                    })
+                                }}
                             >
                                 -
                             </Button>
@@ -437,12 +526,16 @@ export function SeriesEditViewPage(){
 
                 selectedQuestions={selectedAddQuestions}
                 onSelectQuestions={(d) => setSelectedAddQuestions(d)}
+
+                reloadSeries ={() => getSeriesViewEdit(code)}
             /> 
 
             <AssignQuestionsToPool 
                 open={showAssignQuestionsToPool}
                 onClose={() => setShowAssignQuestionsToPool(false)}
                 Series={({...Series, Stats: seriesElementStats})}
+
+                reloadSeries ={() => getSeriesViewEdit(code)}
             /> 
 
             <ReorderQuestionsInSeries 

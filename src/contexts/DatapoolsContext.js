@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { getCurrentDatapool, getDatapools, setCurrentDatapool } from "../services/Datapools"
+import { AddDataPoolRequest, EditDataPoolAccessRequest, EditDataPoolRequest, getCurrentDatapool, getDatapools, getDatapoolsAdmin, setCurrentDatapool } from "../services/Datapools"
 import { useAsyncFn } from "../hooks/useAsync"
 
 const Context = React.createContext()
@@ -11,6 +11,11 @@ export function useDatapools(){
 export function DatapoolsProvider ({children}){
     //Fetch datapools from API
     const {value: datapools, errorGetDatapools, loading:isLoadingDatapools, execute: getAllDatapools} = useAsyncFn(() => getDatapools())
+    const {value: datapoolsAdmin, errorGetDatapoolsAdmin, loading:isLoadingDatapoolsAdmin, execute: getAllDatapoolsAdmin} = useAsyncFn(() => getDatapoolsAdmin())
+    const {value: AddDataPoolResult, errorAddDataPool, loading:isLoadingAddDataPool, execute: AddDataPool} = useAsyncFn(() => AddDataPoolRequest())
+    const {value: EditDataPoolResult, errorEditDataPool, loading:isLoadingEditDataPool, execute: EditDataPool} = useAsyncFn(() => EditDataPoolRequest())
+    const {value: EditDataPoolAccessResult, errorEditDataPoolAccess, loading:isLoadingEditDataPoolAccess, execute: EditDataPoolAccess} = useAsyncFn(() => EditDataPoolAccessRequest())
+
     const [selectedDatapool, setSelectedDatapool] = useState(null)
 
     function changeDatapool(datapool){
@@ -22,8 +27,11 @@ export function DatapoolsProvider ({children}){
         setSelectedDatapool(datapool.label)
     }
 
-    useEffect(() => {
-        getAllDatapools().then((data) => {
+    useEffect(() => {        
+        getAllDatapools().then((r) => {
+            //Get data from response 
+            const {data} = r
+
             //Get datapool saved on local storage
             const currentDatapool = getCurrentDatapool()
 
@@ -37,6 +45,11 @@ export function DatapoolsProvider ({children}){
                 //if datapool saved in local storage is not in the list, default it to null
                 else setCurrentDatapool({value:null});
             }
+            else{
+                //Nullify current data pool if no proper response exists
+                setCurrentDatapool({value:null})
+            }
+            
         })
     }, [])
 
@@ -46,7 +59,27 @@ export function DatapoolsProvider ({children}){
             errorGetDatapools, 
             isLoadingDatapools, 
             selectedDatapool,
-            changeDatapool
+            changeDatapool,
+
+            datapoolsAdmin,
+            errorGetDatapoolsAdmin, 
+            isLoadingDatapoolsAdmin, 
+            getAllDatapoolsAdmin,
+
+            errorAddDataPool,
+            isLoadingAddDataPool,
+            AddDataPoolResult,
+            AddDataPool,
+
+            errorEditDataPool,
+            isLoadingEditDataPool,
+            EditDataPoolResult,
+            EditDataPool,
+
+            errorEditDataPoolAccess,
+            isLoadingEditDataPoolAccess,
+            EditDataPoolAccessResult,
+            EditDataPoolAccess
         }}>
             {children}
         </Context.Provider>

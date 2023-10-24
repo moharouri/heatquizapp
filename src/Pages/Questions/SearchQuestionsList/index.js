@@ -1,16 +1,22 @@
 import React, { useState } from "react";
-import {Empty, Row, Skeleton, Space } from "antd";
+import {Empty, Row, Skeleton, Space, Tooltip } from "antd";
 import { useQuestions } from "../../../contexts/QuestionsContext";
 import {QuestionsSearchTool} from "../List/QuestionsSearchTool"
 
 import './SearchQuestionsList.css'
 import { CompactQuestionComponent } from "./CompactQuestionComponent";
+import { QuestionPlayPocket } from "../QuestionPlayPocket/QuestionPlayPocket";
+
+import { RocketOutlined } from '@ant-design/icons';
 
 export function SearchQuestionsList({selectedQuestions, onSelectQuestions, forbiddenQuestions}){
 
     const {questions, isLoadingQuestions, questionsByIds, isLoadingQuestionsByIds} = useQuestions()
 
     const [firstIndex, setFirstIndex] = useState(0)
+
+    const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
+    const [selectedQuestion, setSelectedQuestion] = useState(false)
 
 
     const handleSelectQuestion = (q) => {
@@ -39,7 +45,9 @@ export function SearchQuestionsList({selectedQuestions, onSelectQuestions, forbi
         }
 
         Questions = Questions.filter(q => !forbiddenQuestions.includes(q.Id))
-        
+
+
+
         return(
            <div>
                 {Questions.length ? 
@@ -54,7 +62,26 @@ export function SearchQuestionsList({selectedQuestions, onSelectQuestions, forbi
                             firstIndex={firstIndex}
                             
                             onRenderCode={(q, i) => (
-                                <p className="series-edit-view-element-code" onClick={() => handleSelectQuestion(q)}>{i}{' '}{q.Code}</p>
+                               <Space
+                                    className="hq-opposite-arrangement"
+                                    align="start"
+                               >
+                                    <p className="series-edit-view-element-code hoverable-plus" onClick={() => handleSelectQuestion(q)}>{i}{' '}{q.Code}</p>
+
+                                    <Space size={'large'} align="start">
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>Play question</p>}
+                                    >
+                                        <RocketOutlined  
+                                            style={{color:'green'}} 
+                                            onClick={() => {
+                                                setSelectedQuestion(q)
+                                                setShowPlayQuestionModal(true)
+                                            }}/>
+                                    </Tooltip>
+                                    </Space>
+                                </Space>
                             )}
                         />
                     ))}
@@ -76,6 +103,14 @@ export function SearchQuestionsList({selectedQuestions, onSelectQuestions, forbi
             {(isLoadingQuestions || isLoadingQuestionsByIds) && <Skeleton />}
             {(!(isLoadingQuestions || isLoadingQuestionsByIds) && questions) && renderQuestions()}
 
+
+            <QuestionPlayPocket 
+                open={showPlayQuestionModal}
+                onClose={() => setShowPlayQuestionModal(false)}
+
+                Id={selectedQuestion.Id}
+                Type={selectedQuestion.Type}
+            />
         </div>
     )
 }

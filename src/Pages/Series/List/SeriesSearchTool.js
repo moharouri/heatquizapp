@@ -86,7 +86,7 @@ export function SeriesSearchTool({onSetFirstIndex}){
                             onSetFirstIndex(ci*selectedPerPage)
 
                             const Ids = SeriesIds.slice(ci*selectedPerPage, (ci + 1)*selectedPerPage)
-                            console.log(Ids)
+
                             const VM = ({Ids})
 
                             searchSeriesByIds(VM)

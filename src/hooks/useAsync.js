@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { HTTP_OK_REQUEST } from "../services/Auxillary"
+import { AxiosError } from "axios"
 
 export function useAsync(func, dependencies = []) {
   const { execute, ...state } = useAsyncInternal(func, dependencies, true)
@@ -21,23 +22,49 @@ function useAsyncInternal(func, dependencies, initialLoading = false) {
   const [value, setValue] = useState()
 
   const execute = useCallback((...params) => {
+
     setLoading(true)
+
     return func(...params)
       .then(res => {
         console.log(res)
+        const isError = (res instanceof AxiosError)
 
-        const response = res.response || res
-        const {data, status} = response
+        if(isError){
+          setValue(null)
 
-        setValue(status === HTTP_OK_REQUEST ? data : undefined)
-        setError(status === HTTP_OK_REQUEST ? undefined : data)
-        
-        return data
+          let msg = ""
+
+          if(res.response){
+            const {data} = res.response
+
+            setError(data)
+
+            msg = data
+          }
+          else{
+            const {message} = res
+            setError(message)
+
+            msg = message
+
+          }
+          
+          return ({error: msg})
+        }
+
+        else{
+          setError(null)
+          const {data} = res
+
+          setValue(data)
+
+          return ({data})
+        }
       })
       .catch(error => {
-        console.log(error)
         setError(error)
-        setValue(undefined)
+        setValue(null)
         return Promise.reject(error)
       })
       .finally(() => {

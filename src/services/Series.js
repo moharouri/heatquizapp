@@ -1,4 +1,4 @@
-import {ADD_REQUEST_FILE_API, GET_REQUEST_API, GET_REQUEST_BODY_API } from "./APIRequests";
+import {ADD_REQUEST_BODY_API, ADD_REQUEST_FILE_API, EDIT_REQUEST_BODY_API, GET_REQUEST_API, GET_REQUEST_BODY_API } from "./APIRequests";
 
 
 export function getSeriesRequest(Code){
@@ -28,4 +28,32 @@ export function searchSeriesByIdsRequest(b){
 
 export function addSeriesStatisticRequest(b){
     return ADD_REQUEST_FILE_API('QuestionSeries/AddStatistic', b)
+}
+
+export function addSeriesRequest(b){
+    return ADD_REQUEST_BODY_API('QuestionSeries/AddSeries', b, true)
+}
+
+export function addQuestionsToSeriesRequest(b){
+    return ADD_REQUEST_BODY_API('QuestionSeries/AddSeriesElements', b, true)
+}
+
+export function editQuestionsInfoRequest(b){
+    return EDIT_REQUEST_BODY_API('QuestionSeries/EditSeriesCode', b, true)
+}
+
+export function assignQuestionsToPoolRequest(b){
+    return EDIT_REQUEST_BODY_API('QuestionSeries/AssignElementsToPool', b, true)
+}
+
+export function deselectQuestionFromSeriesRequest(b){
+    return EDIT_REQUEST_BODY_API('QuestionSeries/DeselectElementSeries', b, true)
+}
+
+export function decreasePoolsNumberSeriesRequest(b){
+    return EDIT_REQUEST_BODY_API('QuestionSeries/DecreasePoolsNumber', b, true)
+}
+
+export function increasePoolsNumberSeriesRequest(b){
+    return EDIT_REQUEST_BODY_API('QuestionSeries/IncreasePoolsNumber', b, true)
 }

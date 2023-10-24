@@ -30,6 +30,8 @@ export function Keyboard({Id, enableDivision, isEnergyBalance, List, onEnterKey}
         }
 
         list.List.push({
+            NumericKeyId:k.NumericKey.Id,
+
             code:k.NumericKey.TextPresentation,
             char: k.NumericKey.IsInteger ? k.NumericKey.TextPresentation : k.KeySimpleForm,
 
@@ -61,9 +63,12 @@ export function Keyboard({Id, enableDivision, isEnergyBalance, List, onEnterKey}
             list = addDot(list)
         }
 
+        const selectedImage = Keyboard.VariableKeyImages.filter((im) => im.ImageId === k.Id)[0]
+
         list.List.push({
-            code: Keyboard.VariableKeyImages.filter((im) => im.ImageId === k.Id)[0].Image.TextPresentation,
-            char: Keyboard.VariableKeyImages.filter((im) => im.ImageId === k.Id)[0].ReplacementCharacter,
+            ImageId:k.Id,
+            code: selectedImage.Image.TextPresentation,
+            char: selectedImage.ReplacementCharacter,
 
             IsKey: true,
             IsInteger: false,

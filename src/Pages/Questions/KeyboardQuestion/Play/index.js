@@ -3,13 +3,14 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Button, Divider, List, Skeleton, Space, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { Keyboard } from "../../../../Components/Keyboard";
-import { FilePdfOutlined } from '@ant-design/icons';
 
 import './Play.css'
 import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../Functions";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
+import { NextButton } from "../../../../Components/NextButton";
 
-export function KeyboardQuestionPlay({Id, onUpdateSeriesPlayElements, showSolution}){
+export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction}){
 
     const {keyboardQuestionPlay, errorGetKeyboardQuestionPlay, isLoadingKeyboardQuestionPlay, getKeyboardQuestionPlay, postQuestionStatistic} = useQuestions()
 
@@ -29,7 +30,7 @@ export function KeyboardQuestionPlay({Id, onUpdateSeriesPlayElements, showSoluti
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
-        getKeyboardQuestionPlay(Id)
+        if(!deadLoad) getKeyboardQuestionPlay(Id);
 
         setShowAnswer(false)
         setAnswerResult(null)
@@ -160,13 +161,13 @@ export function KeyboardQuestionPlay({Id, onUpdateSeriesPlayElements, showSoluti
                                 </span>
                             }</p>
                             {PDFURL && 
-                            <Button
-                                size="small"
-                                onClick={() => window.open(PDFURL)}
-                                icon={<FilePdfOutlined />}
-                            >
-                                Solution
-                            </Button>}
+                            <ViewSolutionComponent 
+                            question={keyboardQuestionPlay}
+                            correct={answerResult.answerStatus}
+                          />}
+                          {nextAction && <NextButton
+                                nextAction={() => nextAction()}
+                            />}
                         </Space>
                         }
 

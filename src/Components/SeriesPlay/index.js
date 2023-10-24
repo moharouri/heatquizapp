@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useSeries } from "../../contexts/SeriesContext";
-import { Button, Col, Divider, Dropdown, FloatButton, Input, List, Progress, QRCode, Row, Skeleton, Space, Spin, message, notification } from "antd";
+import { Button, Col, Divider, Dropdown, FloatButton, Input, List, Progress, QRCode, Row, Skeleton, Space, Spin, Tooltip, message, notification } from "antd";
 import { red, green } from '@ant-design/colors';
 import { getRandomSeriesElements } from "./Functions";
-import { FixURL, convertSecondsToHHMMSS } from "../../services/Auxillary";
+import { FixURL, convertSecondsToHHMMSS, goToQuestionViewEdit, goToSeriesViewEdit } from "../../services/Auxillary";
 
 import { CLICKABLE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
 import { ClickableQuestionPlay } from "../../Pages/Questions/ClickableQuestion/Play";
 import { KeyboardQuestionPlay } from "../../Pages/Questions/KeyboardQuestion/Play";
 import { MultipleChoiceQuestion } from "../../Pages/Questions/MultipleChoiceQuestion/Play";
 import { ForwardOutlined, QuestionCircleOutlined, FilePdfOutlined, CheckCircleFilled, CloseCircleFilled,
-     ClockCircleOutlined, StarFilled, AreaChartOutlined, TrophyOutlined, NotificationOutlined, QrcodeOutlined, RollbackOutlined } from '@ant-design/icons';
+     ClockCircleOutlined, StarFilled, AreaChartOutlined, TrophyOutlined, NotificationOutlined, QrcodeOutlined, RollbackOutlined, MoreOutlined, EyeOutlined, RocketTwoTone, BuildTwoTone } from '@ant-design/icons';
 
 import './SeriesPlay.css'
 import { LatexRenderer } from "../LatexRenderer";
@@ -19,19 +19,22 @@ import { QuestionPlayPocket } from "../../Pages/Questions/QuestionPlayPocket/Que
 import { useStudentFeedback } from "../../contexts/StudentFeedbackContext";
 import { SendFeedback } from "../../Pages/StudentFeedback/SendFeedback";
 import { useAuth } from "../../contexts/AuthContext";
+import { ViewSolutionComponent } from "../ViewSolutionComponent";
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
     const { 
-        isLoadingSeries, errorGetSeries, Series, getSeries,
-        isLoadingSeriesStatistics, errorGetSeriesStatistics, SeriesStatistics, getSeriesStatistics,
+        isLoadingSeries, Series, getSeries,
+        isLoadingSeriesStatistics, SeriesStatistics, getSeriesStatistics,
         postSeriesStatistic
     } = useSeries()
 
     const {
         loadingReferenceQuestion, referenceQuestionResult, referenceQuestionError, referenceQuestion
     } = useStudentFeedback()
+
+    const {isStudent} = useAuth()
 
     const baseDiv = React.createRef()
 
@@ -64,11 +67,14 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
     useEffect(() => {
         if(Series){
+
+            //Get series data from server
             getSeriesStatistics(Series.Id)
 
             let elements = []
             const {IsRandom, Elements, RandomSize} = Series
 
+            //Generate random questions from question pools out of question collection assigned in the series
             if(IsRandom){
                 elements = getRandomSeriesElements(Elements, RandomSize)
             }
@@ -84,6 +90,8 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                 setTopOffset(baseDivCurrent.getBoundingClientRect().top)
             }
 
+
+            //Set a 1 second interval timer
             timer = setInterval(() => {
                 setPlayTime(seconds => seconds + 1)
               }, 1000);
@@ -95,6 +103,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
     }, [Series])
 
     useEffect(() => {
+        //Stop timer
         if(playedElements.length === seriesElements.length){
             clearInterval(timer)
         }
@@ -102,19 +111,20 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
     useEffect(() => {
         if(showFinalPage){
+
+            //Post series play statistics to the database
             let statData = new FormData()
 
             statData.append('SeriesId', Series.Id)
             statData.append('Player', currentPlayerKey)
-
             statData.append('SuccessRate', playedElements.filter(a => a.Correct).length+"/"+playedElements.length)
-
             statData.append('TotalTime', playTime)
-
             statData.append('OnMobile',  false)
 
             postSeriesStatistic(statData)
 
+
+            //Update series progress saved locally 
             if(onFinishPlaySeries){
                 onFinishPlaySeries(playedElements)
             }
@@ -122,6 +132,58 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
         }
     }, [showFinalPage])
 
+    const canGoNext = (playedElements.length === (currentIndex+1))
+    const shouldGoToFinalPage = (playedElements.length === seriesElements.length)
+
+
+    //Go to final page
+    //Show gained points
+    const goToFinalPage = () => {
+        setShowFinalPage(true)
+        let totalScore = 0
+
+        notificationApi.destroy()
+        
+        notificationApi.open({
+            message: 'Summary',
+            description:
+            <div>
+                {playedElements.map((e, ei) => {
+                    const {Question, Score} = e
+                    const {Code} = Question
+                    const score = Math.trunc(parseFloat(Score) * 10)
+                    totalScore += score
+
+                    return(
+                        <div key={e.Id}>
+                            <p >{ei + 1} {'- '} {Code}{' '} <span className="series-play-final-page-item-correct">{' '}{score.toFixed(0) + ' XP'}</span></p>
+                        </div>
+                    )
+                })}
+                <Divider/>
+                <small >
+                    Total
+                </small>
+
+                <p className="series-play-final-page-item-correct">{totalScore.toFixed(0) + ' XP'}</p>
+            </div>,
+            duration: 0,
+        })
+    }
+
+    //Go to next question
+    const goNext = () => {
+        if(shouldGoToFinalPage){
+            goToFinalPage()
+            return
+        }
+
+        //Increment current index 
+        setCurrentIndex(index => index+1)
+    }
+
+
+    //Update played series elements with stats regarding success, selected answers and play time
     const updateSeriesPlayElements = (el) => {
         const _playedElements = [...playedElements]
 
@@ -130,17 +192,16 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
         setPlayedElements(_playedElements)
     }
 
+    //Side action buttons
     const renderActionButtons = () => {
         const currentElement = seriesElements[currentIndex]
 
         if(!currentElement) return <div/>;
 
-        const canGoNext = (playedElements.length === (currentIndex+1))
-        const shouldGoToFinalPage = (playedElements.length === seriesElements.length)
-
-
         const qInfo = currentElement.Question.Information
 
+        const question = currentElement.Question
+        
         return(
         <FloatButton.Group
             shape="square"
@@ -165,41 +226,12 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
             onClick={() => {
 
                 if(shouldGoToFinalPage){
-                    setShowFinalPage(true)
-                    let totalScore = 0
-
-                    notificationApi.destroy()
-                    
-                    notificationApi.open({
-                        message: 'Summary',
-                        description:
-                        <div>
-                            {playedElements.map((e, ei) => {
-                                const {Question, Score} = e
-                                const {Code} = Question
-                                const score = Math.trunc(parseFloat(Score) * 10)
-                                totalScore += score
-
-                                return(
-                                    <div key={e.Id}>
-                                        <p >{ei + 1} {'- '} {Code}{' '} <span className="series-play-final-page-item-correct">{' '}{score.toFixed(0) + ' XP'}</span></p>
-                                    </div>
-                                )
-                            })}
-                            <Divider/>
-                            <small >
-                                Total
-                            </small>
-
-                            <p className="series-play-final-page-item-correct">{totalScore.toFixed(0) + ' XP'}</p>
-                        </div>,
-                        duration: 0,
-                    })
+                    goToFinalPage()
                     return
                 }
 
                 if(canGoNext){
-                    setCurrentIndex(index => index+1)
+                    goNext()
                 }
                 else{
                     messageApi.destroy()
@@ -248,6 +280,41 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
             tooltip='Help'
             />
             }
+
+            {!showFinalPage && !isStudent && 
+            <Tooltip
+                color="white"
+                placement="left"
+
+                title={
+                    <Space direction="vertical">
+                        <Button
+                            className="hq-fill-width"
+                            onClick={() => goToQuestionViewEdit(question)}
+                            size="small"
+                        >
+                            <Space> 
+                                <RocketTwoTone />
+                                View/Edit question
+                            </Space>
+                        </Button>
+                        <Button
+                            className="hq-fill-width"
+                            onClick={() => goToSeriesViewEdit(Series)}
+                            size="small"
+                        >
+                            <Space> 
+                                <BuildTwoTone />
+                                View/Edit series
+                            </Space>
+                        </Button>
+                    </Space>
+                }
+            >
+                <FloatButton 
+                icon={<EyeOutlined />} 
+            />
+            </Tooltip>}
             
         </FloatButton.Group>
         )
@@ -266,18 +333,24 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                 Id={Id}
                 onUpdateSeriesPlayElements = {updateSeriesPlayElements}
                 showSolution={true}
+
+                nextAction = {() => goNext()}
             />,
             [KEYBOARD_QUESTION_PARAMETER]: () => 
             <KeyboardQuestionPlay 
                 Id={Id} 
                 onUpdateSeriesPlayElements = {updateSeriesPlayElements}
                 showSolution={true}
+
+                nextAction = {() => goNext()}
             />,
             [MULTIPLE_CHOICE_QUESTION_PARAMETER]: () => 
             <MultipleChoiceQuestion 
                 Id={Id}
                 onUpdateSeriesPlayElements = {updateSeriesPlayElements}
                 showSolution={true}
+                
+                nextAction = {() => goNext()}
             />,
         }
         
@@ -312,7 +385,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
                         const choiceCorrectness = (Correct)   
 
-                        let className = !isSelected ? "multiple-choice-question-play-choice-container" : "multiple-choice-question-play-choice-container-selected"
+                        let className = !isSelected ? "multiple-choice-question-play-choice-container-final-page" : "multiple-choice-question-play-choice-container-selected-final-page"
 
                         className += choiceCorrectness ? ' multiple-choice-question-play-choice-container-correct' : ' multiple-choice-question-play-choice-container-incorrect'
 
@@ -573,7 +646,21 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
             setShowSendFeedbackModal(true)
             setSelectedQuestion(Question)
         }
-    }]
+    },
+    !isStudent  
+    && 
+    {
+        key: 'edit_view',
+        label: 'Edit/View question',
+        icon: <EyeOutlined 
+        style={{color:'blueviolet'}}
+        /> ,
+        onClick: () => {
+            const element = playedElements[index]
+            const {Question} = element
+            goToQuestionViewEdit(Question)
+        }
+    }].filter(a => a)
 
     const renderFinalPage = () => {
 
@@ -638,9 +725,12 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                             title:'Actions'
                                         }}
                                     >
-                                        <p className="series-play-final-page-item-code">
-                                        {Code}
-                                    </p>
+                                        <Space className="hoverable-plus">
+                                            <MoreOutlined />
+                                            <p >
+                                                {Code}
+                                            </p>
+                                        </Space>
                                     </Dropdown>
                                     <span>
                                     {Correct ? 
@@ -672,13 +762,10 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                                     />
                                                     <p>{score}</p>
                                                     {PDFURL && 
-                                                    <Button
-                                                        size="small"
-                                                        onClick={() => window.open(PDFURL)}
-                                                        icon={<FilePdfOutlined />}
-                                                    >
-                                                        Solution
-                                                    </Button>}
+                                                    <ViewSolutionComponent 
+                                                        question={Question}
+                                                        correct={Correct}
+                                                    />}
                                                 </Space>   
                                                 <Space size={'small'}>
                                                     <span><ClockCircleOutlined /> </span>

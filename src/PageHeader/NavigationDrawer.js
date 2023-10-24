@@ -1,5 +1,5 @@
-import React, {useState } from "react";
-import {MenuOutlined, BuildTwoTone, SettingTwoTone, IdcardTwoTone, SnippetsTwoTone, BellTwoTone, SoundTwoTone,DatabaseTwoTone, ContainerTwoTone, FlagTwoTone, AppstoreTwoTone, ControlTwoTone, SlidersTwoTone} from '@ant-design/icons';
+import React, {useEffect, useState } from "react";
+import {MenuOutlined, BuildTwoTone, SettingTwoTone, IdcardTwoTone, SnippetsTwoTone, BellTwoTone, SoundTwoTone,DatabaseTwoTone, ContainerTwoTone, FlagTwoTone, AppstoreTwoTone, ControlTwoTone, SlidersTwoTone, PlusSquareTwoTone } from '@ant-design/icons';
 import { Button, Drawer, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useCourses } from "../contexts/CoursesContext";
@@ -12,7 +12,7 @@ const NavigationDrawer = () => {
 
     const navigate = useNavigate()
 
-    const {myCourses} = useCourses()
+    const {myCourses, courses} = useCourses()
 
     const onChangePage = (e) => {        
         setCurrentPage(e.key)
@@ -38,6 +38,11 @@ const NavigationDrawer = () => {
         label:'Level of difficulty',
         key:'/level_of_difficulty',
         icon: <SlidersTwoTone style={{...iconStyle}}/>
+    },
+    {
+        label:'Datapools',
+        key:'/datapools',
+        icon: <DatabaseTwoTone  style={{...iconStyle}}/>
     }]
 
     const navigationItems = [{
@@ -68,12 +73,17 @@ const NavigationDrawer = () => {
                 key:'/courses',
                 icon:<DatabaseTwoTone style={{...iconStyle}}/>
             },
-            ...(myCourses || []).map((c, ci) => 
+            ...(courses || []).map((c, ci) => 
             ({
                 label:c.Name,
                 key:'/viewcourse/'+c.Id,
                 icon:<ContainerTwoTone   style={{...iconStyle}}/>
-            }))
+            })),
+            {
+                label:'Map',
+                key:'/add_map',
+                icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+            },
         ],
         type:'group'
     },    
@@ -109,6 +119,16 @@ const NavigationDrawer = () => {
             label:'Questions list',
             key:'/questions_list',
             icon:<DatabaseTwoTone style={{...iconStyle}}/>
+        },
+        {
+            label:'Keyboard question',
+            key:'/add_k_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Multiple choice question',
+            key:'/add_mc_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
         ],
         type:'group'
@@ -120,6 +140,11 @@ const NavigationDrawer = () => {
             label:'Series list',
             key:'/series_list',
             icon:<DatabaseTwoTone style={{...iconStyle}}/>
+        },
+        {
+            label:'Series',
+            key:'/add_series',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
         ],
         type:'group'

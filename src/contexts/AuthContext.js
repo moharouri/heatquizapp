@@ -29,10 +29,13 @@ export function AuthProvider ({children}){
 
         if(!isStudent){
             authenticateToken().then((res) => {
-
-                if(!res) navigate('/login')
+                console.log(res)
+                
+                const {data} = res
+                if(!data) navigate('/login')
                 else {
-                    const {name, username, userProfile, roles} = res
+                    const {name, username, userProfile, roles} = data
+
                     setProfilePicture(userProfile)
                     setUsername_LS(username)
                     setUserFullname_LS(name)
