@@ -7,7 +7,7 @@ import './AddNewCourse.css'
 import { useCourses } from "../../../contexts/CoursesContext";
 const { Dragger } = Upload;
 
-export function AddNewCourse({open, onClose}){
+export function AddNewCourse({open, onClose, reloadData}){
 
   const {loadingAddCourse, addCourse} = useCourses()
 
@@ -127,22 +127,15 @@ export function AddNewCourse({open, onClose}){
               addCourse(data)
               .then(
                 (r) => {
+                  console.log(r)
                   handleResponse(
                   r,
-                    
+                  api,
+                  'Course added successfully', 1,
                   () => {
-                    api.destroy()
-                    api.success('Course added successfully', 1)
-                    .then(() => {
-                        onClose()
-                    })
-                  },
-                  
-                  () => {
-                    api.destroy()
-                    api.error(r)
-                  }
-                  )
+                    reloadData()
+                    onClose()
+                  })
             })
 
             }}

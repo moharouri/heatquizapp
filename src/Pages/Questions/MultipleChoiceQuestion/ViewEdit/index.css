@@ -23,22 +23,3 @@
     object-fit: contain;
 }
 
-.multiple-choice-question-edit-view-choice-btn{
-    width: 100%;
-}
-
-
-.multiple-choice-question-edit-view-correct-choice{
-    color: green;
-    font-weight: bold;
-}
-
-.multiple-choice-question-edit-view-incorrect-choice{
-    color: red;
-    font-weight: bold;
-
-}
-
-.multiple-choice-question-edit-latex{
-    width: 100%;
-}

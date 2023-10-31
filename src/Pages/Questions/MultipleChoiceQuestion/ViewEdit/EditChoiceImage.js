@@ -7,7 +7,7 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 
 import './index.css'
 import Dragger from "antd/es/upload/Dragger";
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../../../services/Auxillary";
 
 export function EditChoiceImage({open, onClose, choice, question, reloadQuestion}){
 
@@ -44,9 +44,7 @@ export function EditChoiceImage({open, onClose, choice, question, reloadQuestion
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
 
@@ -56,7 +54,7 @@ export function EditChoiceImage({open, onClose, choice, question, reloadQuestion
                 align="start"
             >
                 <p 
-                    className={Correct ? 'multiple-choice-question-edit-view-correct-choice' : 'multiple-choice-question-edit-view-incorrect-choice'}
+                    className={Correct ? 'default-green hq-bold-font-weight' : 'default-red hq-bold-font-weight'}
                 >
                     {index+1}
                 </p>
@@ -91,8 +89,8 @@ export function EditChoiceImage({open, onClose, choice, question, reloadQuestion
                 {newImageURL && 
                 <img 
                     src={newImageURL}
-                    className="new-course-photo"
-                    alt="course"
+                    className="hq-upload-img"
+                    alt="question"
                 />}
             </Dragger>
         </div>
@@ -117,25 +115,10 @@ export function EditChoiceImage({open, onClose, choice, question, reloadQuestion
                 data.append("Height", 1)
 
                 editMultipleChoiceQuestionChoice(data)
-                .then(
-                (r) => {
-                    const {Id} = r
-                    
-                    if(Id){
-                        api.destroy()
-                        api.success('Edited successfully', 1)
-                        .then(() => {
-                            onClose()
-                            reloadQuestion()
-                        })
-                    }
-                    else{
-                        api.destroy()
-                        api.error(r)
-                    }
-            })
-
-
+                .then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
+                    onClose()
+                    reloadQuestion()
+                }))
             }}
 
             loading={isLoadingEditMultipleChoiceQuestionChoice}

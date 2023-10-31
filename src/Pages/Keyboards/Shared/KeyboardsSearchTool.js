@@ -9,7 +9,7 @@ export function KeyboardsSearchTool({onSetFirstIndex}){
 
     const { isLoadingKeyLists, keyLists, getAllKeyLists,
         isLoadingKeyboards, keyboards,searchKeyboards,
-        searchKeyboardsIds
+        
         } = useKeyboard()
 
     const [code, setCode] = useState('')
@@ -29,7 +29,24 @@ export function KeyboardsSearchTool({onSetFirstIndex}){
             Page:0,
             QperPage:selectedPerPage,
         })
-        console.log(VM)
+
+        onSetFirstIndex(0)
+        setSelectedPage(1)
+
+        searchKeyboards(VM)
+    }
+
+    const getAllData = () => {
+        const VM = ({
+            Code:"",
+            KeyLists: [],
+            Page:0,
+            QperPage:selectedPerPage,
+        })
+
+        onSetFirstIndex(0)
+        setSelectedPage(1)
+        
         searchKeyboards(VM)
     }
 
@@ -50,13 +67,13 @@ export function KeyboardsSearchTool({onSetFirstIndex}){
 
                         onClick={() => {
                             setSelectedPage(ci+1)
-                            //onSetFirstIndex(ci*selectedPerPage)
+                            onSetFirstIndex(ci*selectedPerPage)
 
                             const Ids = KIds.slice(ci*selectedPerPage, (ci + 1)*selectedPerPage)
 
-                            const VM = ({Ids})
+                            const VM = ({Ids, NumberOfKeyboards, Codes, KeyboardIds: KIds})
 
-                            searchKeyboardsIds(VM)
+                            searchKeyboards(VM, true)
                         }}
                     >
                         <p className="pages-single-value">{c.Index + ' ' + c.Character}</p>
@@ -90,9 +107,9 @@ export function KeyboardsSearchTool({onSetFirstIndex}){
                         <Select
                                 className="keyboard-search-tool-input-column"
                                 onChange={(v, option) => {
-                                    const findLOD = keyLists.filter(l => l.Id === option.value)[0]
+                                    const findL = keyLists.filter(l => l.Id === option.value)[0]
 
-                                    setSelectedList(findLOD)
+                                    setSelectedList(findL)
                                 }}
                                 defaultValue={'please select'}
                                 value={(selectedList || {'Code': 'please select'}).Code}
@@ -135,12 +152,12 @@ export function KeyboardsSearchTool({onSetFirstIndex}){
                             Search
                         </Button>
 
-                        <Button>
-                            Get all Keyboards
-                        </Button>
+                        <Button 
+                            loading={isLoadingKeyboards}
+                            onClick={() => getAllData()}
+                        >
 
-                        <Button>
-                            Get owned Keyboards
+                            Get all Keyboards
                         </Button>
                     </Space>
                 </Space>

@@ -2,11 +2,12 @@ import { Button, Drawer, Form, Input, message } from "antd";
 import React, {useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useTopics } from "../../contexts/TopicsContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function AddTopic({open, onClose}){
+export function AddTopic({open, onClose, reloadData}){
     const [messageApi, contextHolder] = message.useMessage();
 
-    const {loadingAddTopic, getAddTopicError, addTopic, getAllTopics} = useTopics()
+    const {loadingAddTopic, addTopic} = useTopics()
 
     const [newName, setNewName] = useState('')
 
@@ -18,14 +19,12 @@ export function AddTopic({open, onClose}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -37,6 +36,7 @@ export function AddTopic({open, onClose}){
                 </Form>
                 <Button 
                     type="primary"
+                    size="small"
                     onClick={() => {
                         if(!newName.trim()){
                             messageApi.destroy()
@@ -48,15 +48,11 @@ export function AddTopic({open, onClose}){
                             Name: newName
                         })
 
-                        addTopic(VM).then(() => {
-                            if(getAddTopicError){
-                                messageApi.destroy()
-                                messageApi.error(getAddTopicError)
-                            }
-                            else{
-                                getAllTopics()
-                            }
-                        })
+                        addTopic(VM).then((r) => 
+                            handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                                reloadData()
+                                onClose()
+                            }))
 
                         
                     }}

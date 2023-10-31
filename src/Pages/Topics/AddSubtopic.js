@@ -2,15 +2,15 @@ import { Button, Divider, Drawer, Form, Input, message } from "antd";
 import React, { useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useTopics } from "../../contexts/TopicsContext";
+import { handleResponse } from "../../services/Auxillary";
 
-import './AddSubtopic.css'
-
-export function AddSubtopic({open, onClose, topic}){
+export function AddSubtopic({open, onClose, topic, reloadData}){
     const [messageApi, contextHolder] = message.useMessage();
 
-    const {loadingAddSubtopic, getAddSubtopicError, addSubtopic, getAllTopics} = useTopics()
+    const {loadingAddSubtopic, addSubtopic} = useTopics()
 
     const [newName, setNewName] = useState('')
+
 
     return(
         <div>
@@ -20,14 +20,12 @@ export function AddSubtopic({open, onClose, topic}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -39,6 +37,7 @@ export function AddSubtopic({open, onClose, topic}){
                 </Form>
                 <Button 
                     type="primary"
+                    size="small"
                     onClick={() => {
                         if(!newName.trim()){
                             messageApi.destroy()
@@ -51,15 +50,13 @@ export function AddSubtopic({open, onClose, topic}){
                             TopicId: topic.Id
                         })
 
-                        addSubtopic(VM).then(() => {
-                            if(getAddSubtopicError){
-                                messageApi.destroy()
-                                messageApi.error(getAddSubtopicError)
-                            }
-                            else{
-                                getAllTopics()
-                            }
-                        })
+                        addSubtopic(VM)
+                        .then((r) => 
+                            handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                                reloadData()
+                                onClose()
+                            })
+                        )
 
                         
                     }}
@@ -68,8 +65,8 @@ export function AddSubtopic({open, onClose, topic}){
                 Add
                 </Button>
                 <Divider />
-                <small className="add-image-tree-tree-word">Tree </small>
-                <p className="tree-name-add-image-tree">
+                <small className="default-gray">Tree </small>
+                <p className="default-title">
                     {topic.Name} 
                 </p>
             </Drawer>

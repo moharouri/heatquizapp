@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../contexts/QuestionsContext";
 import { CLICKABLE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
 import { PagesWrapper } from "../../../PagesWrapper";
-import { Col, Divider, Dropdown, Row, Skeleton, Space, Spin, Statistic, Tooltip } from "antd";
+import { Col, Divider, Dropdown, Popconfirm, Row, Skeleton, Space, Spin, Statistic, Tooltip, message } from "antd";
 import { useParams } from "react-router-dom";
-import { beautifyDate, beautifyNumber } from "../../../services/Auxillary";
+import { beautifyDate, beautifyNumber, handleResponse } from "../../../services/Auxillary";
 import {EditOutlined, TrophyOutlined, ApartmentOutlined, CommentOutlined, NotificationOutlined, FilePdfOutlined, DeleteOutlined} from '@ant-design/icons';
 
 import './QuestionEditView.css'
-import { useStudentFeedback } from "../../../contexts/StudentFeedbackContext";
 import { ViewFeedbackList } from "../../StudentFeedback/ViewFeedbackList";
 import { ViewQuestionComments } from "../ViewQuestionComments/ViewQuestionComments";
 import { ViewQuestionRelations } from "../ViewQuestionRelations/ViewQuestionRelations";
@@ -18,6 +17,7 @@ import { QuestionEditSupplementaryMaterial } from "./QuestionEditSupplementaryMa
 import { MultipleChoiceQuestionEditView } from "../MultipleChoiceQuestion/ViewEdit";
 import { KeyboardQuestionEditView } from "../KeyboardQuestion/EditView";
 import { ClickableQuestionEditView } from "../ClickableQuestion/ViewEdit";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
 
 export function QuestionEditView(){
     const {
@@ -26,9 +26,9 @@ export function QuestionEditView(){
         multipleChoiceQuestionPlay, errorGetMultipleChoiceQuestionPlay, isLoadingMultipleChoiceQuestionPlay, getMultipleChoiceQuestionPlay,
 
         questionStatistics, errorGetQuestionStatistics, isLoadingGetQuestionStatistics, getQuestionStatistics,
-    } = useQuestions()
 
-    const { loadingQuestionFeedback, questionFeedback, getQuestionFeedbackError, getQuestionFeedback} = useStudentFeedback()
+        removeQuestionSolution,
+    } = useQuestions()
 
     const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
     const [showViewFeedbackListModal, setShowViewFeedbackListModal] = useState(false)
@@ -36,6 +36,8 @@ export function QuestionEditView(){
     const [showViewQuestionRelationsModal, setShowQuestionRelationsModal] = useState(false)
     const [showEditBasicInfoModal, setShowEditBasicInfoModal] = useState(false)
     const [showEditSolutionModal, setShowEditSolutionModal] = useState(false)
+
+    const [api, contextHolder] = message.useMessage()
 
     const {id, type} = useParams()
 
@@ -54,7 +56,7 @@ export function QuestionEditView(){
             }
 
             default:{
-                return
+                return () => <div/>
             }
         }
     }
@@ -78,7 +80,6 @@ export function QuestionEditView(){
             }
         }
     }
-
 
     useEffect(() => {
 
@@ -115,6 +116,26 @@ export function QuestionEditView(){
         }
     }
 
+    const calculateError = () => {
+        switch (Number(type)) {
+            case CLICKABLE_QUESTION_PARAMETER:{
+                return errorGetClickableQuestionPlay
+            }
+
+            case KEYBOARD_QUESTION_PARAMETER: {
+                return errorGetKeyboardQuestionPlay
+            }
+
+            case MULTIPLE_CHOICE_QUESTION_PARAMETER: {
+                return errorGetMultipleChoiceQuestionPlay
+            }
+
+            default:{
+                return null
+            }
+        }
+    }
+
     const calculateQuestion = () => {
         switch (Number(type)) {
             case CLICKABLE_QUESTION_PARAMETER:{
@@ -137,9 +158,19 @@ export function QuestionEditView(){
 
     const isLoading = calculateIsLoading()
     let question = calculateQuestion()
+    const loadError = calculateError()
 
     const renderQuestionStatistics = () => {
-        
+
+        if(errorGetQuestionStatistics){
+            return(
+                <ErrorComponent 
+                    error={errorGetQuestionStatistics}
+                    onReload={() => getQuestionStatistics(id)}
+                />
+            )
+        }
+
         const {TotalPlay, CorrectPlay, MedianPlayTime, MedianPlayTimeCorrect, MedianPlayTimeWrong, TotalPDFViews, TotalPDFViewsWrong} = questionStatistics
         
         const correctPerc = (CorrectPlay ? (100*(CorrectPlay/TotalPlay)).toFixed(0) : 0) + '%'
@@ -219,7 +250,33 @@ export function QuestionEditView(){
         },
         q.PDFURL && {
             key: 'remove_solution',
-            label: 'Remove solution',
+            label: 
+            <Popconfirm
+                title="Remove solution"
+                description="Are you sure to remove solution?"
+                        onConfirm={() => {
+
+                            const data = new FormData()
+                            
+                            data.append("QuestionId",  id)
+                            data.append("QuestionType", type)
+                            data.append("PDF", true)
+
+                            removeQuestionSolution(data)
+                            .then(r => handleResponse(
+                                r,
+                                api,
+                                'Removed successfully',
+                                1,
+                                () => getQueryFunction()(id)))
+                        }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+                placement="right"
+            >
+                Remove solution
+            </Popconfirm>,
             icon: <DeleteOutlined/> ,
             onClick: () => {}
         },
@@ -251,10 +308,7 @@ export function QuestionEditView(){
             key: 'view_feedback',
             label: 'Student feedback',
             icon: <NotificationOutlined /> ,
-            onClick: () => {
-                getQuestionFeedback(question)
-                setShowViewFeedbackListModal(true)
-            }
+            onClick: () => setShowViewFeedbackListModal(true)
         },].filter(a => a)
 
     const renderQuestionHeader = () => {
@@ -290,8 +344,8 @@ export function QuestionEditView(){
                         <p className="question-edit-view-info-title default-title hoverable">{Code}</p>
                     </Dropdown>
 
-                    <p className="question-edit-view-info-card-gray">{AddedByName}</p>
-                    <p className="question-edit-view-info-card-gray">{beautifyDate(DateCreated)}</p>
+                    <p className="default-small default-gray">{AddedByName}</p>
+                    <p className="default-small default-gray">{beautifyDate(DateCreated)}</p>
                     </div>
                     <Row
                     gutter={12}
@@ -317,10 +371,19 @@ export function QuestionEditView(){
     
     return(
         <PagesWrapper>
+            {contextHolder}
+
             {isLoading && <Skeleton/>}
 
             {(!isLoading && question) && renderQuestionHeader()}
             {(!isLoading && question) && renderQuestionBody()}
+
+            {loadError && !isLoading && 
+                <ErrorComponent 
+                    error={loadError}
+                    onReload={() => getQueryFunction()(id)}
+                />
+            }
 
             {(!isLoading && question && 
                 <div>
@@ -332,14 +395,11 @@ export function QuestionEditView(){
                     Type={question.Type}
                     deadLoad={true}
                 />
+
                 <ViewFeedbackList
                     open={showViewFeedbackListModal}
                     onClose={()=> setShowViewFeedbackListModal(false)}
                     question={question}
-                    
-                    loading={loadingQuestionFeedback}
-                    error={getQuestionFeedbackError}
-                    data={questionFeedback}
                 />
 
                 <ViewQuestionComments 

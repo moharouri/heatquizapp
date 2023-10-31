@@ -8,7 +8,7 @@ export function SeriesRelations({open, onClose, Series}){
 
     if(!open) return <div/>;
 
-    const naviagate = useNavigate()
+    const navigate = useNavigate()
 
     const {MapElements} = Series
 
@@ -16,14 +16,13 @@ export function SeriesRelations({open, onClose, Series}){
         key: 'play_map',
         label: 'Play',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => naviagate('/playcoursemap/'+e.Id)
+        onClick: () => navigate('/playcoursemap/'+e.Id)
     },
     {
         key: 'view_edit_map',
         label: 'View / edit map',
         icon: <EditOutlined/> ,
-        onClick: () => {
-        }
+        onClick: () => navigate('/edit_view_map/'+e.Id)
     }]
 
     return(
@@ -42,7 +41,7 @@ export function SeriesRelations({open, onClose, Series}){
                 const {Map} = me
                 return(
                     <div
-                        className="series-relation-line"
+                        className="hq-full-width"
                     >
                         <Space 
                             direction="vertical"
@@ -57,7 +56,7 @@ export function SeriesRelations({open, onClose, Series}){
                                             title:'Actions'
                                             }}
                                     >
-                                        <p className="series-relation-map-name">{Map.Title}</p>
+                                        <p className="default-title hoverable">{Map.Title}</p>
                                     </Dropdown>
                                     <p>-</p>
                                     <p>{me.Title}</p>

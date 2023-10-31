@@ -19,6 +19,7 @@ import { SelectRoutes } from './SelectRoutes';
 import { AuthProvider } from './contexts/AuthContext';
 import { CommentsProvider } from './contexts/CommentsContext';
 import { DefaultValuesProvider } from './contexts/DefaultValuesContext';
+import { AssistanceObjectsProvider } from './contexts/AssistanceObjectsContext';
 
 function App() {
 
@@ -41,7 +42,9 @@ function App() {
             <MapsProvider>
             <CommentsProvider>
             <DefaultValuesProvider>
+            <AssistanceObjectsProvider>
               <SelectRoutes/>
+            </AssistanceObjectsProvider>
             </DefaultValuesProvider>
             </CommentsProvider>
             </MapsProvider>

@@ -16,6 +16,14 @@ export function addTopicRequest(b){
     return ADD_REQUEST_BODY_API('Topic/AddTopic', b, true)
 }
 
+export function removeTopicRequest(b){
+    return EDIT_REQUEST_BODY_API('Topic/DeleteTopic', b)
+}
+
 export function addSubtopicRequest(b){
     return ADD_REQUEST_BODY_API('Topic/AddSubtopic', b, true)
+}
+
+export function removeSubtopicRequest(b){
+    return EDIT_REQUEST_BODY_API('Topic/DeleteSubtopic', b)
 }

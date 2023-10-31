@@ -3,10 +3,22 @@ import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { LatexRenderer } from "../../Components/LatexRenderer";
 import { beautifyDatetime, getShortenedName } from "../../services/Auxillary";
+import { useStudentFeedback } from "../../contexts/StudentFeedbackContext";
+import { useEffect } from "react";
+import { ErrorComponent } from "../../Components/ErrorComponent";
 
-export function ViewFeedbackList({open, onClose, question, loading, error, data}){
+export function ViewFeedbackList({open, onClose, question}){
+    if(!open) return <div/>;
 
-    console.log(question, data)
+    const {loadingQuestionFeedback, questionFeedback, getQuestionFeedbackError, getQuestionFeedback,} = useStudentFeedback()
+
+    useEffect(() => {
+      if(open){
+        getQuestionFeedback(question)
+      }
+    }, [open])
+
+    const {Latex,  Base_ImageURL, Code} = question
 
     return(
         <Drawer
@@ -14,32 +26,37 @@ export function ViewFeedbackList({open, onClose, question, loading, error, data}
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
 
         footer={
           <div>
-          <p className="question-code">{question.Code}</p>
+          <p className="default-title">{Code}</p>
           <Space size={'large'} align="start">
               <div>
                   <img
-                      src = {question.Base_ImageURL}
+                      src = {Base_ImageURL}
                       alt="question"
                       className="question-feedback-image"
                       
                   />
               </div>
               <div>
-                  {question.Latex && <LatexRenderer latex={question.Latex}/>}
+                  {Latex && <LatexRenderer latex={Latex}/>}
               </div>
           </Space>
       </div>}
     >   
-        {loading && <Spin/>}
-        {!loading && data && 
-        data.map((d, di) => 
+        {loadingQuestionFeedback && <Spin/>}
+
+        {getQuestionFeedbackError && !loadingQuestionFeedback && 
+          <ErrorComponent 
+            error={getQuestionFeedbackError}
+            onReload={() => getQuestionFeedback(question)}
+          />}
+
+        {!loadingQuestionFeedback && questionFeedback && 
+        questionFeedback.map((d, di) => 
           {
             const {Player, DateCreated, FeedbackContent} = d
 
@@ -64,7 +81,7 @@ export function ViewFeedbackList({open, onClose, question, loading, error, data}
 
                   <p>{beautifyDatetime(DateCreated)}</p>
                 </Space>
-                <p>{d.FeedbackContent}</p>
+                <p>{FeedbackContent}</p>
                 <Divider/>
               </div>)
           })

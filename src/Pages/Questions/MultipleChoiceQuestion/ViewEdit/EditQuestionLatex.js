@@ -8,6 +8,7 @@ import TextArea from "antd/es/input/TextArea";
 
 import './index.css'
 import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function EditQuestionLatex({open, onClose, question, reloadQuestion}){
 
@@ -23,7 +24,7 @@ export function EditQuestionLatex({open, onClose, question, reloadQuestion}){
 
     useEffect(() => {
         if(open){
-            setNewLatex(Latex)
+            setNewLatex(Latex || '')
         }
     }, [open])
 
@@ -33,9 +34,7 @@ export function EditQuestionLatex({open, onClose, question, reloadQuestion}){
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
 
@@ -62,7 +61,7 @@ export function EditQuestionLatex({open, onClose, question, reloadQuestion}){
         <Space
             direction="vertical"
             size={'large'}
-            className="multiple-choice-question-edit-latex"
+            className="hq-full-width"
         >
             <TextArea 
                 value={newLatex}
@@ -93,22 +92,11 @@ export function EditQuestionLatex({open, onClose, question, reloadQuestion}){
                 })
 
                 editMultipleChoiceQuestionLatex(VM)
-                .then(
-                (r) => {
-                    const {Id} = r
-                    
-                    if(Id){
-                        api.destroy()
-                        api.success('Edited successfully', 1)
-                        .then(() => {
-                            onClose()
-                            reloadQuestion()
-                        })
-                    }
-                    else{
-                        api.destroy()
-                        api.error(r)
-                    }})
+                .then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
+                    onClose()
+                    reloadQuestion()
+                }))
+                
             }}
 
             loading={isLoadingEditMultipleChoiceQuestionLatex}

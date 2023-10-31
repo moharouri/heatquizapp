@@ -6,8 +6,9 @@ import { useEffect } from "react";
 import { MAX_SERIES_CODE } from "./Constants";
 import { useSeries } from "../../../contexts/SeriesContext";
 import { useNavigate } from "react-router-dom";
+import { handleResponse } from "../../../services/Auxillary";
 
-export function EditSeriesBasicInfo({open, onClose, Series}){
+export function EditSeriesBasicInfo({open, onClose, Series, reloadSeries}){
 
     if(!open) return <div/>;
 
@@ -26,8 +27,6 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
         setCode(Code)
         setIsRandom(IsRandom)
         setRandomSize(RandomSize)
-
-        console.log(IsRandom, Series)
     }, [open])
 
     return(
@@ -36,9 +35,7 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         >
@@ -46,7 +43,7 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
                 {contextHolder}
                 <Form>
                     <Form.Item>
-                        <small>Code</small>
+                        <small className="default-gray">Code</small>
                         <Input 
                             placeholder="New course code"
                             value={code}
@@ -56,7 +53,7 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
                         />
                     </Form.Item>
                     <Form.Item>
-                        <small>Random ?{' '} {' '}</small>
+                        <small className="default-gray">Random ?{' '} {' '}</small>
                         <Switch 
                         checked={isRandom}
                         onChange={(v) => setIsRandom(v)}
@@ -64,7 +61,7 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
                         unCheckedChildren="No" />
                     </Form.Item>
                     <Form.Item>
-                        <small>Random sample size</small>
+                        <small className="default-gray">Random sample size</small>
                         <Input 
                             placeholder="Random sample size"
                             value={randomSize}
@@ -99,22 +96,12 @@ export function EditSeriesBasicInfo({open, onClose, Series}){
       
                       editQuestionsInfo(VM)
                       .then(
-                        (r) => {
-                            const {Id} = r
-                            
-                            if(Id){
-                                messageApi.destroy()
-                                messageApi.success('Series info updated successfully', 1)
-                                .then(() => {
-                                    navigate('/series_edit_view/'+code)
-                                    onClose()
-                                })
-                            }
-                            else{
-                                messageApi.destroy()
-                                messageApi.error(r)
-                            }
-                    })
+                        (r) => 
+                        handleResponse(r, messageApi, 'Series info updated successfully', 1, () => {
+                            navigate('/series_edit_view/'+code)
+                            onClose()
+                        }))
+                        
                 }}
                 loading = {isLoadingEditQuestionsInfo}
                 >

@@ -3,9 +3,10 @@ import React, {useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import { useClickTrees } from "../../contexts/ClickTreesContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditNodeName({open, onClose, node}){
-    const {loadingEditNode, getEditNodeError, editNode, getAllClickTrees} = useClickTrees()
+export function EditNodeName({open, onClose, node, reloadData}){
+    const {loadingEditNode, editNode} = useClickTrees()
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -15,13 +16,6 @@ export function EditNodeName({open, onClose, node}){
         setNewName((node || {}).Name)
     }, [open])
 
-    useEffect(() => {
-        if(getEditNodeError){
-            messageApi.destroy()
-            messageApi.error(getEditNodeError)
-        }
-    }, [getEditNodeError])
-
     return(
         <div>
             {contextHolder}
@@ -30,14 +24,12 @@ export function EditNodeName({open, onClose, node}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <Form>
                     <Form.Item>
-                        <small>Updated name</small>
+                        <small className="default-gray">Updated name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -62,7 +54,12 @@ export function EditNodeName({open, onClose, node}){
                         data.append('Picture', null)
                         data.append('SameImage', true)
 
-                       editNode(data).then(() => getAllClickTrees())
+                       editNode(data).then((r) => 
+                        handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                        })
+                       )
                        
                     }}
                     loading = {loadingEditNode}

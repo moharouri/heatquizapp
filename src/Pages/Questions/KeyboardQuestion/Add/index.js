@@ -14,6 +14,7 @@ import { SelectKeyboard } from "./SelectKeyboard";
 import { Keyboard } from "../../../../Components/Keyboard";
 import { validateKeyboardAnswer } from "../Functions";
 import { UploadPDF } from "../../../../Components/UploadPDF";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AddKeyboardQuestion(){
 
@@ -394,19 +395,8 @@ export function AddKeyboardQuestion(){
         data.append('PDF', newPDF)
         
         addKeyboardQuestion(data)
-            .then(
-                (r) => {
-                    const {Id} = r
-                    
-                    if(Id){
-                        api.destroy()
-                        api.success('Question added successfully', 1)
-                    }
-                    else{
-                        api.destroy()
-                        api.error(r)
-                    }
-            })
+            .then(r => handleResponse(r, api, 'Question added successfully', 1))
+            
 
     }
 

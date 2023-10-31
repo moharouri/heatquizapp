@@ -8,19 +8,29 @@ export const MAX_ALLOWED_COURSE_NAME = 70
 export const MAX_ALLOWED_COURSE_CODE = 30
 
 //Function to handle api request response
-export const handleResponse = (r, onSuccess, onError) => {
+export const handleResponse = (r, api, successMessage, delay, postSuccess, postError) => {
     if(!r){
-
       return
     }
+    const {error, data} = r
 
-    const {Id} = r.data
+    console.log(api)
 
-    if(Id){
-      onSuccess()
+    api.destroy()
+
+    if(error){
+      api.error(error)
+
+      if(postError) postError();
+
     }
     else{
-      onError()
+      api.success(successMessage, delay || 3)
+      .then(() => {
+        if(postSuccess) postSuccess();
+      })
+
+      
     }
 
 }
@@ -202,4 +212,13 @@ return A
 //Function to fix URL 
 export function FixURL(url){
   return url.replaceAll("\\", '/').replaceAll(' ', '%20')
+}
+
+//Functions to get unique values in an array 
+export function getUniqueValues(array){
+  return array.filter( onlyUnique );
+}
+
+function onlyUnique(value, index, self) { 
+  return self.indexOf(value) === index;
 }

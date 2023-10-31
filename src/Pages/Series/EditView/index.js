@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useSeries } from "../../../contexts/SeriesContext";
 import { Button, Col, Divider, Dropdown, Empty, Row, Skeleton, Space, Spin, Statistic, Tooltip, message } from "antd";
-import { beautifyDate, beautifyNumber } from "../../../services/Auxillary";
+import { beautifyDate, beautifyNumber, handleResponse } from "../../../services/Auxillary";
 import {TrophyOutlined, EditOutlined, ApartmentOutlined, PlusOutlined, AreaChartOutlined, ClockCircleOutlined, NotificationOutlined, DeleteOutlined, GroupOutlined} from '@ant-design/icons';
 
 import './EditView.css'
@@ -14,11 +14,11 @@ import { QuestionPlayPocket } from "../../Questions/QuestionPlayPocket/QuestionP
 import { SeriesPlayPocket } from "../Play/SeriesPlayPocket";
 import { EditSeriesBasicInfo } from "./EditSeriesBasicInfo";
 import { SeriesRelations } from "./SeriesRelations";
-import { useStudentFeedback } from "../../../contexts/StudentFeedbackContext";
 import { ViewFeedbackList } from "../../StudentFeedback/ViewFeedbackList";
 import { AddQuestionsToSeries } from "./AddQuestionsToSeries";
 import { AssignQuestionsToPool } from "./AssignQuestionsToPool";
 import { ReorderQuestionsInSeries } from "./ReorderQuestionsInSeries";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
 
 export function SeriesEditViewPage(){
     const {code} = useParams()
@@ -33,8 +33,6 @@ export function SeriesEditViewPage(){
         isLoadingDecreasePoolsNumberSeries, decreasePoolsNumberSeries,
         isLoadingIncreasePoolsNumberSeries, increasePoolsNumberSeries
     } = useSeries()
-
-    const { loadingQuestionFeedback, questionFeedback, getQuestionFeedbackError, getQuestionFeedback} = useStudentFeedback()
 
 
     const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
@@ -55,13 +53,17 @@ export function SeriesEditViewPage(){
 
     const [api, contextHolder] = message.useMessage()
 
-    useEffect(() => {
+    const loadData = () => {
         getSeriesViewEdit(code)
         setShowEditBasicInfo(false)
         setShowSeriesRelations(false)
         setShowAddQuestionsToSeries(false)
         setShowAssignQuestionsToPool(false)
         setShowReorderElements(false)
+    }
+
+    useEffect(() => {
+        loadData()
     }, [code])
 
     useEffect(() => {
@@ -75,6 +77,15 @@ export function SeriesEditViewPage(){
         
         const onMobilePerc = (TotalPlayOnMobile ? (100*(TotalPlayOnMobile/TotalPlay)).toFixed(0) : 0) + '% on mobile'
 
+        if(errorGetSeriesStatistics){
+            return(
+                <ErrorComponent 
+                    error={errorGetSeriesStatistics}
+                    onReload={() => getSeriesStatistics(Series.Id)}
+                />
+            )
+        }
+
         return(
             <Space
                 size={'large'}
@@ -82,7 +93,7 @@ export function SeriesEditViewPage(){
                 <Statistic 
                     title='Total play'
                     value={beautifyNumber(TotalPlay)}
-                    suffix = {<span className="series-edit-view-info-card-gray">{' '}{onMobilePerc}</span>}
+                    suffix = {<span className="default-small default-gray">{' '}{onMobilePerc}</span>}
                     valueStyle={{fontSize:'medium', color:'gray'}}
                 />
                 <Statistic 
@@ -107,8 +118,7 @@ export function SeriesEditViewPage(){
         key: 'view_edit_question',
         label: 'View / edit question',
         icon: <EditOutlined/> ,
-        onClick: () => {
-        }
+        onClick: () =>  naviagate('/question_view_edit/'+e.Question.Id+'/'+e.Question.Type)
     },
     {
         key: 'view_question_feedback',
@@ -116,7 +126,6 @@ export function SeriesEditViewPage(){
         icon: <NotificationOutlined style={{color:'blueviolet'}}/> ,
         onClick: () => {
             setSelectedQuestion(e.Question)
-            getQuestionFeedback(e.Question)
             setShowViewFeedbackListModal(true)
         }
     },
@@ -127,20 +136,11 @@ export function SeriesEditViewPage(){
         onClick: () => {
             deselectQuestionFromSeries(e)
             .then(
-                (r) => {
-
-                    const {Id} = r
-                    
-                    if(Id){
-                        api.destroy()
-                        api.success('Question removed successfully', 1)
-                        .then(() => getSeriesViewEdit(code))
-                    }
-                    else{
-                        api.destroy()
-                        api.error(r)
-                    }
-            })
+                (r) => 
+                handleResponse(r, api, 'Question removed successfully', 1, () => {
+                    getSeriesViewEdit(code)
+                }))
+                
         }
     }]
 
@@ -164,19 +164,10 @@ export function SeriesEditViewPage(){
       
                       assignQuestionsToPool(VM)
                       .then(
-                        (r) => {
-                            const {Id} = r
-                            
-                            if(Id){
-                                api.destroy()
-                                api.success('Question re-assigned successfully', 1)
-                                .then(() => getSeriesViewEdit(code))
-                            }
-                            else{
-                                api.destroy()
-                                api.error(r)
-                            }
-                    })
+                        (r) => 
+                        handleResponse(r, api, 'Question re-assigned successfully', 1, () => {
+                            getSeriesViewEdit(code)
+                        }))
                 }
             })
         }
@@ -229,7 +220,7 @@ export function SeriesEditViewPage(){
                             className="series-edit-view-element-img"
                         />
                         {elementStat &&
-                        <div className="series-edit-view-element-other-info">
+                        <div className="default-gray">
                             <Divider
                                 orientation='center'
                             >
@@ -257,7 +248,9 @@ export function SeriesEditViewPage(){
                                 <Space>
                                     <AreaChartOutlined  style={{color:'green'}}/>
                                     <Tooltip
-                                        title='Success rate (%)'
+                                        title={<p>Success rate (%)</p>}
+                                        color="white"
+
                                     >
                                     <p>{successPercentage}</p>
                                     </Tooltip>
@@ -265,7 +258,8 @@ export function SeriesEditViewPage(){
                                 <Space>
                                     <ClockCircleOutlined />
                                     <Tooltip
-                                        title='Median play time (seconds)'
+                                        title={<p>Median play time (seconds)</p>}
+                                        color="white"
                                     >
                                         <p>{medianPlayTime}
                                             <i><small>{' '}seconds </small></i>
@@ -358,19 +352,21 @@ export function SeriesEditViewPage(){
                 <Space
                     size={'large'}
                     align="start"
-                    className="series-edit-view-info-card-base"
+                    className="hq-opposite-arrangement"
                 >
-                    <div className="series-edit-view-info-card">
+                    <Space direction="vertical" align="start">
                         <Dropdown
                             menu={{
                                 items:actionList(Series),
                                 title:'Actions'
                                 }}
                         >
-                            <p className="series-edit-view-info-title default-title hoverable">{Code}</p>
+                            <p className="default-large default-title hoverable">{Code}</p>
                         </Dropdown>
-                        <p className="series-edit-view-info-card-gray">{AddedByName}</p>
-                        <p className="series-edit-view-info-card-gray">{beautifyDate(DateCreated)}</p>
+                        <div>
+                            <p className="default-small default-gray">{AddedByName}</p>
+                            <p className="default-small default-gray">{beautifyDate(DateCreated)}</p>
+                        </div>
                                 
                         {IsRandom 
                         && 
@@ -385,19 +381,10 @@ export function SeriesEditViewPage(){
                                 onClick={() => {
                                     increasePoolsNumberSeries(({...Series}))
                                     .then(
-                                        (r) => {
-                                            const {Id} = r
-                                            
-                                            if(Id){
-                                                api.destroy()
-                                                api.success('Successful', 1)
-                                                .then(() => getSeriesViewEdit(code))
-                                            }
-                                            else{
-                                                api.destroy()
-                                                api.error(r)
-                                            }
-                                    })
+                                        (r) => 
+                                        handleResponse(r, api, 'Increased successfully', 1, () => {
+                                            getSeriesViewEdit(code)
+                                        }))
                                 }}
                             >
                                 +
@@ -417,32 +404,23 @@ export function SeriesEditViewPage(){
 
                                     decreasePoolsNumberSeries(({...Series}))
                                     .then(
-                                        (r) => {
-                                            const {Id} = r
-                                            
-                                            if(Id){
-                                                api.destroy()
-                                                api.success('Successful', 1)
-                                                .then(() => getSeriesViewEdit(code))
-                                            }
-                                            else{
-                                                api.destroy()
-                                                api.error(r)
-                                            }
-                                    })
+                                        (r) => 
+                                        handleResponse(r, api, 'Decreased successfully', 1, () => {
+                                            getSeriesViewEdit(code)
+                                        }))
                                 }}
                             >
                                 -
                             </Button>
                             <Button
                                 size='small'
-                                className="series-edit-view-pools-number-assign"
+                                className="default-gray"
                                 onClick={() => setShowAssignQuestionsToPool(true)}
                             >
                                 assign
                             </Button>
                         </Space>}
-                    </div>
+                    </Space>
                    <Row
                     gutter={12}
                    >
@@ -464,7 +442,7 @@ export function SeriesEditViewPage(){
                                     style={{color:'orange'}}
                                     valueStyle={{fontSize:'medium', color:'gray'}}
                                     value={' '}
-                                    suffix = {<span className="series-edit-view-info-card-gray">sample size:  {RandomSize} </span>}
+                                    suffix = {<span className="default-small default-gray">sample size:  {RandomSize} </span>}
                                 />}
                             </Space>
                         </Col>
@@ -493,6 +471,13 @@ export function SeriesEditViewPage(){
             {isLoadingSeries && <Skeleton />}
             {!isLoadingSeries && Series && renderSeries()}
 
+            {errorGetSeries && !isLoadingSeries && 
+                <ErrorComponent 
+                    error={errorGetSeries}
+                    onReload={() => loadData()}
+                />
+            }
+
             <QuestionPlayPocket 
                 open={showPlayQuestionModal}
                 onClose={() => setShowPlayQuestionModal(false)}
@@ -511,6 +496,8 @@ export function SeriesEditViewPage(){
                 open={showEditBasicInfo}
                 onClose={() => setShowEditBasicInfo(false)}
                 Series={Series}
+
+                reloadSeries ={() => getSeriesViewEdit(code)}
             />  
 
             <SeriesRelations 
@@ -542,16 +529,14 @@ export function SeriesEditViewPage(){
                 open={showReorderElements}
                 onClose={() => setShowReorderElements(false)}
                 Series={({...Series, Stats: seriesElementStats})}
+
+                reloadSeries ={() => getSeriesViewEdit(code)}
             />
 
             <ViewFeedbackList
                 open={showViewFeedbackListModal}
                 onClose={()=> setShowViewFeedbackListModal(false)}
                 question={selectedQuestion}
-                
-                loading={loadingQuestionFeedback}
-                error={getQuestionFeedbackError}
-                data={questionFeedback}
             />
         </PagesWrapper>
     )

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { PagesWrapper } from "../../PagesWrapper";
-import { Button, Divider, Dropdown, List, Select, Skeleton, Space, message } from "antd";
+import { Button, Divider, Dropdown, List, Popconfirm, Select, Skeleton, Space, Tooltip, message } from "antd";
 import { useClickTrees } from "../../contexts/ClickTreesContext";
 import { useDatapools } from "../../contexts/DatapoolsContext";
 import {PlusOutlined, EditOutlined, DeleteOutlined, PictureOutlined} from '@ant-design/icons';
@@ -12,9 +12,15 @@ import { AddLeaf } from "./AddLeaf";
 import { EditTreeName } from "./EditTreeName";
 import { EditNodeName } from "./EditNodeName";
 import { EditNodeImage } from "./EditNodeImage";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { handleResponse } from "../../services/Auxillary";
 
 export function ClickTrees(){
-    const {clickTrees, errorGetClickTrees, isLoadingClickTrees, getAllClickTrees} = useClickTrees()
+    const {
+        clickTrees, errorGetClickTrees, isLoadingClickTrees, getAllClickTrees,
+        removeTree,
+        removeNode
+    } = useClickTrees()
     const {selectedDatapool} = useDatapools()
 
     const [selectedTree, setSelectedTree] = useState(null)
@@ -29,18 +35,10 @@ export function ClickTrees(){
     const [showEditNodeImageModal, setShowEditNodeImageModal] = useState(false)
     const [selectedNode, setSelectedNode] = useState(null)
 
-    const [messageApi, contextHolder] = message.useMessage()
-
-
+    const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
-        getAllClickTrees().then(() => {
-            if(errorGetClickTrees){
-                messageApi.destroy()
-                messageApi.error(errorGetClickTrees)
-            }
-            
-        })
+        getAllClickTrees()
     }, [selectedDatapool])
 
     useEffect(() => {
@@ -55,7 +53,7 @@ export function ClickTrees(){
     const baseImageActionList = (t) => [
         {
             key: 'edit_tree_name',
-            label: 'Edit name ',
+            label: 'Edit name',
             icon: <EditOutlined/>,
             onClick: () => {
                 setSelectedNode(t)
@@ -84,7 +82,24 @@ export function ClickTrees(){
         &&
         {
             key: 'delete_tree',
-            label: 'Delete',
+            label: 
+            <Popconfirm
+                title="Remove node"
+                description="Are you sure to delete this node?"
+                onConfirm={() => {
+                    removeNode(t)
+                    .then((r) => handleResponse(r, api, 'Removed', 1, () => {
+                        getAllClickTrees()
+                    }))
+                }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+                placement="right"
+            >
+                Delete    
+            </Popconfirm>
+            ,
             icon: <DeleteOutlined />,
             onClick: () => {}
         }
@@ -113,7 +128,24 @@ export function ClickTrees(){
         &&
         {
             key: 'delete_leaf',
-            label: 'Delete',
+            label: 
+            <Popconfirm
+                title="Remove node"
+                description="Are you sure to delete this node?"
+                onConfirm={() => {
+                    removeNode(l)
+                    .then((r) => handleResponse(r, api, 'Removed', 1, () => {
+                        getAllClickTrees()
+                    }))
+                }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+                placement="right"
+            >
+                Delete    
+            </Popconfirm>
+            ,
             icon: <DeleteOutlined />,
             onClick: () => {}
         }
@@ -145,19 +177,56 @@ export function ClickTrees(){
 
             {!isLoadingClickTrees && selectedTree && 
                 <Space size={'small'}>
-                    <Button
-                        onClick={() =>  setShowEditTreeNameModal(true)}
+                    <Tooltip
+                        color="white"
+                        placement="top"
+                        title={<p>Edit name</p>}
                     >
-                        <EditOutlined/>
-                        Edit name
-                    </Button>
+                        <Button
+                            onClick={() =>  setShowEditTreeNameModal(true)}
+                        >
+                            <EditOutlined/>
+                            
+                        </Button>
+                    </Tooltip>
 
-                    <Button
-                        onClick={() => setShowAddImageTreeModal(true)}
+                    <Tooltip
+                        color="white"
+                        placement="top"
+                        title={<p>New image</p>}
                     >
-                        <PlusOutlined style={{color:'green'}}/>
-                        New image
-                    </Button>
+                        <Button
+                            onClick={() => setShowAddImageTreeModal(true)}
+                        >
+                            <PlusOutlined style={{color:'green'}}/>
+                        </Button>
+                    </Tooltip>
+
+                    <Popconfirm
+                        title="Remove tree"
+                        description="Are you sure to delete this tree?"
+                                onConfirm={() => {
+                                    removeTree(selectedTree)
+                                    .then((r) => handleResponse(r, api, 'Removed', 1, () => {
+                                        getAllClickTrees()
+                                    }))
+                                }}
+                        onCancel={() => {}}
+                        okText="Yes"
+                        cancelText="No"
+                        placement="right"
+                    >
+                        <Tooltip
+                            color="white"
+                            placement="top"
+                            title={<p>Delete tree</p>}
+                        >
+                            <Button>
+                                <DeleteOutlined/>
+                            </Button>
+                        </Tooltip>
+                    </Popconfirm>
+                   
 
                 </Space>
             }
@@ -178,24 +247,24 @@ export function ClickTrees(){
                             <List.Item
                                 key={img.Id}
                             >
-                                <div className="click-tree-item-container">
-                                    <div className="click-tree-head-container">
+                                <Space align="end">
+                                    <Space className="click-tree-head-container" direction="vertical" align="start">
                                         <Dropdown
                                             menu={{
                                                 items:baseImageActionList(img),
                                                 title:'Actions'
                                             }}
                                         >
-                                            <p className="click-tree-head-title click-tree-clickable-title">{img.Name}</p>
+                                            <p className="default-title hoverable">{img.Name}</p>
                                         </Dropdown>
                                         
-                                        <small className="click-tree-usage-times">{ img.ClickImages.length ? img.ClickImages.length + ' usage times' : ''} </small>
+                                        <small className="default-gray">{ img.ClickImages.length ? img.ClickImages.length + ' usage times' : ''} </small>
                                         <img 
                                             src={img.URL}
                                             className="click-tree-head-img"
                                             alt={img.Name}
                                         />
-                                    </div>
+                                    </Space>
                                     <div className="click-tree-leaf-container">
 
                                         {img.Leafs.map(l => {
@@ -207,9 +276,9 @@ export function ClickTrees(){
                                                             title:'Actions'
                                                         }}
                                                     >
-                                                        <p className="click-tree-leaf-title click-tree-clickable-title">{l.Name}</p>
+                                                        <p className="hoverable-plus">{l.Name}</p>
                                                     </Dropdown>
-                                                    <small className="click-tree-usage-times">{ l.ClickImages.length ? l.ClickImages.length + ' usage times' : ''} </small>
+                                                    <small className="default-gray">{ l.ClickImages.length ? l.ClickImages.length + ' usage times' : 'not used'} </small>
                                                     <img 
                                                         src={l.URL}
                                                         className="click-tree-leaf-img"
@@ -219,56 +288,18 @@ export function ClickTrees(){
                                             )
                                             })}
                                     </div>
-                                </div>
+                                </Space>
                             </List.Item>
                         )
                     }}
                 />
             </div>
         )
-    }
+    }   
 
     return(
         <PagesWrapper>
             {contextHolder}
-
-            <AddTree 
-                open={showAddTreeModal}
-                onClose={()=>setShowAddTreeModal(false)}
-            />
-
-            <EditTreeName 
-                open={showEditTreeNameModal}
-                onClose={() => setShowEditTreeNameModal(false)}
-                tree={selectedTree}
-            />
-
-            <AddImageTree 
-                open={showAddImageTreeModal}
-                onClose={()=>setShowAddImageTreeModal(false)}
-                baseTree={selectedTree}
-
-            />
-
-            <EditNodeName 
-                open={showEditNodeNameModal}
-                onClose={() => setShowEditNodeNameModal(false)}
-                node={selectedNode}
-            />
-
-            <EditNodeImage 
-                open={showEditNodeImageModal}
-                onClose={() => setShowEditNodeImageModal(false)}
-                node={selectedNode}
-            />
-
-            <AddLeaf 
-                open={showAddLeafModal}
-                onClose={() => setShowAddLeafModal(false)}
-                baseTree={selectedTree}
-                baseImage={selectedBaseImage}
-            />
-
             <Divider orientation="left">
                     <span className="page-title">
                         Click trees
@@ -283,9 +314,62 @@ export function ClickTrees(){
             </Divider>
 
             {isLoadingClickTrees && <Skeleton />}
-            
+
+            {errorGetClickTrees && !isLoadingClickTrees && 
+                <ErrorComponent 
+                    error={errorGetClickTrees}
+                    onReload={() => getAllClickTrees()}
+                />
+            } 
+
             {renderSelectTree()}
             {!isLoadingClickTrees && selectedTree && renderSelectedTree()}
+
+            <AddTree 
+                open={showAddTreeModal}
+                onClose={()=>setShowAddTreeModal(false)}
+                reloadData={() => getAllClickTrees()}
+            />
+
+            <EditTreeName 
+                open={showEditTreeNameModal}
+                onClose={() => setShowEditTreeNameModal(false)}
+                tree={selectedTree}
+                reloadData={() => getAllClickTrees()}
+            />
+
+            <AddImageTree 
+                open={showAddImageTreeModal}
+                onClose={()=>setShowAddImageTreeModal(false)}
+                baseTree={selectedTree}
+                reloadData={() => getAllClickTrees()}
+
+            />
+
+            <EditNodeName 
+                open={showEditNodeNameModal}
+                onClose={() => setShowEditNodeNameModal(false)}
+                node={selectedNode}
+                reloadData={() => getAllClickTrees()}
+
+            />
+
+            <EditNodeImage 
+                open={showEditNodeImageModal}
+                onClose={() => setShowEditNodeImageModal(false)}
+                node={selectedNode}
+                reloadData={() => getAllClickTrees()}
+
+            />
+
+            <AddLeaf 
+                open={showAddLeafModal}
+                onClose={() => setShowAddLeafModal(false)}
+                baseTree={selectedTree}
+                baseImage={selectedBaseImage}
+                reloadData={() => getAllClickTrees()}
+
+            />
         </PagesWrapper>
     )
 }

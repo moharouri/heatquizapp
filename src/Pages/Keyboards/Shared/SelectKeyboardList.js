@@ -10,13 +10,12 @@ import { LatexRenderer } from "../../../Components/LatexRenderer";
 export function SelectKeyboardList({onSelect}){
     const {
         isLoadingKeyboards, keyboards,
-        isLoadingKeyboardsIds, keyboardsIds,
      } = useKeyboard()
 
     const [firstIndex, setFirstIndex] = useState(0)
 
-    const isLoading = (isLoadingKeyboards || isLoadingKeyboardsIds)
-    const data = keyboardsIds || (keyboards || {Keyboards:[]}).Keyboards
+    const isLoading = (isLoadingKeyboards)
+    const data = (keyboards || {Keyboards:[]}).Keyboards
 
      const renderKeyboard = (k) => {
         const {NumericKeys, VariableKeys} = k

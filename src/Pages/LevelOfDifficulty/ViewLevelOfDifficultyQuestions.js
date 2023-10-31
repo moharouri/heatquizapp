@@ -1,4 +1,4 @@
-import {Col, Divider, Drawer, Dropdown, Row, Skeleton, Space} from "antd";
+import {Col, Drawer, Dropdown, Row, Skeleton, Space} from "antd";
 import React from "react";
 import { useLevelsOfDifficulty } from "../../contexts/LevelOfDifficultyContext";
 import { beautifyDate } from "../../services/Auxillary";

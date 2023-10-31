@@ -1,19 +1,3 @@
-.player-timeline-code:hover{
-    color: #0275d8;
-    cursor: pointer;
-    background-color: whitesmoke;
-    padding-left: 0.125vw;
-    padding-right: 0.125vw;
-    border-radius: 0.25em;
-}
-
-.player-timeline-header{
-    width: 100%;
-    flex-direction: row;
-    display: flex;
-    justify-content: space-between;
-}
-
 .question-image-player-timeline{
     width: 100%;
     height: 15vh;
@@ -34,8 +18,4 @@
 
 .player-timeline-datetime-score{
     color: rgba(0, 0, 0, 0.45);
-}
-
-.player-timeline-map-key{
-    color: orange;
 }

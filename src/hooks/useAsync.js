@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react"
-import { HTTP_OK_REQUEST } from "../services/Auxillary"
 import { AxiosError } from "axios"
 
 export function useAsync(func, dependencies = []) {

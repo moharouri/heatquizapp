@@ -57,3 +57,7 @@ export function decreasePoolsNumberSeriesRequest(b){
 export function increasePoolsNumberSeriesRequest(b){
     return EDIT_REQUEST_BODY_API('QuestionSeries/IncreasePoolsNumber', b, true)
 }
+
+export function rearrangeSeriesRequest(b){
+    return EDIT_REQUEST_BODY_API('QuestionSeries/RearrangeSeries', b, true)
+}

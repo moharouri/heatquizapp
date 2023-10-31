@@ -8,6 +8,7 @@ import TextArea from "antd/es/input/TextArea";
 
 import './index.css'
 import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function EditQuestionAdditionalInformation({open, onClose, question, reloadQuestion}){
 
@@ -33,9 +34,7 @@ export function EditQuestionAdditionalInformation({open, onClose, question, relo
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
 
@@ -62,7 +61,7 @@ export function EditQuestionAdditionalInformation({open, onClose, question, relo
         <Space
             direction="vertical"
             size={'large'}
-            className="multiple-choice-question-edit-latex"
+            className="hq-full-width"
         >
             <TextArea 
                 value={newInfo}
@@ -84,22 +83,10 @@ export function EditQuestionAdditionalInformation({open, onClose, question, relo
                 })
 
                 editMultipleChoiceQuestionAdditionalInfo(VM)
-                .then(
-                (r) => {
-                    const {Id} = r
-                    
-                    if(Id){
-                        api.destroy()
-                        api.success('Edited successfully', 1)
-                        .then(() => {
-                            onClose()
-                            reloadQuestion()
-                        })
-                    }
-                    else{
-                        api.destroy()
-                        api.error(r)
-                    }})
+                .then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
+                    onClose()
+                    reloadQuestion()
+                }))
             }}
 
             loading={isLoadingEditMultipleChoiceQuestionAdditionalInfo}

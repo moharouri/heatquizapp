@@ -1,4 +1,4 @@
-import {Button, Drawer, Space, message, Form, Input, Select, Skeleton, List} from "antd";
+import {Button, Drawer, Space, message, Form, Select, Skeleton, List} from "antd";
 import React, { useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useMaps } from "../../../../contexts/MapsContext";
@@ -58,20 +58,15 @@ export function AttachMapToElement({open, onClose, element, reloadMap}){
 
                         attachMapToElement(data)
                         .then(r => 
-                        handleResponse(
-                            r,
-                            () => {
-                                api.destroy()
-                                api.success('Attachment successful')
-
-                                reloadMap()
-                                onClose()
-                            },
-                            () => {
-                                api.destroy()
-                                api.error(r)
-                            }
-                        )
+                            handleResponse(
+                                r,
+                                api,
+                                'Attached successfuly',
+                                1,
+                                () => {
+                                    reloadMap()
+                                    onClose()
+                                })
                         )
                     }}
                 >

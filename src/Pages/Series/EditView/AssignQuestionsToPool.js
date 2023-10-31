@@ -1,8 +1,9 @@
-import {Button, Drawer, Dropdown, Row, Space, message} from "antd";
+import {Button, Drawer, Dropdown, Row, Space, Tooltip, message} from "antd";
 import React, { useEffect, useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { CompactQuestionComponent } from "../../Questions/SearchQuestionsList/CompactQuestionComponent";
 import { useSeries } from "../../../contexts/SeriesContext";
+import { handleResponse } from "../../../services/Auxillary";
 
 export function AssignQuestionsToPool({open, onClose, Series, reloadSeries}){
 
@@ -77,8 +78,8 @@ export function AssignQuestionsToPool({open, onClose, Series, reloadSeries}){
             }}
           >
             <div>
-            <small className="series-edit-view-element-selected-pool-word">Selected pool: </small>
-            <p className="series-edit-view-element-selected-pool-assign">Pool #{selectedPool}</p>
+            <small className="default-gray hq-normal-font-weight">Selected pool: </small>
+            <p className="default-title highlighted hq-normal-font-weight">Pool #{selectedPool}</p>
             </div>
           </Dropdown>
       )
@@ -108,24 +109,11 @@ export function AssignQuestionsToPool({open, onClose, Series, reloadSeries}){
 
                 assignQuestionsToPool(VM)
                 .then(
-                  (r) => {
-                      const {Id} = r
-                      
-                      if(Id){
-                          api.destroy()
-                          api.success('Questions assigned successfully', 1)
-                          .then(() => {
-                              reloadSeries()
-                              onClose()
-                          })
-                      }
-                      else{
-                          api.destroy()
-                          api.error(r)
-                      }
-              })
-
-
+                  (r) => 
+                  handleResponse(r, api, 'Questions assigned successfully', 1, () => {
+                    reloadSeries()
+                    onClose()
+                  }))
               }}
             >
               Update assignment
@@ -142,13 +130,13 @@ export function AssignQuestionsToPool({open, onClose, Series, reloadSeries}){
         maskClosable={false}
         >
             <p
-              className="series-edit-view-element-selected-pool-word"
-            >Questions assigned to 
+              className="default-gray"
+            >Questions assigned to {' '}
             <span 
-              className="series-edit-view-element-selected-pool-assign"
+              className="default-title highlighted"
             >
               Pool #{selectedPool}
-            </span> are not shown</p>
+            </span>{' '} are not shown</p>
             <br/>
             <Row
                     gutter={[12, 12]}
@@ -162,12 +150,17 @@ export function AssignQuestionsToPool({open, onClose, Series, reloadSeries}){
                                 selectedQuestions = {selectedQuestions}
                                 onRenderCode = {(q, i) =>
                                   
-                                  <p  
+                                  <Tooltip
+                                    title={<p>Click to select</p>}
+                                    color="white"
+                                  >
+                                    <p  
                                     onClick={() => handleSelectQuestion(q)}
                                     className="hoverable-plus">
                                     
                                     {i}{' '}{q.Code}
                                   </p>
+                                  </Tooltip>
                                 }
                             />
                         )

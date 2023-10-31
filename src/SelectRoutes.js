@@ -26,6 +26,14 @@ import { AddKeyboardQuestion } from "./Pages/Questions/KeyboardQuestion/Add";
 import { AddSeries } from "./Pages/Series/Add";
 import { AddMap } from "./Pages/CoursePages/Maps/Add";
 import { MapEditView } from "./Pages/CoursePages/Maps/EditView";
+import { KeyboardsList } from "./Pages/Keyboards/List";
+import { AddKeyboard } from "./Pages/Keyboards/Add";
+import { KeysListsList } from "./Pages/Keyboards/KeysList/List";
+import { AddNewKey } from "./Pages/Keyboards/Keys/Add";
+import { KeysList } from "./Pages/Keyboards/Keys/List";
+import { KeyboardEditView } from "./Pages/Keyboards/EditView";
+import { MapClickImagesList } from "./Pages/MapClickImages/List";
+import { QuestionInformationList } from "./Pages/QuestionInformation/List";
 
 export function SelectRoutes({}){
     const {roles, isStudent,} = useAuth()
@@ -92,6 +100,20 @@ export function SelectRoutes({}){
                 <Route path="/add_mc_q" element={<AddMutlipleChoiceQuestion />}/>
                 <Route path="/add_k_q" element={<AddKeyboardQuestion />}/>
 
+                <Route path="/keyboards_list" element={<KeyboardsList/>}/>
+                <Route path="/add_keyboard" element={<AddKeyboard/>}/>
+                <Route path="/keyboard_edit_view/:id" element={<KeyboardEditView/>}/>
+
+                <Route path="/key_list_list" element={<KeysListsList/>}/>
+
+                <Route path="/add_key" element={<AddNewKey/>}/>
+                <Route path="/keys_list" element={<KeysList/>}/>
+
+                <Route path="/map_click_images_list" element={<MapClickImagesList/>}/>
+
+                <Route path="/information_list" element={<QuestionInformationList/>}/>
+                
+                
                 <Route path="*" exact element={<NotFoundPage />}/>
             </Routes>
         )

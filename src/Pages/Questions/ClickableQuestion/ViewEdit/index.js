@@ -19,6 +19,8 @@ export function ClickableQuestionEditView({reloadQuestion}){
     const [imageWidth, setImageWidth] = useState(0)
     const [offset, setOffset] = useState(0)
 
+    const [hoveredElementIndex, setHoveredElementIndex] = useState(null)
+
     useEffect(() => {
         let _offset = 0
 
@@ -59,7 +61,8 @@ export function ClickableQuestionEditView({reloadQuestion}){
             display:'flex',
             flexDirection:'column',
             position: 'absolute',
-            border:'1px solid rgb(245, 245, 245)'
+            border:'1px solid rgb(245, 245, 245)',
+            cursor:'pointer'
            
         })
 
@@ -75,11 +78,14 @@ export function ClickableQuestionEditView({reloadQuestion}){
                 src = {Base_ImageURL}
                 alt={Code}
                 />
-                {ClickImages.map((p) => {
+                {ClickImages.map((p, pi) => {
                     const itemPositionStyle = getItemPositionStyle(imageWidth, BackgroundImageWidth, p)
+                    const {Answer} = p
+                    const {URL} = Answer
 
                     return (
                         <span 
+
                         key={p.Id}
                         style = {{
                             ...backgroundImageStyle,
@@ -90,17 +96,31 @@ export function ClickableQuestionEditView({reloadQuestion}){
                             [p.Background_ImageId ? "backgroundImage" : ""]:
                             p.Background_ImageId ? "url(" + FixURL(p.Background_Image.URL) + ")" : "",
                         }}
+                        onMouseEnter={() => setHoveredElementIndex(pi)}
+                        onMouseLeave={() => setHoveredElementIndex(null)}
+
                         >
-                            
+                            <Space direction="vertical" align="center">
+                                <p className="default-title highlighted">{pi+1}</p>
+
+                                <img 
+                                    src={URL}
+                                    alt="Answer"
+                                    className="clickable-element-img"
+                                />
+                            </Space>
                         </span>
                     )
                 })}
 
-                {ClickCharts.map((p) => {
+                {ClickCharts.map((p, pi) => {
                     const itemPositionStyle = getItemPositionStyle(imageWidth, BackgroundImageWidth, p)
+                    const {Answer} = p
+                    const {URL} = Answer
 
                     return (
-                        <span 
+                        <span         
+
                         key={p.Id}
                         style = {{
                             ...backgroundImageStyle,
@@ -111,8 +131,19 @@ export function ClickableQuestionEditView({reloadQuestion}){
                             [p.Background_ImageId ? "backgroundImage" : ""]:
                             p.Background_ImageId ? "url(" + FixURL(p.Background_Image.URL) + ")" : "",
                         }}
+
+                        onMouseEnter={() => setHoveredElementIndex(pi + ClickImages)}
+                        onMouseLeave={() => setHoveredElementIndex(null)}
                         >
-                            
+                            <Space direction="vertical" align="center">
+                            <p className="default-title highlighted">{ClickImages.length + pi+1}</p>
+
+                                <img 
+                                    src={URL}
+                                    alt="Answer"
+                                    className="clickable-element-img"
+                                />
+                            </Space>
                         </span>
                     )
                 })}
@@ -137,6 +168,7 @@ export function ClickableQuestionEditView({reloadQuestion}){
                         return(
                             <div
                                 key={Id}
+                                className={(hoveredElementIndex === ci) ? "highlighted" : ""}
                             >
                                 <Tooltip
                                     placement="right"
@@ -158,20 +190,20 @@ export function ClickableQuestionEditView({reloadQuestion}){
                                                 <Button
                                                     size="small"
                                                     loading={false}
-                                                    className="clickable-question-edit-view-answer-btn"
+                                                    className="hq-full-width"
                                                 >
                                                     Remove part 
                                                 </Button>
                                             </Popconfirm>}
 
                                             <Button
-                                                className="clickable-question-edit-view-answer-btn"
+                                                className="hq-full-width"
                                             >
                                                 Edit answer
                                             </Button>
 
                                             <Button
-                                                className="clickable-question-edit-view-answer-btn"
+                                                className="hq-full-width"
                                             >
                                                 Edit background image
                                             </Button>
@@ -201,6 +233,7 @@ export function ClickableQuestionEditView({reloadQuestion}){
                         return(
                             <div
                                 key={Id}
+                                className={(hoveredElementIndex === (ci + ClickImages.length)) ? "highlighted" : ""}
                             >
                                 <Space>
                                     <p>{ci+ClickImages.length}</p>

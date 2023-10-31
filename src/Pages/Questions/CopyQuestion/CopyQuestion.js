@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { LatexRenderer } from "../../../Components/LatexRenderer";
 
-import './CopyQuestion.css'
 import { useQuestions } from "../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../services/Auxillary";
 
 export function CopyQuestion({open, onClose, question}){
 
     if(!open) return <div/>;
 
-    const { errorCopyQuestion, isLoadingCopyQuestion, copyQuestion} = useQuestions()
+    const {isLoadingCopyQuestion, copyQuestion} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -22,27 +22,18 @@ export function CopyQuestion({open, onClose, question}){
         }
     }, [open])
 
-    useEffect(() => {
-        if(errorCopyQuestion){
-            api.destroy()
-            api.error(errorCopyQuestion)
-        }
-    }, [errorCopyQuestion])
-
     return(
         <Drawer
         title="Copy question"
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
 
         footer={
           <div>
-          <p className="question-code">{question.Code}</p>
+          <p className="default-title">{question.Code}</p>
           <Space size={'large'} align="start">
               <div>
                   <img
@@ -64,7 +55,7 @@ export function CopyQuestion({open, onClose, question}){
 
         <Form>
             <Form.Item>
-                <small>Code</small>
+                <small className="default-gray">Code</small>
                 <Input 
                     placeholder="New code"
                     value={newCode}
@@ -88,6 +79,10 @@ export function CopyQuestion({open, onClose, question}){
                 })
 
                 copyQuestion(VM)
+                .then((r) => handleResponse(r, api, 'Copied successfully', 1, () => {
+                    onClose()
+
+                }))
             }}
 
             loading={isLoadingCopyQuestion}

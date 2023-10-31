@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { UploadPDF } from "../../../../Components/UploadPDF";
 import { useMaps } from "../../../../contexts/MapsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AssignPDFToElement({open, onClose, element, reloadMap}){
     
@@ -34,23 +35,16 @@ export function AssignPDFToElement({open, onClose, element, reloadMap}){
                         data.append("PDF", newPDF)
 
                         assignPDFToMapElement(data)
-                        .then(
-                            (r) => {
-                                const {Id} = r
-                                
-                                if(Id){
-                                    api.destroy()
-                                    api.success('PDF assigned successfuly', 1)
-                                    .then(() => {
-                                        onClose()
-                                        reloadMap()
-                                    }) 
-                                }
-                                else{
-                                    api.destroy()
-                                    api.error(r)
-                                }
-                        })
+                        .then(r => 
+                            handleResponse(
+                                r,
+                                api,
+                                'PDF assigned successfuly',
+                                1,
+                                () => {
+                                    reloadMap()
+                                    onClose()
+                                }))
                     }}
                 >
                     Assign

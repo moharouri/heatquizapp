@@ -8,13 +8,17 @@ import './ProfilePage.css'
 import { useAuth } from "../../contexts/AuthContext";
 import { EditUserNameEmail } from "./EditUserNameEmail";
 import { EditProfilePicture } from "./EditProfilePicture";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { handleResponse } from "../../services/Auxillary";
 
 export function ProfilePage(){
-    const {users, loadingUsers, getUserError, 
+    const {users, loadingUsers, getUserError,  getUsers,
         loadingRemoveProfilePicture,
-        getRemoveProfilePictureError,
         deleteUserProfilePicture
+        
     } = useUsers()
+
+    const [api, contextHolder] = message.useMessage()
     
     const {username, currentPlayerKey} = useAuth()
     
@@ -56,6 +60,7 @@ export function ProfilePage(){
 
     return(
         <PagesWrapper>
+            {contextHolder}
             <div>
                 <Divider orientation="left">User profile</Divider>
                 {userProfile()}
@@ -67,11 +72,13 @@ export function ProfilePage(){
                     open={showEditNameEmailModal}
                     user={{...currentUser, ...userData}}
                     onClose={() => setShowEditNameEmailModal(false)}
+                    reloadData={() => getUsers()}
                 />
                 <EditProfilePicture 
                     open={showEditProfilePictureModal}
                     onClose={() => setShowEditProfilePictureModal(false)}
                     username={currentUser.Username}
+                    reloadData={() => getUsers()}
                 />
 
             </div>
@@ -134,12 +141,8 @@ export function ProfilePage(){
                       let data = new FormData()
                       data.append('Username', currentUser.Username)
                       
-                      deleteUserProfilePicture(data).then(() => {
-                        if(getRemoveProfilePictureError){
-                            message.destroy()
-                            message.warning(getRemoveProfilePictureError)
-                        }
-                      })
+                      deleteUserProfilePicture(data).then((r) => handleResponse(r, api, 'Picture removed successfully', 1, () => getUsers()))
+                     
                   }
                 }] : []),
             {
@@ -153,7 +156,7 @@ export function ProfilePage(){
 
         return(
             <div>
-                <Space className="user-profile-area">
+                <Space className="hq-full-width">
                 <Avatar 
                     src={userData.ProfilePicture || 'https://img.freepik.com/free-icon/user_318-159711.jpg'} 
                     className="user-profile-picture"
@@ -163,7 +166,7 @@ export function ProfilePage(){
                         <p className="user-profile-name">{userData.Name}</p>
                         {!loadingUsers && 
                         <Dropdown
-                            className="settings-list"
+                            className="hoverable"
                             menu={{
                                 items:actionsDropdownList,
                                 title:'Actions'
@@ -220,7 +223,7 @@ export function ProfilePage(){
         return(
             !getUserError ? 
             <Table
-            className="user-list-table"
+            className="hq-full-width"
             columns={columns}
             dataSource={users ? users.filter((u) => {
                 if(u.Username === username) return false
@@ -235,8 +238,12 @@ export function ProfilePage(){
             rowKey={(record) => record.username}
             loading={loadingUsers}
             pagination={{position:['topLeft']}}
-            /> : <p>{getUserError}</p>
-        )
+            /> : 
+            <ErrorComponent 
+                error={getUserError}
+                onReload={() => getUsers()}
+            />
+            )
     }
 
     

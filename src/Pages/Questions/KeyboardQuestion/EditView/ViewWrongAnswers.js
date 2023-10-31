@@ -1,9 +1,10 @@
-import {Divider, Drawer, Dropdown, List, Skeleton, Space, Table, message} from "antd";
+import {Drawer, Skeleton, Space, Table} from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { useEffect } from "react";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { ErrorComponent } from "../../../../Components/ErrorComponent";
 
 export function ViewWrongAnswers({open, onClose, question}){
 
@@ -11,8 +12,6 @@ export function ViewWrongAnswers({open, onClose, question}){
 
     const {getKeyboardQuestionWrongAnswersResult, errorGetKeyboardQuestionWrongAnswers, isLoadingKeyboardQuestionWrongAnswers, getKeyboardQuestionWrongAnswers} = useQuestions()
     
-    const [api, contextHolder] = message.useMessage()
-
     useEffect(() => {
        if(open){
         const {Id} = question
@@ -20,13 +19,6 @@ export function ViewWrongAnswers({open, onClose, question}){
         getKeyboardQuestionWrongAnswers(Id)
        }
     }, [open])
-
-    useEffect(() => {
-        if(errorGetKeyboardQuestionWrongAnswers){
-            api.destroy()
-            api.error(errorGetKeyboardQuestionWrongAnswers)
-        }
-     }, [errorGetKeyboardQuestionWrongAnswers])
 
 
     const renderWrongAnswers = () => {
@@ -49,12 +41,12 @@ export function ViewWrongAnswers({open, onClose, question}){
                 title: 'Count',
                 dataIndex: 'Count',
                 render: (Count) => {
-                    const perc = ((Count/(totalAnswers + 1)) * 100).toFixed(1) + '%'
+                    const perc = ((Count/(totalAnswers || 1)) * 100).toFixed(1) + '%'
 
                     return(
                     <Space size={'large'}>
                         <p>{Count}</p>
-                        <small className="question-edit-view-gray">{perc}</small>
+                        <small className="default-gray">{perc}</small>
                     </Space>)
                 },
 
@@ -77,14 +69,12 @@ export function ViewWrongAnswers({open, onClose, question}){
         width={'65%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
 
         footer={
             <div>
-            <p className="question-code">{question.Code}</p>
+            <p className="default-title">{question.Code}</p>
             <Space size={'large'} align="start">
                 <div>
                     <img
@@ -100,11 +90,20 @@ export function ViewWrongAnswers({open, onClose, question}){
             </Space>
         </div>}
         >
-            {contextHolder}
-
             {isLoadingKeyboardQuestionWrongAnswers && <Skeleton />}
 
             {(!isLoadingKeyboardQuestionWrongAnswers && getKeyboardQuestionWrongAnswersResult) && renderWrongAnswers()}
+
+            {errorGetKeyboardQuestionWrongAnswers && !isLoadingKeyboardQuestionWrongAnswers && 
+                <ErrorComponent 
+                    error={errorGetKeyboardQuestionWrongAnswers}
+                    onReload={() => {
+                        const {Id} = question
+
+                        getKeyboardQuestionWrongAnswers(Id)
+                    }}
+                />
+            }
 
         </Drawer>
     )

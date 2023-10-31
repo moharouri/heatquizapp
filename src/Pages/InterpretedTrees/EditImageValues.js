@@ -3,9 +3,11 @@ import React, {useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditImageValues({open, onClose, node}){
-    const {loadingEditImageValues, getEditImageValuesError, editImageValues, getAllInterpretedTrees, 
+export function EditImageValues({open, onClose, node, reloadData}){
+    const {loadingEditImageValues, editImageValues, 
         interpretedValues, errorGetInterpretedValues, isLoadingInterpretedValues, getAllInterpretedValues,
     } = useInterpretedTrees()
     
@@ -32,30 +34,23 @@ export function EditImageValues({open, onClose, node}){
 
     }, [open])
 
-
-    useEffect(() => {
-        if(getEditImageValuesError){
-            messageApi.destroy()
-            messageApi.error(getEditImageValuesError)
-        }
-
-        if(errorGetInterpretedValues){
-            
-            messageApi.destroy()
-            messageApi.error(errorGetInterpretedValues)
-        }
-
-    }, [errorGetInterpretedValues, getEditImageValuesError])
-
-
     const renderChooseValues = () => {
+        if(errorGetInterpretedValues){
+            return(
+                <ErrorComponent 
+                    error={errorGetInterpretedValues}
+                    onReload={() => getAllInterpretedValues()}
+                />
+            )
+        }
+
          const {Left, Right, Jump, RatioOfGradients} = interpretedValues
 
          return(
             <Row 
             gutter={16}>
                 <Col xs = {3}>
-                    <small>Left</small>
+                    <small className="default-gray">Left</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.Left.filter(v => v.Id === option.value)[0]
@@ -74,7 +69,7 @@ export function EditImageValues({open, onClose, node}){
                     />
                 </Col>
                 <Col xs = {3}>
-                    <small>Right</small>
+                    <small className="default-gray">Right</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.Right.filter(v => v.Id === option.value)[0]
@@ -93,7 +88,7 @@ export function EditImageValues({open, onClose, node}){
                     />
                 </Col>
                 <Col xs = {3}>
-                    <small>Jump</small>
+                    <small className="default-gray">Jump</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.Jump.filter(v => v.Id === option.value)[0]
@@ -112,7 +107,7 @@ export function EditImageValues({open, onClose, node}){
                     />
                 </Col>
                 <Col xs = {3}>
-                    <small>Ratio</small>
+                    <small className="default-gray">Ratio</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.RatioOfGradients.filter(v => v.Id === option.value)[0]
@@ -143,9 +138,7 @@ export function EditImageValues({open, onClose, node}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 {isLoadingInterpretedValues && <Spin />}
@@ -168,8 +161,10 @@ export function EditImageValues({open, onClose, node}){
                         data.append('RatioId', selectedRatio.Id)
                         data.append('JumpId', selectedJump.Id)
 
-                        editImageValues(data).then(() => getAllInterpretedTrees())
-
+                        editImageValues(data).then((r) => handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                       }))
                         
                     }}
                     loading = {loadingEditImageValues || isLoadingInterpretedValues}
@@ -177,8 +172,8 @@ export function EditImageValues({open, onClose, node}){
                 Update
                 </Button>
                 <Divider />
-                <small className="edit-image-tree-node-word">Node </small>
-                <p className="edit-image-tree-node-code">
+                <small className="default-gray">Node </small>
+                <p className="default-title">
                     {(node || {}).Code} 
                 </p>
             </Drawer>

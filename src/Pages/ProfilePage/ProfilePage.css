@@ -1,7 +1,3 @@
-.user-profile-area{
-    width: 100%;    
-}
-
 .user-profile-picture{
     width: 8vw;
     height:  8vw;
@@ -21,20 +17,12 @@
  cursor: pointer;
 }
 
-.user-list-table{
-    width: 100%;
-}
-
 .user-list-profile-picture{
     width: 15vh;
     height: 15vh;
     object-fit: contain;
 }
 
-.settings-list:hover{
-    background-color: whitesmoke;
-    border-radius: 0.5em;
-}
 
 .settings-icon{
     padding: 0.25vmin;

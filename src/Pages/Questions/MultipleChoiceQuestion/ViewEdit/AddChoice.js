@@ -8,7 +8,7 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 
 import './index.css'
 import Dragger from "antd/es/upload/Dragger";
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../../../services/Auxillary";
 
 export function AddChoice({open, onClose, question, reloadQuestion}){
 
@@ -47,15 +47,13 @@ export function AddChoice({open, onClose, question, reloadQuestion}){
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
 
         footer={
             <div>
-            <p className="question-code">{question.Code}</p>
+            <p className="default-title">{question.Code}</p>
             <Space size={'large'} align="start">
                 <div>
                     <img
@@ -93,8 +91,8 @@ export function AddChoice({open, onClose, question, reloadQuestion}){
                 {newImageURL && 
                 <img 
                     src={newImageURL}
-                    className="new-course-photo"
-                    alt="course"
+                    className="hq-upload-img"
+                    alt="question"
                 />}
             </Dragger>
         </div>
@@ -103,7 +101,7 @@ export function AddChoice({open, onClose, question, reloadQuestion}){
         <Space
             direction="vertical"
             size={'large'}
-            className="multiple-choice-question-edit-latex"
+            className="hq-full-width"
         >
             <TextArea 
                 value={newLatex}
@@ -144,23 +142,10 @@ export function AddChoice({open, onClose, question, reloadQuestion}){
                 data.append("Height", 1)
 
                 addMultipleChoiceQuestionChoice(data)
-                .then(
-                    (r) => {
-                        const {Id} = r
-                        
-                        if(Id){
-                            api.destroy()
-                            api.success('Choice added successfully', 1)
-                            .then(() => {
-                                onClose()
-                                reloadQuestion()
-                            })
-                        }
-                        else{
-                            api.destroy()
-                            api.error(r)
-                        }
-                })
+                .then(r => handleResponse(r, api, 'Choice added successfully', 1, () => {
+                    onClose()
+                    reloadQuestion()
+                }))
 
             }}
 

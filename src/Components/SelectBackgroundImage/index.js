@@ -1,4 +1,4 @@
-import {Col, Drawer, Row, Skeleton, Space, message} from "antd";
+import {Col, Drawer, Row, Skeleton, Space} from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useDefaultValues } from "../../contexts/DefaultValuesContext";

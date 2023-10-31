@@ -16,8 +16,16 @@ export function editInterpretedTreeRequest(b){
     return EDIT_REQUEST_BODY_API('InterpretedImages/EditGroup', b, true)
 }
 
+export function removeInterpretedTreeRequest(b){
+    return EDIT_REQUEST_BODY_API('InterpretedImages/DeleteTree', b)
+}
+
 export function addImageRequest(b){
     return ADD_REQUEST_FILE_API('InterpretedImages/AddImageSingleStep', b, true)
+}
+
+export function removeInterpretedNodeRequest(b){
+    return EDIT_REQUEST_BODY_API('InterpretedImages/DeleteNode', b)
 }
 
 export function editImageNameRequest(b){

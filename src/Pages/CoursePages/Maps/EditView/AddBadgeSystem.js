@@ -180,19 +180,15 @@ export function AddBadgeSystem({open, onClose, map, reloadMap}){
                     addMapBadgeSystem(data)
                     .then(r => handleResponse(
                         r,
+                        api,
+                        'Added successfuly',
+                        1,
                         () => {
-                            api.destroy()
-                            api.success('Added successfuly')
-
                             reloadMap()
                             onClose()
-                        },
+                        }))
 
-                        () => {
-                            api.destroy()
-                            api.error(r)
-                        }
-                    ))
+                    
 
                 }}
 

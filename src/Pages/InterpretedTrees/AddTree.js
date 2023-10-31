@@ -1,22 +1,16 @@
 import { Button, Drawer, Form, Input, message } from "antd";
-import React, {useEffect, useState } from "react"
+import React, {useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function AddTree({open, onClose}){
-    const {loadingAddTree, getAddTreeError, addTree, getAllInterpretedTrees} = useInterpretedTrees()
+export function AddTree({open, onClose, reloadData}){
+    const {loadingAddTree, addTree} = useInterpretedTrees()
 
     const [messageApi, contextHolder] = message.useMessage();
 
     const [newName, setNewName] = useState('')
-
-    useEffect(() => {
-        if(getAddTreeError){
-            messageApi.destroy()
-            messageApi.error(getAddTreeError)
-        }
-    }, [getAddTreeError])
 
     return(
         <div>
@@ -26,14 +20,12 @@ export function AddTree({open, onClose}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -56,7 +48,10 @@ export function AddTree({open, onClose}){
                         Name:newName
                        })
                       
-                       addTree(VM).then(() => getAllInterpretedTrees())
+                       addTree(VM).then((r) => handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                       }))
                         
                     }}
                     loading = {loadingAddTree}

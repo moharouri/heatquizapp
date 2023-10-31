@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { PagesWrapper } from "../../PagesWrapper";
 import { useTopics } from "../../contexts/TopicsContext";
 import { useDatapools } from "../../contexts/DatapoolsContext";
-import { Button, Divider, Dropdown, List, Skeleton, Space, message } from "antd";
+import { Button, Divider, Dropdown, List, Popconfirm, Skeleton, Space, message } from "antd";
 import {PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined} from '@ant-design/icons';
 
 import './Topics.css'
@@ -11,10 +11,17 @@ import { EditSubtopicName } from "./EditSubtopicName";
 import { ViewSubtopicQuestions } from "./ViewSubtopicQuestions";
 import { AddTopic } from "./AddTopic";
 import { AddSubtopic } from "./AddSubtopic";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { beautifyDate, handleResponse } from "../../services/Auxillary";
 
 export function Topics(){
 
-    const {topics, errorGetTopics, isLoadingTopics, getAllTopics} = useTopics()
+    const {
+        topics, errorGetTopics, isLoadingTopics, getAllTopics,
+        removeTopic, 
+        removeSubtopic
+    
+    } = useTopics()
     const {selectedDatapool} = useDatapools()
 
     const [showAddTopicModal, setShowAddTopicModal] = useState(false)
@@ -31,13 +38,7 @@ export function Topics(){
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
-        getAllTopics().then(() => {
-            if(errorGetTopics){
-                messageApi.destroy()
-                messageApi.error(errorGetTopics)
-                return
-            }
-        })
+        getAllTopics()
     }, [selectedDatapool])
 
     
@@ -64,7 +65,28 @@ export function Topics(){
         &&
         {
             key: 'delete_topic',
-            label: 'Delete',
+            label: 
+            <Popconfirm
+                title="Remove topic"
+                description="Are you sure to delete this topic?"
+                        onConfirm={() => {
+
+                            removeTopic(t)
+                            .then(r => handleResponse(
+                                r,
+                                messageApi,
+                                'Removed',
+                                1,
+                                () => getAllTopics()))
+                        }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+                placement="right"
+            >
+            
+                Delete
+            </Popconfirm>,
             icon: <DeleteOutlined />,
             onClick: () => {
                
@@ -96,7 +118,28 @@ export function Topics(){
     &&
     {
         key: 'delete_subtopic',
-        label: 'Delete',
+        label: 
+        <Popconfirm
+                title="Remove subtopic"
+                description="Are you sure to delete this subtopic?"
+                        onConfirm={() => {
+
+                            removeSubtopic(s)
+                            .then(r => handleResponse(
+                                r,
+                                messageApi,
+                                'Removed',
+                                1,
+                                () => getAllTopics()))
+                        }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+                placement="right"
+            >
+        Delete
+        </Popconfirm>,
+        
         icon: <DeleteOutlined />,
         onClick: () => {}
     }]
@@ -104,36 +147,6 @@ export function Topics(){
     return(
         <PagesWrapper>
             {contextHolder}
-
-            <AddTopic 
-                open={showAddTopicModal}
-                onClose={() => setShowAddTopicModal(false)}
-            />
-
-            <AddSubtopic 
-                open={showAddSubtopicModal}
-                onClose={() => setShowAddSubtopicModal(false)}
-                topic={selectedTopic}
-            />
-
-
-            <EditTopicName 
-                open={showEditTopicNameModal}
-                onClose={() => setShowEditTopicNameModal(false)}
-                topic={selectedTopic}
-            />
-
-            <EditSubtopicName 
-                open={showEditSubtopicNameModal}
-                onClose={() => setShowEditSubtopicNameModal(false)}
-                subtopic={selectedSubtopic}
-            />
-
-            <ViewSubtopicQuestions 
-                open={showViewSubtopicQuestionsModal}
-                onClose={() => setShowViewSubtopicQuestionsModal(false)}
-                subtopic={selectedSubtopic}
-            />
 
             <Divider orientation="left">
             
@@ -150,67 +163,113 @@ export function Topics(){
                     </Button>
                 </Space>
             </Divider>
+
+
             {isLoadingTopics && <Skeleton/>}
+
+            {errorGetTopics && !isLoadingTopics && 
+                <ErrorComponent 
+                    error={errorGetTopics}
+                    onReload={() => getAllTopics()}
+                />
+            }
             
             {!isLoadingTopics && topics &&
                <List
                 dataSource={topics}
-                renderItem={(t, ti) => (
-                    <div 
-                                key={t.Id}
-                                className="topic-box">
-                                    <div className="topic-box-internal">
-                                        <div className="topic-info-header">
-                                            <div className="topic-index-section">
-                                                <p>{ti+1}</p>
-                                            </div>
-                                            <div className="topic-info-section">
-                                                <Dropdown
-                                                    menu={{
-                                                        items:topicActionList(t),
-                                                        title:'Actions'
-                                                    }}
-                                                >
-                                                    <p className="topic-title topic-subtopic-title">{t.Name}</p>
-                                                </Dropdown>
-                                                <small className="subtopic-adder-date-number-questions">{t.AddedByName}</small>
-                                                <small className="subtopic-adder-date-number-questions">{t.DateCreated.substring(0,10)}</small>
-
-                                            </div>
-                                            
-                                        </div>  
-                                        <div className="subtopic-list">
-                                            <br/>
-                                            {t.Subtopics.map((s) => 
-                                            <div 
-                                            key={s.Id}
-                                            className="subtopic-box">
-                                                <Dropdown
-                                                    menu={{
-                                                        items:subtopicActionList(s, t),
-                                                        title:'Actions'
-                                                    }}
-                                                >
-                                                    <p 
-                                                    className="topic-subtopic-title"
+                renderItem={(t, ti) => {
+                    const {Id, Name, AddedByName, DateCreated, Subtopics} = t
+                    return(
+                        <div key={Id}>
+                                <Space align="start">
+                                            <Space align="start" className="topics-list-info-column">
+                                                <p className="default-gray">{ti+1}</p>
+                                                <Space direction="vertical" align="start">
+                                                    <Dropdown
+                                                        menu={{
+                                                            items:topicActionList(t),
+                                                            title:'Actions'
+                                                        }}
                                                     >
-                                                        {s.Name}
-                                                    </p>
-                                                </Dropdown>
-                                                <small className="subtopic-adder-date-number-questions">
-                                                    {s.Questions.length} {' '} questions
-                                                </small>
-                                            </div>
-                                            )}
-                                        </div> 
-                                        <div className="topic-action-section">
+                                                        <p className="default-title hoverable">{Name}</p>
+                                                    </Dropdown>
+                                                    <Space size={'0'} direction="vertical">
+                                                        <small className="default-gray">{AddedByName}</small>
+                                                        <small className="default-gray">{beautifyDate(DateCreated)}</small>
+                                                    </Space>
+    
+                                                </Space>
                                                 
-                                        </div>
+                                            </Space>  
+                                            <div>
+                                                <br/>
+                                                {Subtopics.map((s) => 
+                                                {
+                                                    const {Id, Name, Questions} = s
+
+                                                    return(
+                                                        <div key={Id}>
+                                                                <Dropdown
+                                                                    menu={{
+                                                                        items:subtopicActionList(s, t),
+                                                                        title:'Actions'
+                                                                    }}
+                                                                >
+                                                                    <p className="hoverable-plus">
+                                                                        {Name}
+                                                                    </p>
+                                                                </Dropdown>
+                                                                <small className="default-gray">
+                                                                    {Questions.length} {' '} questions
+                                                                </small>
+                                                                <br/>
+                                                                <br/>
+                                                        </div>)
+                                                }
+                                                )}
+                                            </div> 
+                                        </Space>
+                                        <Divider />
                                     </div>
-                                </div>
-                )}
+                    )
+                }}
                />
             }
+
+            <AddTopic 
+                open={showAddTopicModal}
+                onClose={() => setShowAddTopicModal(false)}
+                reloadData={() => getAllTopics()}
+            />
+
+            <AddSubtopic 
+                open={showAddSubtopicModal}
+                onClose={() => setShowAddSubtopicModal(false)}
+                topic={selectedTopic}
+                reloadData={() => getAllTopics()}
+            />
+
+
+            <EditTopicName 
+                open={showEditTopicNameModal}
+                onClose={() => setShowEditTopicNameModal(false)}
+                topic={selectedTopic}
+                reloadData={() => getAllTopics()}
+            />
+
+            <EditSubtopicName 
+                open={showEditSubtopicNameModal}
+                onClose={() => setShowEditSubtopicNameModal(false)}
+                subtopic={selectedSubtopic}
+                reloadData={() => getAllTopics()}
+            />
+
+            <ViewSubtopicQuestions 
+                open={showViewSubtopicQuestionsModal}
+                onClose={() => setShowViewSubtopicQuestionsModal(false)}
+                subtopic={selectedSubtopic}
+                reloadData={() => getAllTopics()}
+            />
         </PagesWrapper>
     )
 }

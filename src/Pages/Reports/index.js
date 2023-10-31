@@ -9,6 +9,10 @@ import './Reports.css'
 import { useReports } from "../../contexts/ReportsContext";
 import { convertSecondsToHHMMSS, downloadFile } from "../../services/Auxillary";
 import { PlayerTimeline } from "./PlayerTimeline";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { useNavigate } from "react-router-dom";
+import { QuestionPlayPocket } from "../Questions/QuestionPlayPocket/QuestionPlayPocket";
+import { SeriesPlayPocket } from "../Series/Play/SeriesPlayPocket";
 
 const { RangePicker } = DatePicker;
 
@@ -27,7 +31,16 @@ export function Reports(){
     const [showPlyerTimeline, setShowPlyerTimeline] = useState(false)
     const [selectedPlyerTimeline, setSelectedPlyerTimeline] = useState(false)
 
+    const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
+    const [selectedQuestion, setSelectedQuestion] = useState(false)
+
+    const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
+    const [selectedSeries, setSelectedSeries] = useState({Code:''})
+
     const [messageApi, contextHolder] = message.useMessage();
+
+    const navigate = useNavigate()
+
 
     const {
         loadingNumericStats,
@@ -81,12 +94,7 @@ export function Reports(){
             To:toTimeData
         })
         
-        getNumericStats(VM).then(() => {
-            if(getNumericStatsError){
-                message.destroy()
-                message.error(getNumericStatsError)
-            }
-        })
+        getNumericStats(VM)
 
         setShowNumericStats(true)
     }
@@ -101,12 +109,7 @@ export function Reports(){
             To:toTimeData
         })
         
-        getGraphicalStats(VM).then(() => {
-            if(getGraphicalStatsError){
-                message.destroy()
-                message.error(getGraphicalStatsError)
-            }
-        })
+        getGraphicalStats(VM)
 
         setShowNumericStats(false)
     }
@@ -120,15 +123,8 @@ export function Reports(){
         })
 
         setShowPlyerTimeline(true)
-        setSelectedPlyerTimeline(player)
-
-        getPlayerTimelineReport(VM).then(() => {
-
-            if(getPlayerTimelineReportError){
-                message.destroy()
-                message.error(getPlayerTimelineReportError)
-            }
-        })
+        setSelectedPlyerTimeline(VM)
+        
     }
 
     const downloadButton = (title, action) => (
@@ -292,7 +288,7 @@ export function Reports(){
         return(
             <Space>
                 <div className="section-base search-key-section">
-                    <p>Key</p>
+                    <small className="default-gray">Key</small>
                     <Input 
                         value={searchKey}
                         onChange={(v) => setSearchKey(v.target.value)}
@@ -300,7 +296,7 @@ export function Reports(){
                     />
                 </div>
                 <div className="section-base search-datetime-section">
-                    <p>Date time range</p>
+                    <small className="default-gray">Date time range</small>
                     <RangePicker
                         presets={rangePresets}
                         showTime
@@ -309,7 +305,7 @@ export function Reports(){
                     />
                 </div>
                 <div className="section-base search-datapool-section">
-                    <p>Datapool</p>
+                    <small className="default-gray">Datapool</small>
                     {!(isLoadingDatapools || errorGetDatapools) && 
                         <Select
                         onChange={(v, option) => setSelectedDatapool(option)}
@@ -328,7 +324,7 @@ export function Reports(){
                         </div>}
                 </div>
                 <div>
-                    <p className="fake-search-title">
+                    <p className="default-white">
                         .
                     </p>
                     <Button 
@@ -339,7 +335,7 @@ export function Reports(){
                     </Button>
                 </div>
                 <div>
-                    <p className="fake-search-title">
+                    <p className="default-white">
                         .
                     </p>
                     <Button 
@@ -396,13 +392,16 @@ export function Reports(){
         key: 'view_edit_question',
         label: 'View edit question',
         icon: <EditOutlined/>,
-        onClick: () => {}
+        onClick: () => navigate('/question_view_edit/'+q.Id+'/'+q.Type)
     },
     {
         key: 'play_question',
         label: 'Play question',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => {
+            setSelectedQuestion(q)
+            setShowPlayQuestionModal(true)
+        }
     }]
 
     function renderQuestionStats(){
@@ -422,8 +421,9 @@ export function Reports(){
             <div className="stats-block">
                 
                 <Space 
-                className="stats-space-line"
-                size={"large"}>
+                    align="start"
+                    size={"large"}
+                >
                     <Statistic title="Total games played" value={nTotal} valueStyle={{color:'grey'}}/>
                     <Statistic title="Total unique games played" value={nTotalUnique} valueStyle={{color:'grey'}}/>
                         
@@ -431,14 +431,14 @@ export function Reports(){
                     title="Correctly" 
                     value={nCorrect} 
                     valueStyle={{color:'green'}}
-                    suffix={<small className="statistic-suffix">({nPercCorrect}%)</small>}
+                    suffix={<small className="default-gray">({nPercCorrect}%)</small>}
                     />
 
                     <Statistic 
                     title="Incorrectly" 
                     value={nWrong} 
                     valueStyle={{color:'red'}}
-                    suffix={<small className="statistic-suffix">({nPercWrong}%)</small>}
+                    suffix={<small className="default-gray">({nPercWrong}%)</small>}
                     />
 
                     {downloadButton('Download', () => downloadQuestionsReport())}
@@ -453,36 +453,33 @@ export function Reports(){
                             dataSource={successfulGames}
 
                             renderItem={(g, gi) => {
+                                const {QuestionCode, TotalGamesCorrect, TotalGames, QuestionImage} = g
 
                                 return(
                                     <List.Item>
-                                    <div className="list-item-question-series">
-                                        <div className="question-code-stats-line">
+                                    <Space className="hq-full-width" align="start" direction="vertical">
+                                        <Space className="question-code-stats-line  hq-opposite-arrangement">
                                             <Dropdown
                                                     menu={{
-                                                        items:questionActionList({
-                                                            Id: g.QuestionId,
-                                                            Type: g.QuestionType
-                                                        }),
+                                                        items:questionActionList(g),
                                                         title:'Actions'
                                                     }}
                                                 >
-                                                     <p className="question-series-code-reports">
-                                                        <span className="report-index">{gi+1}</span>{' '}{g.QuestionCode}
+                                                     <p className="stats-name hoverable hoverable-plus">
+                                                        <span className="default-gray">{gi+1}</span>{' '}{QuestionCode}
                                                     </p>
                                             </Dropdown>
-                                           
                                             <p className="question-percentage-correct">
-                                                {g.TotalGamesCorrect}/{g.TotalGames} {' '}({(100*(g.TotalGamesCorrect/g.TotalGames)).toFixed(0)}%)
+                                                {TotalGamesCorrect}/{TotalGames} {' '}({(100*(TotalGamesCorrect/TotalGames)).toFixed(0)}%)
                                             </p> 
 
-                                        </div>
+                                        </Space>
                                         <img 
-                                            src = {g.QuestionImage}
-                                            className="question-image"
-                                            alt={g.QuestionCode}
+                                            src = {QuestionImage}
+                                            className="report-question-image"
+                                            alt={QuestionCode}
                                         />
-                                    </div>
+                                    </Space>
                                     </List.Item>
                                 )
                             }}
@@ -497,31 +494,31 @@ export function Reports(){
                             dataSource={unsuccessfulGames}
 
                             renderItem={(g, gi) => {
-    
+                                const {QuestionCode, TotalGamesIncorrect, TotalGames, QuestionImage} = g
+
                                 return(
                                     <List.Item>
-                                        <div className="list-item-question-series">
-                                            <div className="question-code-stats-line">
+                                        <Space className="hq-full-width" align="start" direction="vertical">
+                                            <Space className="question-code-stats-line hq-opposite-arrangement">
                                                 <Dropdown
                                                     menu={{
-                                                        items:questionActionList({
-                                                            Id: g.QuestionId,
-                                                            Type: g.QuestionType
-                                                        }),
+                                                        items:questionActionList(g),
                                                         title:'Actions'
                                                     }}
                                                 >
-                                                    <p className="question-series-code-reports"><span className="report-index">{gi+1}</span>{' '}{g.QuestionCode}</p>
+                                                     <p className="stats-name hoverable hoverable-plus">
+                                                        <span className="default-gray">{gi+1}</span>{' '}{QuestionCode}
+                                                    </p>
                                                 </Dropdown>
-                                                <span  className="question-percentage-incorrect">{g.TotalGamesIncorrect}/{g.TotalGames}{' '}({(100*(g.TotalGamesIncorrect/g.TotalGames)).toFixed(0)}%)</span> 
+                                                <span  className="question-percentage-incorrect">{TotalGamesIncorrect}/{TotalGames}{' '}({(100*(TotalGamesIncorrect/TotalGames)).toFixed(0)}%)</span> 
 
-                                            </div>
+                                            </Space>
                                             <img 
-                                                src = {g.QuestionImage}
-                                                className="question-image"
-                                                alt={g.QuestionCode}
+                                                src = {QuestionImage}
+                                                className="report-question-image"
+                                                alt={QuestionCode}
                                             />
-                                        </div>
+                                        </Space>
                                     </List.Item>
                                 )
                             }}
@@ -545,7 +542,7 @@ export function Reports(){
         return(
             <div className="stats-block">
                 <Space 
-                className="stats-space-line"
+                align="start"
                 size={"large"}>
                     <Statistic 
                         title="Total games played" 
@@ -581,21 +578,20 @@ export function Reports(){
                                         <div 
                                         onClick={() => handlePlayerReportRequest(p.Player)}
                                         className="list-item">
-                                            <div className="player-stats-line">
-                                                <p className="player-stats-name">
-                                                    <span className="report-index">{pi+1}</span>
-                                                    {p.Player + ' '}{pi === 0 && <StarFilled className="player-star"/>}
+                                            <div className="hq-opposite-arrangement">
+                                                <p className="stats-name hoverable hoverable-plus">
+                                                    <span className="default-gray">{pi+1}{' '}</span>
+                                                    {p.Player + ' '}{pi === 0 && <StarFilled className="default-orange"/>}
                                                 </p>
-                                                <p className="player-stats-total-games">
-                                                    <Tooltip title="total games played" color={'blue'} >
-                                                        {p.TotalGames}
-                                                    </Tooltip>
-                                                </p>
-                                                <p className="player-stats-play-time">
-                                                    <Tooltip title="total play time HH:mm:ss" color={'blue'} >
-                                                        {convertSecondsToHHMMSS(p.TotalPlayTime)}
-                                                    </Tooltip>
-                                                </p>
+                                                
+                                                <Tooltip title={<p>total games played</p>} color="white" placement="top" >
+                                                    <p>{p.TotalGames}</p>
+                                                </Tooltip>  
+
+                                                <Tooltip title={<p>total play time HH:mm:ss</p>} color="white" placement="top" >
+                                                    <p>{convertSecondsToHHMMSS(p.TotalPlayTime)}</p>
+                                                </Tooltip>
+                                               
                                             </div>
                                         </div>
                                     </List.Item>
@@ -618,21 +614,20 @@ export function Reports(){
                                         <div 
                                         onClick={() => handlePlayerReportRequest(p.Player)}
                                         className="list-item">
-                                            <div className="player-stats-line">
-                                                <p className="player-stats-name">
-                                                    <span className="report-index">{pi+1}</span>
-                                                    {p.Player + ' '}{pi === 0 && <StarFilled className="player-star"/>}
+                                            <div className="hq-opposite-arrangement">
+                                                <p className="stats-name hoverable hoverable-plus">
+                                                    <span className="default-gray">{pi+1}{' '}</span>
+                                                    {p.Player + ' '}{pi === 0 && <StarFilled className="default-green"/>}
                                                 </p>
-                                                <p className="player-stats-total-games">
-                                                    <Tooltip title="total games played correctly" color={'cyan'} >
-                                                        {p.TotalGamesCorrect}
-                                                    </Tooltip>
-                                                </p>
-                                                <p className="player-stats-play-time">
-                                                    <Tooltip title="total play time HH:mm:ss" color={'cyan'} >
-                                                        {convertSecondsToHHMMSS(p.TotalPlayTime)}
-                                                    </Tooltip>
-                                                </p>
+
+                                                <Tooltip title={<p>total games played correctly</p>} color="white" placement="top">
+                                                    <p>{p.TotalGamesCorrect}</p>
+                                                </Tooltip>
+
+                                                <Tooltip title={<p>total play time HH:mm:ss</p>} color="white" placement="top">
+                                                    <p>{convertSecondsToHHMMSS(p.TotalPlayTime)}</p>
+                                                </Tooltip>
+                                                
                                             </div>
                                         </div>
                                     </List.Item>
@@ -647,17 +642,20 @@ export function Reports(){
         )
     }
 
-    const seriesActionList = (q) => [{
+    const seriesActionList = (s) => [{
         key: 'view_edit_series',
         label: 'View edit series',
         icon: <EditOutlined/>,
-        onClick: () => {}
+        onClick: () => navigate('/series_edit_view/'+s.Code)
     },
     {
         key: 'play_series',
         label: 'Play series',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => {
+            setShowPlaySeriesModal(true)
+            setSelectedSeries(s)
+        }
     }]
 
     function renderSeriesStats(){
@@ -673,7 +671,7 @@ export function Reports(){
         return(
             <div className="stats-block">
                 <Space 
-                className="stats-space-line"
+                align="start"
                 size={"large"}>
                     <Statistic 
                         title="Total series played" 
@@ -690,7 +688,7 @@ export function Reports(){
                     <Statistic title="On mobile" 
                         value={nOnMobile}
                         valueStyle={{color:'grey'}}
-                        suffix={<small className="statistic-suffix">({nPercOnMobile}%)</small>}
+                        suffix={<small className="default-gray">({nPercOnMobile}%)</small>}
 
                     />
                     <Statistic title="Total play time" 
@@ -715,8 +713,8 @@ export function Reports(){
 
                                 return(
                                     <List.Item>
-                                        <div className="list-item-question-series">
-                                            <div className="series-map-stats-line">
+                                        <Space className="hq-full-width" align="start" direction="vertical">
+                                            <Space className="question-code-stats-line hq-opposite-arrangement" size={'large'}>
                                                 <Dropdown
                                                     menu={{
                                                         items:seriesActionList({
@@ -725,27 +723,26 @@ export function Reports(){
                                                         title:'Actions'
                                                     }}
                                                 >
-                                                    <p className="question-series-code-reports"><span className="report-index">{si+1}</span>{' '}{s.Series}</p>
+                                                    <p className="stats-name hoverable hoverable-plus"><span className="default-gray">{si+1}</span>{' '}{s.Series}</p>
                                                 </Dropdown>
-                                                <div className="series-map-line-numbers">
-                                                    <p className="series-map-line-numbers-value">
-                                                        <Tooltip title="series play count" color={'blue'} >
-                                                            {s.Count}
-                                                        </Tooltip>
-                                                    </p>
-                                                    <p className="series-map-line-numbers-value">
-                                                        <Tooltip title="play time" color={'blue'} >
-                                                            {convertSecondsToHHMMSS(s.TotalPlayTime)}
-                                                        </Tooltip>
-                                                        </p>
-                                                    <p className="series-map-line-numbers-value">
-                                                        <Tooltip title="median play time" color={'blue'} >
-                                                            {convertSecondsToHHMMSS(s.MedianPlayTime)}
-                                                        </Tooltip>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                <Space size={'large'}>
+                                                    <Tooltip title={<p>Series play count</p>} color="white" placement="top">
+                                                        <p>{s.Count}</p>
+                                                    </Tooltip>
+
+                                                   
+                                                    <Tooltip title={<p>Play time</p>} color="white" placement="top" >
+                                                        <p>{convertSecondsToHHMMSS(s.TotalPlayTime)}</p>
+                                                    </Tooltip>
+                                                        
+                                                   
+                                                    <Tooltip title={<p>Median play time</p>} color="white" placement="top" >
+                                                        <p>{convertSecondsToHHMMSS(s.MedianPlayTime)}</p>
+                                                    </Tooltip>
+                                                    
+                                                </Space>
+                                            </Space>
+                                        </Space>
                                     </List.Item>
                                 )
                             }}
@@ -766,7 +763,7 @@ export function Reports(){
         return(
             <div className="stats-block">
                 <Space 
-                className="stats-space-line"
+                align="start"
                 size={"large"}>
                     <Statistic 
                         title="Total keys" 
@@ -787,17 +784,17 @@ export function Reports(){
         )
     }
 
-    const mapActionList = (q) => [{
+    const mapActionList = (m) => [{
         key: 'view_edit_map',
         label: 'View edit map',
         icon: <EditOutlined/>,
-        onClick: () => {}
+        onClick: () => navigate('/edit_view_map/'+m.Id)
     },
     {
         key: 'play_map',
         label: 'Play map',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => navigate('/playcoursemap/'+m.Id)
     }]
 
     function renderPDFStats(){
@@ -807,7 +804,7 @@ export function Reports(){
         return(
             <div className="stats-block">
                 <Space 
-                className="stats-space-line"
+                align="start"
                 size={"large"}>
                     <Statistic 
                         title="Total clicks" 
@@ -833,8 +830,8 @@ export function Reports(){
 
                                 return(
                                     <List.Item>
-                                        <div className="list-item-question-series">
-                                            <div className="series-map-stats-line">
+                                         <Space className="hq-full-width" align="start" direction="vertical">
+                                            <Space className="question-code-stats-line hq-opposite-arrangement" size={'large'}>
                                                 <Dropdown
                                                     menu={{
                                                         items:mapActionList({
@@ -844,17 +841,13 @@ export function Reports(){
                                                         title:'Actions'
                                                     }}
                                                 >
-                                                    <p className="question-series-code-reports"><span className="report-index">{si+1}</span>{' '}{s.Map}</p>
+                                                    <p className="stats-name hoverable hoverable-plus"><span className="default-gray">{si+1}</span>{' '}{s.Map}</p>
                                                 </Dropdown>
-                                                <div className="series-map-line-numbers">
-                                                    <p className="series-map-line-numbers-value">
-                                                        <Tooltip title="PDF clicks" color={'blue'} >
-                                                            {s.Count}
-                                                        </Tooltip>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                <Tooltip title={<p>PDF clicks</p>} color="white" placement="top" >
+                                                    <p>{s.Count}</p>
+                                                </Tooltip>
+                                            </Space>
+                                        </Space>
                                     </List.Item>
                                 )
                             }}
@@ -864,7 +857,7 @@ export function Reports(){
                 </Space>
             </div>
         )
-    }
+    }   
 
     return(
         <PagesWrapper>
@@ -874,10 +867,38 @@ export function Reports(){
             {(loadingGraphicalStats || loadingNumericStats) && <Skeleton />}
             {!(loadingGraphicalStats || loadingNumericStats) && numericStats && showNumericStats && renderNumericStatistics()}
 
+            {getNumericStatsError && !loadingNumericStats &&
+                <ErrorComponent 
+                    error={getNumericStatsError}
+                    
+                    onReload={() =>  loadNumericStatistics()}
+                />}
+
+                {getGraphicalStatsError && !loadingGraphicalStats &&
+                <ErrorComponent 
+                    error={getGraphicalStatsError}
+                    
+                    onReload={() =>  loadGraphicalStatistics()}
+                />}
+
             <PlayerTimeline 
                 open={showPlyerTimeline}
                 onClose={() => setShowPlyerTimeline(false)}
-                selectedPlayer={selectedPlyerTimeline}
+                selectedPlayer={selectedPlyerTimeline}                
+            />
+            
+            <QuestionPlayPocket 
+                open={showPlayQuestionModal}
+                onClose={() => setShowPlayQuestionModal(false)}
+
+                Id={selectedQuestion.Id}
+                Type={selectedQuestion.Type}
+            />
+
+            <SeriesPlayPocket 
+                open={showPlaySeriesModal}
+                onClose={() => setShowPlaySeriesModal(false)}
+                Code={selectedSeries.Code}
             />
         </PagesWrapper>
     )

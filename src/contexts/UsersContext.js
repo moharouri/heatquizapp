@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
 import { editUserNameEmail, editUserProfilePicture, getAllUsers, removeUserProfilePicture } from "../services/Users"
+import { useAuth } from "./AuthContext"
 
 const Context = React.createContext()
 
@@ -9,7 +10,9 @@ export function useUsers(){
 }
 
 export function UsersProvider ({children}){
-    
+
+    const {isStudent} = useAuth()
+
     //Fetch users from API
     const {loading: loadingUsers, value: users, error: getUserError, execute: getUsers} = useAsyncFn(() => getAllUsers())
 
@@ -19,8 +22,10 @@ export function UsersProvider ({children}){
     const {loading: loadingRemoveProfilePicture, error: getRemoveProfilePictureError, execute: deleteUserProfilePicture} = useAsyncFn((b) => removeUserProfilePicture(b))
     
     useEffect(() => {
-        getUsers()
-    }, [])
+        if(!isStudent){
+            getUsers()
+        }
+    }, [isStudent])
 
     return(
         <Context.Provider value = {{

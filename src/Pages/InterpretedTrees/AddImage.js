@@ -2,13 +2,15 @@ import { Button, Col, Divider, Drawer, Form, Input, Row, Select, Spin, message }
 import React, {useEffect, useState } from "react"
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
 
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../services/Auxillary";
 import Dragger from "antd/es/upload/Dragger";
 
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
+import { ErrorComponent } from "../../Components/ErrorComponent";
 
-export function AddImage({open, onClose, baseTree}){
-    const {loadingAddImage, getAddImageError, addImage, getAllInterpretedTrees, 
+export function AddImage({open, onClose, baseTree, reloadData}){
+    const {
+        loadingAddImage, addImage, 
         interpretedValues, errorGetInterpretedValues, isLoadingInterpretedValues, getAllInterpretedValues,
     } = useInterpretedTrees()
     
@@ -31,19 +33,6 @@ export function AddImage({open, onClose, baseTree}){
         getAllInterpretedValues()
     }, [open])
 
-    useEffect(() => {
-        if(errorGetInterpretedValues){
-            messageApi.destroy()
-            messageApi.error(errorGetInterpretedValues)
-        }
-    }, [errorGetInterpretedValues])
-
-    useEffect(() => {
-        if(getAddImageError){
-            messageApi.destroy()
-            messageApi.error(getAddImageError)
-        }
-    }, [getAddImageError])
 
     const handleChange = (info) => {
         if (info.file.status === 'uploading') {
@@ -63,13 +52,22 @@ export function AddImage({open, onClose, baseTree}){
 
 
     const renderChooseValues = () => {
-         const {Left, Right, Jump, RatioOfGradients} = interpretedValues
+        if(errorGetInterpretedValues){
+            return(
+                <ErrorComponent 
+                    error={errorGetInterpretedValues}
+                    onReload={() => getAllInterpretedValues()}
+                />
+            )
+        }
 
-         return(
+        const {Left, Right, Jump, RatioOfGradients} = interpretedValues
+
+        return(
             <Row 
             gutter={16}>
                 <Col xs = {3}>
-                    <small>Left</small>
+                    <small className="default-gray">Left</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.Left.filter(v => v.Id === option.value)[0]
@@ -88,7 +86,7 @@ export function AddImage({open, onClose, baseTree}){
                     />
                 </Col>
                 <Col xs = {3}>
-                    <small>Right</small>
+                    <small className="default-gray">Right</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.Right.filter(v => v.Id === option.value)[0]
@@ -107,7 +105,7 @@ export function AddImage({open, onClose, baseTree}){
                     />
                 </Col>
                 <Col xs = {3}>
-                    <small>Jump</small>
+                    <small className="default-gray">Jump</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.Jump.filter(v => v.Id === option.value)[0]
@@ -126,7 +124,7 @@ export function AddImage({open, onClose, baseTree}){
                     />
                 </Col>
                 <Col xs = {3}>
-                    <small>Ratio</small>
+                    <small className="default-gray">Ratio</small>
                     <Select
                         onChange={(v, option) => {
                             const findOption = interpretedValues.RatioOfGradients.filter(v => v.Id === option.value)[0]
@@ -157,9 +155,7 @@ export function AddImage({open, onClose, baseTree}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <div className="tree-picture-uploader">
@@ -180,14 +176,14 @@ export function AddImage({open, onClose, baseTree}){
                         <img 
                             src={newImageURL}
                             className="new-tree-picture"
-                            alt="course"
+                            alt="tree"
                         />}
                     </Dragger>
                 </div>
                 <br/>
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -223,7 +219,7 @@ export function AddImage({open, onClose, baseTree}){
                     }
                        
                         let data = new FormData()
-                        data.append('Name', newName)
+                        data.append('Code', newName)
                         data.append('Picture', newImage)
                         data.append('GroupId', baseTree.Id)
 
@@ -232,7 +228,12 @@ export function AddImage({open, onClose, baseTree}){
                         data.append('RatioId', selectedRatio.Id)
                         data.append('JumpId', selectedJump.Id)
 
-                        addImage(data).then(() => getAllInterpretedTrees())
+                        addImage(data).then((r) => 
+                            handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                                reloadData()
+                                onClose()
+                            })
+                        )
 
                         
                     }}
@@ -241,8 +242,8 @@ export function AddImage({open, onClose, baseTree}){
                 Add
                 </Button>
                 <Divider />
-                <small className="add-image-tree-tree-word">Tree </small>
-                <p className="tree-name-add-image-tree">
+                <small className="default-gray">Tree </small>
+                <p className="default-title">
                     {(baseTree || {}).Name} 
                 </p>
             </Drawer>

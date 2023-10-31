@@ -1,4 +1,4 @@
-import React, { Profiler } from "react";
+import React, {  } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PagesWrapper } from "../../../../PagesWrapper";
 import { useMaps } from "../../../../contexts/MapsContext";
@@ -234,17 +234,15 @@ export function MapEditView(){
                         .then((r) => 
                         handleResponse(
                             r,
+                            api,
+                            'Update successful',
+                            1,
                             () => {
-                                api.destroy()
-                                api.success('Update successful', 1)
                                 loadData()
                                 setShowEditLink(false)
-                            },
-                            () => {
-                                api.destroy()
-                                api.error(r)
-
                             }))
+
+                            
                     }}
                     loading={loadingEditMapElementBasicInfo}
                 >   
@@ -297,17 +295,15 @@ export function MapEditView(){
                             .then((r) => 
                             handleResponse(
                                 r,
+                                api,
+                                'Update successful',
+                                1,
                                 () => {
-                                    api.destroy()
-                                    api.success('Updated successful', 1)
                                     loadData()
                                     setShowEditTitle(false)
-                                },
-                                () => {
-                                    api.destroy()
-                                    api.error(r)
-    
                                 }))
+
+                                
                         }
                         else{
                             const VM = ({
@@ -320,17 +316,15 @@ export function MapEditView(){
                             .then((r) => 
                             handleResponse(
                                 r,
+                                api,
+                                'Update successful',
+                                1,
                                 () => {
-                                    api.destroy()
-                                    api.success('Updated successful', 1)
                                     loadData()
                                     setShowEditTitle(false)
-                                },
-                                () => {
-                                    api.destroy()
-                                    api.error(r)
-    
                                 }))
+
+                                
                         }
 
                         
@@ -392,19 +386,15 @@ export function MapEditView(){
                                 editBadgeSystemEntity(data)
                                 .then(r => handleResponse(
                                     r,
+                                    api,
+                                    'Update successful',
+                                    1,
                                     () => {
-                                        api.destroy()
-                                        api.success('Updated')
-    
                                         loadData()
                                         setShowEditElementBadgePercentage(false)
-                                    },
-    
-                                    () => {
-                                        api.destroy()
-                                        api.error(r)
-                                    }
-                                ))
+                                    }))
+
+                                
                             }
                             else{
 
@@ -416,19 +406,15 @@ export function MapEditView(){
                                 editMapElementBadgeProgress(VM)
                                 .then(r => handleResponse(
                                     r,
+                                    api,
+                                    'Update successful',
+                                    1,
                                     () => {
-                                        api.destroy()
-                                        api.success('Updated')
-    
                                         loadData()
                                         setShowEditElementBadgePercentage(false)
-                                    },
-    
-                                    () => {
-                                        api.destroy()
-                                        api.error(r)
-                                    }
-                                ))
+                                    }))
+
+                                
                             }
 
                             
@@ -527,18 +513,13 @@ export function MapEditView(){
                                                         deleteMapElement(e)
                                                             .then((r) => 
                                                             handleResponse(
-                                                                r, 
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.success('Removed')
+                                                                r,
+                                                                api,
+                                                                'Removed',
+                                                                1,
+                                                                () => loadData()))
 
-                                                                    loadData()
-                                                                },
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.error(r)
-                                                                }
-                                                            ))
+                                                            
                                                             
                                                         }}
                                                         onCancel={() => {}}
@@ -581,19 +562,12 @@ export function MapEditView(){
 
                                                 removePDFToMapElement(data)
                                                 .then(
-                                                    (r) => {
-                                                        const {Id} = r
-                                                        
-                                                        if(Id){
-                                                            api.destroy()
-                                                            api.success('PDF removed successfuly', 1)
-                                                            .then(() => loadData()) 
-                                                        }
-                                                        else{
-                                                            api.destroy()
-                                                            api.error(r)
-                                                        }
-                                                })
+                                                    (r) => handleResponse(
+                                                        r,
+                                                        api,
+                                                        'Removed',
+                                                        1,
+                                                        () =>  loadData()))
                                             }
                                         },
                                         {
@@ -732,19 +706,14 @@ export function MapEditView(){
 
                                                 removeSeriesFromMapElement(VM)
                                                 .then(
-                                                    (r) => {
-                                                        const {Id} = r
-                                                        
-                                                        if(Id){
-                                                            api.destroy()
-                                                            api.success('Series removed successfuly', 1)
-                                                            .then(() => loadData()) 
-                                                        }
-                                                        else{
-                                                            api.destroy()
-                                                            api.error(r)
-                                                        }
-                                                })
+                                                    (r) => handleResponse(
+                                                        r,
+                                                        api,
+                                                        'Series removed successfuly',
+                                                        1,
+                                                        () => loadData()))
+
+                                                
                                             }
                                         },
                                         {
@@ -856,19 +825,14 @@ export function MapEditView(){
                         
                                                 removeRelationToMapElement(VM)
                                                 .then(
-                                                    (r) => {
-                                                        const {Id} = r
-                                                        
-                                                        if(Id){
-                                                            api.destroy()
-                                                            api.success('Relationship removed successfuly', 1)
-                                                            .then(() => loadData()) 
-                                                        }
-                                                        else{
-                                                            api.destroy()
-                                                            api.error(r)
-                                                        }
-                                                })
+                                                    (r) => handleResponse(
+                                                        r,
+                                                        api,
+                                                        'Relationship removed successfuly',
+                                                        1,
+                                                        () => loadData()))
+
+                                                
                                             }
                                         }],
                                         title:'Actions'
@@ -945,17 +909,10 @@ export function MapEditView(){
                                                     r => 
                                                     handleResponse(
                                                         r,
-                                                        () => {
-                                                            api.destroy()
-                                                            api.success('Removed', 1)
-
-                                                            loadData()
-                                                        },
-                                                        () => {
-                                                            api.destroy()
-                                                            api.error(r)
-                                                        }
-                                                    )
+                                                        api,
+                                                        'Removed',
+                                                        1,
+                                                        () => loadData())
                                                 )
                                             }
                                         },
@@ -1022,18 +979,13 @@ export function MapEditView(){
                                                         onConfirm={() => {
                                                             removeMapElementBadge(b).then((r) => 
                                                             handleResponse(
-                                                                r, 
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.success('Removed')
+                                                                r,
+                                                                api,
+                                                                'Removed',
+                                                                1,
+                                                                () => loadData()))
 
-                                                                    loadData()
-                                                                },
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.error(r)
-                                                                }
-                                                            ))
+                                                            
                                                             
                                                         }}
                                                         onCancel={() => {}}
@@ -1125,18 +1077,11 @@ export function MapEditView(){
 
                                                         deassignClickListToMapElement(data)
                                                         .then((r) => handleResponse(
-                                                            r, 
-                                                            () => {
-                                                                api.destroy()
-                                                                api.success('Removed')
-
-                                                                loadData()
-                                                            },
-                                                            () => {
-                                                                api.destroy()
-                                                                api.error(r)
-                                                            }
-                                                        ))
+                                                            r,
+                                                            api,
+                                                            'Removed',
+                                                            1,
+                                                            () => loadData()))
                                                     }
                                                 }]
                                             }}
@@ -1265,18 +1210,10 @@ export function MapEditView(){
                                                             removeBadgeSystem(data)
                                                             .then(r => handleResponse(
                                                                 r,
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.success('Removed successfuly')
-                                        
-                                                                    loadData()
-                                                                },
-                                        
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.error(r)
-                                                                }
-                                                            ))
+                                                                api,
+                                                                'Removed',
+                                                                1,
+                                                                () => loadData()))
                                                         }}
                                                 onCancel={() => {}}
                                                 okText="Yes"
@@ -1318,18 +1255,11 @@ export function MapEditView(){
 
                                                             removeMapBadgeEntity(data).then((r) => 
                                                             handleResponse(
-                                                                r, 
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.success('Removed')
-
-                                                                    loadData()
-                                                                },
-                                                                () => {
-                                                                    api.destroy()
-                                                                    api.error(r)
-                                                                }
-                                                            ))
+                                                                r,
+                                                                api,
+                                                                'Removed',
+                                                                1,
+                                                                () => loadData()))
                                                             
                                                         }}
                                                         onCancel={() => {}}
@@ -1528,19 +1458,14 @@ export function MapEditView(){
 
                     assignSeriesToMapElement(VM)
                     .then(
-                        (r) => {
-                            const {Id} = r
-                            
-                            if(Id){
-                                api.destroy()
-                                api.success('Series assigned successfuly', 1)
-                                .then(() => loadData()) 
-                            }
-                            else{
-                                api.destroy()
-                                api.error(r)
-                            }
-                    })
+                        (r) => handleResponse(
+                            r,
+                            api,
+                            'Series assigned successfuly',
+                            1,
+                            () => loadData()))
+
+                    
 
                 }}
             />
@@ -1583,19 +1508,14 @@ export function MapEditView(){
 
                     assignClickListToMapElement(data)
                     .then(
-                        (r) => {
-                            const {Id} = r
-                            
-                            if(Id){
-                                api.destroy()
-                                api.success('List assigned successfuly', 1)
-                                .then(() => loadData()) 
-                            }
-                            else{
-                                api.destroy()
-                                api.error(r)
-                            }
-                    })
+                        (r) => handleResponse(
+                            r,
+                            api,
+                            'List assigned successfuly',
+                            1,
+                            () => loadData()))
+
+                    
                 }}
             />
 

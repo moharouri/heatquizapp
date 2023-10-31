@@ -35,40 +35,9 @@
     min-width: 120px;
 }
 
-.feedback-box {
-    padding: 0px 0;
-    background-color: rgb(253, 253, 253);
-    border: 1px #F0F0F0 solid;
-    border-radius: 0.5em;
-}
-
-.feedback-box-internal{
-    margin: 0.5vmin;
-    flex-direction: column;
-    display: flex;
-    width: 100%;
-}
-
-.question-info-section{
-    width: 100%;
-}
-
-.question-code{
-    color: blue;
-    font-size: small;
-    font-weight: 500;
-    width: 100%;
-    text-align: left;
-    margin-bottom: 0.5vh;
-}
-
-.question-adder{
-    font-size: small;
-    font-weight: 800;
-}
-
 .question-feedback-image{
     width: 10vw;
+    height: 10vw;
     object-fit: contain;
 }
 
@@ -109,22 +78,7 @@
     padding-left: 0.25vw;
 }
 
-.footer-section{
-    flex-direction: row;
-    display: flex;
-}
 
-.question-identity-card{
-    width: 80%;
-}
-
-.question-actions-card{
-    width: 20%;
-    flex-direction: column;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: flex-start;
-}
 
 .add-comment-player-name{
     font-size: small;

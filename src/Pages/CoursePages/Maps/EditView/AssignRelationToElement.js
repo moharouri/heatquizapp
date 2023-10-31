@@ -2,6 +2,7 @@ import {Button, Drawer, Space, message, Form, Input, Select} from "antd";
 import React, { useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useMaps } from "../../../../contexts/MapsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AssignRelationshipToElement({open, onClose, element, elements, reloadMap}){
     
@@ -51,22 +52,16 @@ export function AssignRelationshipToElement({open, onClose, element, elements, r
 
                         assignRelationToMapElement(VM)
                         .then(
-                            (r) => {
-                                const {Id} = r
-                                
-                                if(Id){
-                                    api.destroy()
-                                    api.success('Relationship assigned successfuly', 1)
-                                    .then(() => {
-                                        onClose()
-                                        reloadMap()
-                                    }) 
-                                }
-                                else{
-                                    api.destroy()
-                                    api.error(r)
-                                }
-                        })
+                            (r) =>
+                            handleResponse(
+                                r,
+                                api,
+                                'Relationship assigned successfuly',
+                                1,
+                                () => {
+                                    reloadMap()
+                                    onClose()
+                                }))
                     }}
                 >
                     Assign

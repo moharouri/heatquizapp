@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { validateKeyboardAnswer } from "../Functions";
 import { Keyboard } from "../../../../Components/Keyboard";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AddNewAnswer({open, onClose, question, reloadQuestion}){
 
@@ -52,7 +53,7 @@ export function AddNewAnswer({open, onClose, question, reloadQuestion}){
 
         footer={
             <div>
-            <p className="question-code">{question.Code}</p>
+            <p className="default-title">{question.Code}</p>
             <Space size={'large'} align="start">
                 <div>
                     <img
@@ -85,7 +86,7 @@ export function AddNewAnswer({open, onClose, question, reloadQuestion}){
                 <br/>
                 {answerValidity ? 
                 <small
-                    className="keyboard-question-play-warning-text"
+                    className="default-red highlighted"
                 > 
                     {answerValidity}
                 </small> : 
@@ -109,23 +110,11 @@ export function AddNewAnswer({open, onClose, question, reloadQuestion}){
                         })
 
                         addKeyboardQuestionAnswer(VM)
-                        .then(
-                            (r) => {
-                                const {Id} = r
-                                
-                                if(Id){
-                                    api.destroy()
-                                    api.success('Answer added successfully', 1)
-                                    .then(() => {
-                                        onClose()
-                                        reloadQuestion()
-                                    })
-                                }
-                                else{
-                                    api.destroy()
-                                    api.error(r)
-                                }
-                        })
+                        .then(r => handleResponse(r, api, 'Answer added successfully', 1, () => {
+                            onClose()
+                            reloadQuestion()
+                        }))
+                        
                     }}
 
                     loading={isLoadingAddKeyboardQuestionAnswer}

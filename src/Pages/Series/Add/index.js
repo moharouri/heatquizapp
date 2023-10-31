@@ -10,6 +10,7 @@ import { CompactQuestionComponent } from "../../Questions/SearchQuestionsList/Co
 import {QUESTION_TYPES_SEARCH_NAMES } from "../../Questions/List/constants";
 import { useSeries } from "../../../contexts/SeriesContext";
 import { QuestionPlayPocket } from "../../Questions/QuestionPlayPocket/QuestionPlayPocket";
+import { handleResponse } from "../../../services/Auxillary";
 
 export function AddSeries(){
 
@@ -235,7 +236,7 @@ export function AddSeries(){
                                                     />
                                                 </Tooltip>
                                                 &nbsp;
-                                                <p className="series-edit-view-element-code">{i}{' '}{q.Code}</p>
+                                                <p className="default-title hoverable">{i}{' '}{q.Code}</p>
                                             </Space>
                                             <Space size={'large'} align="start" >
                                                 <Tooltip
@@ -320,19 +321,8 @@ export function AddSeries(){
         })
 
         addSeries(VM)
-        .then(
-            (r) => {
-                const {Id} = r
-                
-                if(Id){
-                    api.destroy()
-                    api.success('Series added successfully', 1)
-                }
-                else{
-                    api.destroy()
-                    api.error(r)
-                }
-        })
+        .then(r => handleResponse(r, api, 'Series added successfully', 1))
+
     }
 
     const renderFinalPage = () => {

@@ -2,11 +2,12 @@ import { Button, Drawer, Form, Input, message } from "antd";
 import React, { useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useTopics } from "../../contexts/TopicsContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditSubtopicName({open, onClose, subtopic}){
+export function EditSubtopicName({open, onClose, subtopic, reloadData}){
     const [messageApi, contextHolder] = message.useMessage();
 
-    const {loadingEditSubtopicName, getEditSubtopicNameError, updateSubtopicName} = useTopics()
+    const {loadingEditSubtopicName, updateSubtopicName} = useTopics()
 
     const [newName, setNewName] = useState('')
 
@@ -22,14 +23,12 @@ export function EditSubtopicName({open, onClose, subtopic}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -41,6 +40,7 @@ export function EditSubtopicName({open, onClose, subtopic}){
                 </Form>
                 <Button 
                     type="primary" 
+                    size="small"
                     onClick={() => {
                         if(!newName.trim()){
                             messageApi.destroy()
@@ -53,12 +53,12 @@ export function EditSubtopicName({open, onClose, subtopic}){
                             Name: newName
                         })
 
-                        updateSubtopicName(VM).then(() => {
-                            if(getEditSubtopicNameError){
-                                messageApi.destroy()
-                                messageApi.error(getEditSubtopicNameError)
-                            }
-                        })
+                        updateSubtopicName(VM)
+                        .then((r) =>
+                            handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                                reloadData()
+                                onClose()
+                            }))
 
                         
                     }}

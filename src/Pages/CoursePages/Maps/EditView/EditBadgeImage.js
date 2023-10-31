@@ -70,19 +70,13 @@ export function EditBadgeImage({open, onClose, badge, nonElementBadge, reloadMap
                                 editBadgeSystemEntity(data)
                                 .then(r => handleResponse(
                                     r,
+                                    api,
+                                    'Updated successfuly',
+                                    1,
                                     () => {
-                                        api.destroy()
-                                        api.success('Updated')
-    
                                         reloadMap()
                                         onClose()
-                                    },
-    
-                                    () => {
-                                        api.destroy()
-                                        api.error(r)
-                                    }
-                                ))
+                                    }))
                             }
                             else{
                                 const data = new FormData()
@@ -92,19 +86,13 @@ export function EditBadgeImage({open, onClose, badge, nonElementBadge, reloadMap
                                 editMapElementBadgeImage(data)
                                 .then(r => handleResponse(
                                     r,
+                                    api,
+                                    'Updated successfuly',
+                                    1,
                                     () => {
-                                        api.destroy()
-                                        api.success('Updated')
-    
                                         reloadMap()
                                         onClose()
-                                    },
-    
-                                    () => {
-                                        api.destroy()
-                                        api.error(r)
-                                    }
-                                ))
+                                    }))
                             }
                             
                         }}

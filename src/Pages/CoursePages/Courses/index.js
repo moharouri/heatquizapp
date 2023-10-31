@@ -172,11 +172,15 @@ export function Courses(){
                     setSelectedCourse({})
                     setShowEditCourseModal(false)
                 }}
+
+                reloadData={() => loadData()}
             />
 
             <AddNewCourse 
                 open={showAddCourseModal}
                 onClose={() => setShowAddCourseModal(false)}
+
+                reloadData={() => loadData()}
             />
         </PagesWrapper>
     

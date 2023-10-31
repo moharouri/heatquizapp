@@ -1,5 +1,4 @@
 import React, {useEffect, useState } from "react";
-import {ArrowLeftOutlined} from '@ant-design/icons';
 import {Button, Drawer} from "antd";
 import { FilePdfOutlined } from '@ant-design/icons';
 

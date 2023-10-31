@@ -1,6 +1,6 @@
 import { Space } from "antd";
 import React from "react";
-import { RedoOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import {ExclamationCircleOutlined } from '@ant-design/icons';
 
 export function ErrorComponent({error, onReload}){
 

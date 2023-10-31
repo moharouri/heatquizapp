@@ -3,21 +3,19 @@ import { PagesWrapper } from "../../../PagesWrapper";
 import { Divider, Dropdown, List, Skeleton, Space, Tooltip } from "antd";
 import { QuestionsSearchTool } from "./QuestionsSearchTool";
 import { useQuestions } from "../../../contexts/QuestionsContext";
-import { beautifyDatetime, beautifyNumber } from "../../../services/Auxillary";
+import { beautifyDate, beautifyNumber } from "../../../services/Auxillary";
 import {EditOutlined, TrophyOutlined, CopyOutlined, DeleteOutlined, ApartmentOutlined, CommentOutlined, NotificationOutlined} from '@ant-design/icons';
 import { QuestionPlayPocket } from "../QuestionPlayPocket/QuestionPlayPocket";
-import { useStudentFeedback } from "../../../contexts/StudentFeedbackContext";
 import { ViewFeedbackList } from "../../StudentFeedback/ViewFeedbackList";
 import { ViewQuestionComments } from "../ViewQuestionComments/ViewQuestionComments";
 import { ViewQuestionRelations } from "../ViewQuestionRelations/ViewQuestionRelations";
 import { CopyQuestion } from "../CopyQuestion/CopyQuestion";
 import { useNavigate } from "react-router-dom";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
 
 export function QuestionList(){
 
-    const {questions, isLoadingQuestions, questionsByIds, isLoadingQuestionsByIds} = useQuestions()
-    const { loadingQuestionFeedback, questionFeedback, getQuestionFeedbackError, getQuestionFeedback} = useStudentFeedback()
-
+    const {questions, isLoadingQuestions, errorGetQuestions} = useQuestions()
     const naviagate = useNavigate()
 
     const [firstIndex, setFirstIndex] = useState(0)
@@ -34,9 +32,7 @@ export function QuestionList(){
         key: 'view_edit_question',
         label: 'View / edit',
         icon: <EditOutlined/>,
-        onClick: () => {
-            naviagate('/question_view_edit/'+q.Id+'/'+q.Type)
-        }
+        onClick: () => naviagate('/question_view_edit/'+q.Id+'/'+q.Type)
     },
     {
         key: 'play_question',
@@ -80,7 +76,6 @@ export function QuestionList(){
         icon: <NotificationOutlined /> ,
         onClick: () => {
             setSelectedQuestion(q)
-            getQuestionFeedback(q)
             setShowViewFeedbackListModal(true)
         }
     },
@@ -92,16 +87,7 @@ export function QuestionList(){
     }]
 
     const renderQuestions = () => {
-        let Questions = []
-        if(questions){
-            Questions = questions.Questions
-        }
-
-        if(questionsByIds){
-            Questions = questionsByIds
-        }
-
-
+        const Questions = questions.Questions
         
         return(
            <div>
@@ -125,19 +111,19 @@ export function QuestionList(){
                                         }}
                                     >
                                         <p className="hoverable-plus">
-                                            <span className="question-list-item-index">{firstIndex + qi+1}</span>
+                                            <span className="default-gray">{firstIndex + qi+1}{' '}</span>
                                             {q.Code}
                                         </p>
                                     </Dropdown>
                                     <br/>
 
-                                    <p className="question-list-item-code-adder-date-stats">{q.AddedByName}</p>
-                                    <p className="question-list-item-code-adder-date-stats">{beautifyDatetime(q.DateCreated)}</p>
+                                    <p className="default-gray">{q.AddedByName}</p>
+                                    <p className="default-gray">{beautifyDate(q.DateCreated)}</p>
 
                                     <br/>
 
-                                    <p className="question-list-item-code-adder-date-stats">{q.LevelOfDifficulty.Name}</p>
-                                    <p className="question-list-item-code-adder-date-stats">{q.Subtopic.Topic.Name} - {q.Subtopic.Name}</p>
+                                    <p className="default-gray">{q.LevelOfDifficulty.Name}</p>
+                                    <p className="default-gray">{q.Subtopic.Topic.Name} - {q.Subtopic.Name}</p>
 
                                 </div>
 
@@ -148,12 +134,12 @@ export function QuestionList(){
                                 />
 
                                 <div className="question-list-item-stats">
-                                    <small className="question-list-item-code-adder-date-stats">Play statistics</small>
+                                    <small className="default-gray">Play statistics</small>
                                     <Space size={'large'}>
                                         <p>{beautifyNumber(q.TotalGames)}</p>
-                                        <p className="question-list-item-play-numbers-correct">
+                                        <p className="default-green">
                                             {beautifyNumber(q.TotalCorrectGames)}
-                                            <small className="question-list-item-code-adder-date-stats"> {' '}({correctPlayPerc}) </small>
+                                            <small className="default-gray"> {' '}({correctPlayPerc}) </small>
                                         </p>
                                     </Space>
 
@@ -161,22 +147,23 @@ export function QuestionList(){
                                     {q.PDFURL && 
                                     <>
                                         <br/>
-                                        <small className="question-list-item-code-adder-date-stats">PDF view statistics</small>
+                                        <small className="default-gray">PDF view statistics</small>
                                         <Space size={'large'}>
-                                            <p>{beautifyNumber(q.TotalPDFViews)} <small className="question-list-item-code-adder-date-stats"> views </small></p>
+                                            <p>{beautifyNumber(q.TotalPDFViews)} <small className="default-gray"> views </small></p>
                                             <Tooltip
-                                                title="Percentage of PDF clicks following a wrong answer"
+                                                title={<p>Percentage of PDF clicks following a wrong answer</p>}
+                                                color="white"
                                             >
-                                            <p className="question-list-item-code-adder-date-stats-red">{wrongPDFPerc}</p>
+                                            <p className="default-red">{wrongPDFPerc}</p>
                                             </Tooltip>
                                         </Space>
                                     </>}
 
                                     <br/>
 
-                                    <small className="question-list-item-code-adder-date-stats">Median play time</small>
+                                    <small className="default-gray">Median play time</small>
                                     <Space size={'large'}>
-                                        <p>{q.MedianPlayTime} <small className="question-list-item-code-adder-date-stats"> seconds </small></p>
+                                        <p>{q.MedianPlayTime} <small className="default-gray"> seconds </small></p>
                                     </Space>
                                 </div>
                             </div>
@@ -194,10 +181,20 @@ export function QuestionList(){
             <Divider orientation="left">
                 Questions List
             </Divider>
-                <QuestionsSearchTool onSetFirstIndex = {(i) => setFirstIndex(i)}/>
+
+            <QuestionsSearchTool onSetFirstIndex = {(i) => setFirstIndex(i)}/>
+
             <br/>
-            {(isLoadingQuestions || isLoadingQuestionsByIds) && <Skeleton />}
-            {(!(isLoadingQuestions || isLoadingQuestionsByIds) && questions) && renderQuestions()}
+
+            {isLoadingQuestions && <Skeleton />}
+            {(!isLoadingQuestions && questions) && renderQuestions()}
+
+            {errorGetQuestions && !isLoadingQuestions &&
+                <ErrorComponent 
+                    error={errorGetQuestions}
+                    onReload={() => window.location.reload()}
+                />
+            }
 
             <QuestionPlayPocket 
                 open={showPlayQuestionModal}
@@ -211,10 +208,6 @@ export function QuestionList(){
                 open={showViewFeedbackListModal}
                 onClose={()=> setShowViewFeedbackListModal(false)}
                 question={selectedQuestion}
-                
-                loading={loadingQuestionFeedback}
-                error={getQuestionFeedbackError}
-                data={questionFeedback}
             />
 
             <ViewQuestionComments 

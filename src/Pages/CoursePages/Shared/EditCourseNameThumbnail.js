@@ -7,7 +7,7 @@ import './AddNewCourse.css'
 import { useCourses } from "../../../contexts/CoursesContext";
 const { Dragger } = Upload;
 
-export function EditCourseNameThumbnail({open, onClose, selectedCourse}){  
+export function EditCourseNameThumbnail({open, onClose, selectedCourse, reloadData}){  
 
   if(!open) return <div/>;
 
@@ -108,23 +108,14 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
             editCourse(data)
             .then(
               (r) => {
-                console.log(r)
                 handleResponse(
-                  r,
-                    
-                  () => {
-                    api.destroy()
-                    api.success('Course edited successfully', 1)
-                    .then(() => {
-                          onClose()
-                    })
-                  },
-                  
-                  () => {
-                    api.destroy()
-                      api.error(r)
-                  }
-                )
+                r,
+                api,
+                'Course edited successfully', 1,
+                () => {
+                  reloadData()
+                  onClose()
+                })
           })
 
             
@@ -180,23 +171,16 @@ export function EditCourseNameThumbnail({open, onClose, selectedCourse}){
             editCourse(data)
             .then(
               (r) => {
+
                 handleResponse(
-                  r,
-                    
-                  () => {
-                    api.destroy()
-                    api.success('Course edited successfully', 1)
-                    .then(() => {
-                          onClose()
-                    })
-                  },
-                  
-                  () => {
-                    api.destroy()
-                      api.error(r)
-                  }
-                )
-          })
+                r,
+                api,
+                'Course edited successfully', 1,
+                () => {
+                  reloadData()
+                  onClose()
+                })
+            })
           }}
           loading = {loadingEditCourse}
           >

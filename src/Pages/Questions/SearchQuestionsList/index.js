@@ -65,8 +65,13 @@ export function SearchQuestionsList({selectedQuestions, onSelectQuestions, forbi
                                <Space
                                     className="hq-opposite-arrangement"
                                     align="start"
-                               >
-                                    <p className="series-edit-view-element-code hoverable-plus" onClick={() => handleSelectQuestion(q)}>{i}{' '}{q.Code}</p>
+                               >    
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>Click to select</p>}
+                                    >
+                                        <p className="series-edit-view-element-code hoverable-plus" onClick={() => handleSelectQuestion(q)}>{i}{' '}{q.Code}</p>
+                                    </Tooltip>
 
                                     <Space size={'large'} align="start">
                                     <Tooltip

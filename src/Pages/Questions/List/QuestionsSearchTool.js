@@ -13,7 +13,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
     const {topics, errorGetTopics, isLoadingTopics, getAllTopics} = useTopics()
     const { isLoadingLODs, errorGetLODs, LODs, getAllLODs} = useLevelsOfDifficulty()
 
-    const {questions,isLoadingQuestions, errorGetQuestions, searchQuestions, errorGetQuestionsByIds, searchQuestionsByIds} = useQuestions()
+    const {questions,isLoadingQuestions, searchQuestions} = useQuestions()
 
     const {selectedDatapool} = useDatapools()
 
@@ -60,18 +60,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             messageApi.destroy()
             messageApi.error(errorGetLODs)
         }
-
-        if(errorGetQuestions){
-            messageApi.destroy()
-            messageApi.error(errorGetQuestions)
-        }
-
-        if(errorGetQuestionsByIds){
-            messageApi.destroy()
-            messageApi.error(errorGetQuestionsByIds)
-        }
-
-    }, [errorGetTopics, errorGetLODs, errorGetQuestions, errorGetQuestionsByIds])
+    }, [errorGetTopics, errorGetLODs])
 
 
     const renderSelectQuestionTypes = () => {
@@ -301,10 +290,6 @@ export function QuestionsSearchTool({onSetFirstIndex}){
         setSelectedPage(1)
     }
 
-    const getOwnedData = () => {
-
-    }
-
     const renderSearchButtons = () => (
             <Space size={'small'}>
                 <Button
@@ -314,9 +299,6 @@ export function QuestionsSearchTool({onSetFirstIndex}){
                 </Button>
                 <Button onClick={getAllData}>
                     Get all questions 
-                </Button>
-                <Button>
-                    Get owned questions 
                 </Button>
             </Space>
             
@@ -344,9 +326,9 @@ export function QuestionsSearchTool({onSetFirstIndex}){
 
                             const Ids = QuestionsIdsTypes.slice(ci*selectedPerPage, (ci + 1)*selectedPerPage).map(a => a.Key)
 
-                            const VM = ({Ids})
+                            const VM = ({Ids, QuestionsIdsTypes, Codes, NumberOfQuestions})
 
-                            searchQuestionsByIds(VM)
+                            searchQuestions(VM, true)
                         }}
                     >
                         <p className="pages-single-value">{c.Index + ' ' + c.Character}</p>
@@ -462,16 +444,16 @@ export function QuestionsSearchTool({onSetFirstIndex}){
                                 setSelectedPerPage(value)
 
                                 if(questions && questions.QuestionsIdsTypes){
-                                    const {QuestionsIdsTypes} = questions
+                                    const {QuestionsIdsTypes, Codes, NumberOfQuestions} = questions
 
                                     setSelectedPage(1)
                                     onSetFirstIndex(0)
 
                                     const Ids = QuestionsIdsTypes.slice(0, value).map(a => a.Key)
 
-                                    const VM = ({Ids})
+                                    const VM = ({Ids, QuestionsIdsTypes, Codes, NumberOfQuestions})
 
-                                    searchQuestionsByIds(VM)
+                                    searchQuestions(VM, true)
                                 }
                             }}
                             defaultValue={'please select'}

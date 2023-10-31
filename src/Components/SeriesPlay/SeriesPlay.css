@@ -3,11 +3,6 @@
     display: flex;
 }
 
-.series-play-total-play-time-word{
-    color: #777;
-    line-height: 0;
-}
-
 .series-play-final-page-item-container-base{
     margin-bottom: 1vw;
 
@@ -34,19 +29,6 @@
     justify-content: center;
 }
 
-.series-play-final-page-item-code{
-    margin-bottom: 0.5vmin;
-}
-
-.series-play-final-page-item-code:hover{
-    background-color: whitesmoke;
-    padding-left: 0.25vw;
-    padding-right: 0.25vw;
-    cursor: pointer;
-    width: fit-content;
-    color: blue;
-    border-radius: 0.25em;
-}
 
 .series-play-final-page-item-statistics-section{
     align-items: flex-start;
@@ -62,24 +44,4 @@
     width: 10vw;
     height: auto;
     object-fit: contain;
-}
-
-.series-play-final-page-item-correct{
-    color: green;
-}
-
-.series-play-final-page-item-incorrect{
-    color: red;
-}
-
-.series-play-final-page-item-xp{
-    color: orange;
-}
-
-.series-play-final-page-item-success-rate{
-    color: green;
-}
-
-.series-play-final-page-item-gray-word{
-    color: #777;
 }

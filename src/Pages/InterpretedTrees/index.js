@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { PagesWrapper } from "../../PagesWrapper";
-import { Button, Col, Divider, Dropdown, Row, Select, Skeleton, Space, message } from "antd";
+import { Button, Col, Divider, Dropdown, Popconfirm, Row, Select, Skeleton, Space, Tooltip, message } from "antd";
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
 import { useDatapools } from "../../contexts/DatapoolsContext";
 import {PlusOutlined, EditOutlined, DeleteOutlined, PictureOutlined, SlidersOutlined} from '@ant-design/icons';
@@ -11,10 +11,17 @@ import { AddImage } from "./AddImage";
 import { EditImageName } from "./EditImageName";
 import { EditImagePicture } from "./EditImagePicture";
 import { EditImageValues } from "./EditImageValues";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { handleResponse } from "../../services/Auxillary";
 
 export function InterpretedTrees(){
 
-    const {interpretedTrees, errorGetInterpretedTrees, isLoadingInterpretedTrees, getAllInterpretedTrees} = useInterpretedTrees()
+    const {
+        interpretedTrees, errorGetInterpretedTrees, isLoadingInterpretedTrees, getAllInterpretedTrees,
+
+        removeInterpretedTree,
+        removeInterpretedNode,
+    } = useInterpretedTrees()
     const {selectedDatapool} = useDatapools()
     const [selectedTree, setSelectedTree] = useState(null)
 
@@ -44,12 +51,6 @@ export function InterpretedTrees(){
         }
     }, [interpretedTrees])
 
-    useEffect(() => {
-        if(errorGetInterpretedTrees){
-            messageApi.destroy()
-            messageApi.error(errorGetInterpretedTrees)
-        }
-    }, [errorGetInterpretedTrees])
 
     const imageActionList = (t) => [
         {
@@ -83,7 +84,24 @@ export function InterpretedTrees(){
         &&
         {
             key: 'delete_tree',
-            label: 'Delete',
+            label: 
+            <Popconfirm
+                title="Remove tree"
+                description="Are you sure to delete this tree?"
+                        onConfirm={() => {
+                            removeInterpretedNode(t)
+                            .then((r) => handleResponse(r, messageApi, 'Removed', 1, () => {
+                                getAllInterpretedTrees()
+                            }))
+                        }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+                placement="right"
+            >
+                Delete
+            </Popconfirm>
+            ,
             icon: <DeleteOutlined />,
             onClick: () => {}
         }
@@ -115,22 +133,55 @@ export function InterpretedTrees(){
 
             {!isLoadingInterpretedTrees && selectedTree && 
                 <Space size={'small'}>
-                    <Button
-                        onClick={() =>  {
-                            setShowEditTreeNameModal(true)
-                        }}
+                    <Tooltip
+                        color="white"
+                        placement="top"
+                        title={<p>Edit name</p>}
                     >
-                        <EditOutlined/>
-                        Edit name
-                    </Button>
+                        <Button
+                            onClick={() =>  setShowEditTreeNameModal(true)}
+                        >
+                            <EditOutlined/>
+                            
+                        </Button>
+                    </Tooltip>
 
-                    <Button
-                        onClick={() => setShowAddImageModal(true)}
+                    <Tooltip
+                        color="white"
+                        placement="top"
+                        title={<p>New image</p>}
                     >
-                        <PlusOutlined style={{color:'green'}}/>
-                        New image
-                    </Button>
+                        <Button
+                            onClick={() => setShowAddImageModal(true)}
+                        >
+                            <PlusOutlined style={{color:'green'}}/>
+                        </Button>
+                    </Tooltip>
 
+                    <Popconfirm
+                        title="Remove tree"
+                        description="Are you sure to delete this tree?"
+                                onConfirm={() => {
+                                    removeInterpretedTree(selectedTree)
+                                    .then((r) => handleResponse(r, messageApi, 'Removed', 1, () => {
+                                        getAllInterpretedTrees()
+                                    }))
+                                }}
+                        onCancel={() => {}}
+                        okText="Yes"
+                        cancelText="No"
+                        placement="right"
+                    >
+                        <Tooltip
+                            color="white"
+                            placement="top"
+                            title={<p>Delete tree</p>}
+                        >
+                            <Button>
+                                <DeleteOutlined/>
+                            </Button>
+                        </Tooltip>
+                    </Popconfirm>
                 </Space>
             }
         </Space>
@@ -151,36 +202,36 @@ export function InterpretedTrees(){
                         md={4}
                         key={img.Id}
                     >
-                        <div className="interpreted-tree-item-container">
-                            <div className="interpreted-tree-head-container">
+                        <Space>
+                            <div>
                                 <Dropdown
                                     menu={{
                                         items:imageActionList(img),
                                         title:'Actions'
                                     }}
                                 >
-                                    <p className="interpreted-tree-head-title interpreted-tree-clickable-title">{img.Code}</p>
+                                    <p className="default-title hoverable">{img.Code}</p>
                                 </Dropdown>
-                                <small className="interpreted-tree-usage-times">{ img.ClickCharts.length ? img.ClickCharts.length + ' usage times' : ''} </small>
+                                <small className="default-gray">{ img.ClickCharts.length ? img.ClickCharts.length + ' usage times' : ''} </small>
                                 <Space size={'large'}>
                                 <img 
                                     src={img.URL}
                                     className="interpreted-tree-head-img"
                                     alt={img.Name}
                                 />
-                                <div className="interpreted-tree-values-list">
-                                    <p><small className="interpreted-tree-values-type">Left</small>{img.Left.Value}</p>
+                                <Space direction="vertical" align="start">
+                                    <p><small className="default-gray">Left{' '}</small>{img.Left.Value}</p>
                                     
-                                    <p><small className="interpreted-tree-values-type">Right</small>{img.Right.Value}</p>
+                                    <p><small className="default-gray">Right{' '}</small>{img.Right.Value}</p>
                                  
-                                    <p><small className="interpreted-tree-values-type">Ratio</small>{img.RationOfGradients.Value}</p>
+                                    <p><small className="default-gray">Ratio{' '}</small>{img.RationOfGradients.Value}</p>
                                     
-                                    <p><small className="interpreted-tree-values-type">Jump</small>{img.Jump.Value}</p>
-                                </div>
+                                    <p><small className="default-gray">Jump{' '}</small>{img.Jump.Value}</p>
+                                </Space>
                                 </Space>
                             </div>
                                     
-                        </div>
+                        </Space>
                     </Col>
                     )}
                 </Row>
@@ -204,47 +255,58 @@ export function InterpretedTrees(){
                 </Button>
             </Divider>
 
+            {isLoadingInterpretedTrees && <Skeleton />}
+
+            {errorGetInterpretedTrees && !isLoadingInterpretedTrees && 
+                <ErrorComponent 
+                    error={errorGetInterpretedTrees}
+                    onReload={() => getAllInterpretedTrees()}
+                />}
+
+            {renderSelectTree()}
+            {!isLoadingInterpretedTrees && selectedTree && renderSelectedTree()}
+            
             <AddTree 
                 open={showAddTreeModal}
                 onClose={()=>setShowAddTreeModal(false)}
+                reloadData = {() => getAllInterpretedTrees()}
             />
 
             <EditTreeName 
                 open={showEditTreeNameModal}
                 onClose={() => setShowEditTreeNameModal(false)}
                 tree={selectedTree}
+                reloadData = {() => getAllInterpretedTrees()}
             />
 
             <AddImage 
                 open={showAddImageModal}
                 onClose={()=>setShowAddImageModal(false)}
                 baseTree={selectedTree}
-
+                reloadData = {() => getAllInterpretedTrees()}
             />
 
             <EditImageName 
                 open={showEditImageNameModal}
                 onClose={() => setShowEditImageNameModal(false)}
                 node={selectedNode}
+                reloadData = {() => getAllInterpretedTrees()}
             />
 
             <EditImagePicture 
                 open={showEditImagePictureModal}
                 onClose={() => setShowEditImagePictureModal(false)}
                 node={selectedNode}
+                reloadData = {() => getAllInterpretedTrees()}
             />
 
             <EditImageValues 
                 open={showEditImageValuesModal}
                 onClose={() => setShowEditImageValuesModal(false)}
                 node={selectedNode}
+                reloadData = {() => getAllInterpretedTrees()}
             />
 
-            {isLoadingInterpretedTrees && <Skeleton />}
-            
-            {renderSelectTree()}
-            {!isLoadingInterpretedTrees && selectedTree && renderSelectedTree()}
-            
         </PagesWrapper>
     )
 }

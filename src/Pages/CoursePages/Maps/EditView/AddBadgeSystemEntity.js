@@ -62,18 +62,13 @@ export function AddBadgeSystemEntity({open, onClose, system, reloadMap}){
                             addBadgeSystemEntity(data).then(r => 
                                 handleResponse(
                                     r,
+                                    api,
+                                    'Added successfuly',
+                                    1,
                                     () => {
-                                        api.destroy()
-                                        api.success('Added successfully')
-
                                         reloadMap()
                                         onClose()
-                                    },
-                                    () => {
-                                        api.destroy()
-                                        api.error(r)
-                                    }
-                                )
+                                    })
                             )
                         }}
 

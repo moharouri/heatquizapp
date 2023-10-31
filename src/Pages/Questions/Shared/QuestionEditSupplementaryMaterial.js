@@ -6,14 +6,14 @@ import { useEffect } from "react";
 
 import './QuestionEditView.css'
 import { useQuestions } from "../../../contexts/QuestionsContext";
-import { ALLOWED_PDF_EXTENSIONS, dummyRequest, getBase64 } from "../../../services/Auxillary";
+import { ALLOWED_PDF_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../../services/Auxillary";
 import Dragger from "antd/es/upload/Dragger";
 
 export function QuestionEditSupplementaryMaterial({open, onClose, question, reloadQuestion}){
 
     if(!open) return <div/>;
 
-    const {editQuestionSolutionResult, errorEditQuestionSolution, isLoadingEditQuestionSolution, editQuestionSolution,} = useQuestions()
+    const {isLoadingEditQuestionSolution, editQuestionSolution,} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -26,13 +26,6 @@ export function QuestionEditSupplementaryMaterial({open, onClose, question, relo
           
         }
     }, [open])
-
-    useEffect(() => {
-        if(errorEditQuestionSolution){
-            api.destroy()
-            api.error(errorEditQuestionSolution)
-        }
-    }, [errorEditQuestionSolution])
 
     const handleChange = (info) => {
         if (info.file.status === 'uploading') {
@@ -53,18 +46,50 @@ export function QuestionEditSupplementaryMaterial({open, onClose, question, relo
 
     return(
         <Drawer
-        title="Edit question solution material"
+        title={
+            <Space size={'large'}>
+                <p>Edit question solution material</p>
+                <Button
+                    size="small"
+                    type="primary"
+
+                    onClick={() => {
+                        if(!newPDF){
+                            api.destroy()
+                            api.warning('Please provide a pdf file')
+
+                            return
+                        }
+
+                        const data = new FormData()
+
+                        data.append('QuestionId', question.Id)
+                        data.append('PDF', newPDF)
+                        data.append('QuestionType', question.Type) // Should be removed
+
+
+                        editQuestionSolution(data)
+                        .then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
+                            reloadQuestion()
+                            onClose()
+                        }))
+                    }}
+
+                    loading={isLoadingEditQuestionSolution}
+                >
+                    Update
+                </Button>
+            </Space>           
+        }
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         footer={
           <div>
-          <p className="question-code">{question.Code}</p>
+          <p className="default-title">{question.Code}</p>
           <Space size={'large'} align="start">
               <div>
                   <img
@@ -86,7 +111,6 @@ export function QuestionEditSupplementaryMaterial({open, onClose, question, relo
             accept={ALLOWED_PDF_EXTENSIONS}
             onChange={handleChange}
             showUploadList={false}
-
             
         >
             {!newPDFURL && <>
@@ -112,35 +136,7 @@ export function QuestionEditSupplementaryMaterial({open, onClose, question, relo
         >
             Original solution
         </Button>}
-        <Button
-            size="small"
-            type="primary"
-
-            onClick={() => {
-                if(!newPDF){
-                    api.destroy()
-                    api.warning('Please provide a pdf file')
-
-                    return
-                }
-
-                const data = new FormData()
-
-                data.append('QuestionId', question.Id)
-                data.append('PDF', question.Id)
-                data.append('QuestionType', question.Type) // Should be removed
-
-
-                editQuestionSolution(data).then(() => {
-                    reloadQuestion()
-                    onClose()
-                })
-            }}
-
-            loading={isLoadingEditQuestionSolution}
-        >
-            Update
-        </Button>
+        
         </Space>
     </Drawer>
     )

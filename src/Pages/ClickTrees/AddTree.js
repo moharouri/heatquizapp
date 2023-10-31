@@ -3,9 +3,10 @@ import React, {useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import { useClickTrees } from "../../contexts/ClickTreesContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function AddTree({open, onClose}){
-    const {loadingAddTree, getAddTreeError, addTree, getAllClickTrees} = useClickTrees()
+export function AddTree({open, onClose, reloadData}){
+    const {loadingAddTree, addTree} = useClickTrees()
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -19,14 +20,12 @@ export function AddTree({open, onClose}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -50,17 +49,12 @@ export function AddTree({open, onClose}){
                        })
                       
 
-                       addTree(VM).then(() => {
-
-                            if(getAddTreeError){
-                                messageApi.destroy()
-                                messageApi.error(getAddTreeError)
-                            }
-                            else{
-                                getAllClickTrees()
-                            }
-
-                       })
+                       addTree(VM)
+                       .then((r) => 
+                            handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                                reloadData()
+                                onClose()
+                            }))
 
                         
                     }}

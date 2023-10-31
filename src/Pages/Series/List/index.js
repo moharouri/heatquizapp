@@ -8,12 +8,10 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {EditOutlined, TrophyOutlined, DeleteOutlined} from '@ant-design/icons';
 import { SeriesPlayPocket } from "../Play/SeriesPlayPocket"
+import { ErrorComponent } from "../../../Components/ErrorComponent"
 
 export function SeriesList(){
-    const {
-        isLoadingSeriesQuery, errorGetSeriesQuery, SeriesQuery,
-        isLoadingSeriesByIdsQuery, errorGetSeriesByIdsQuery, SeriesByIdsQuery
-    } = useSeries() 
+    const {isLoadingSeriesQuery, errorGetSeriesQuery, SeriesQuery,} = useSeries() 
 
     const [firstIndex, setFirstIndex] = useState(0)
 
@@ -51,15 +49,8 @@ export function SeriesList(){
     }]
 
     const renderSeries = () => {
-        let series = []
-        if(SeriesQuery && !isLoadingSeriesQuery){
-            series = SeriesQuery.Series
-        }
-
-        if(SeriesByIdsQuery && !isLoadingSeriesByIdsQuery){
-            series = SeriesByIdsQuery
-        }
-        
+        const series = SeriesQuery.Series
+      
         return(
            <div>
             {series.length ? 
@@ -68,12 +59,13 @@ export function SeriesList(){
             >
                 {series.map((q, qi) => {
 
-                const {Code, AddedByName, DateCreated, IsRandom, Elements, MapElements} = q
+                const {Id, Code, AddedByName, DateCreated, IsRandom, Elements, MapElements} = q
 
                 return(
                     <Col
                         xs={12}
                         className="series-list-item-container-0"
+                        key={Id}
                     >
                     <div className="series-list-item-container-0-internal">
                             <div className="series-list-item-container-1">
@@ -130,10 +122,12 @@ export function SeriesList(){
                 </Col>
                 )
                 })}
-                </Row> : <Space align="center">{!(isLoadingSeriesByIdsQuery || isLoadingSeriesQuery) && <Empty />}</Space>}
+                </Row> : <Space align="center">{!isLoadingSeriesQuery && <Empty />}</Space>}
            </div>
         )
     }
+
+    console.log(errorGetSeriesQuery)
 
     return(
         <PagesWrapper>
@@ -143,8 +137,15 @@ export function SeriesList(){
             <SeriesSearchTool  onSetFirstIndex={(i) => setFirstIndex(i)}/>
 
             <br/>
-            {(isLoadingSeriesQuery || isLoadingSeriesByIdsQuery) && <Skeleton />}
-            {(!(isLoadingSeriesByIdsQuery || isLoadingSeriesByIdsQuery) && (SeriesQuery || SeriesByIdsQuery)) && renderSeries()}
+            {isLoadingSeriesQuery && <Skeleton />}
+            {(!isLoadingSeriesQuery && SeriesQuery) && renderSeries()}
+
+            {errorGetSeriesQuery && !isLoadingSeriesQuery && 
+                <ErrorComponent 
+                    error={errorGetSeriesQuery}
+                    onReload={() => window.location.reload()}
+                />
+            }
 
             <SeriesPlayPocket 
                 open={showPlaySeriesModal}

@@ -3,10 +3,11 @@ import React, {useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditImageName({open, onClose, node}){
-    console.log(node)
-    const {loadingEditImageName, getEditImageNameError, editImageName, getAllInterpretedTrees} = useInterpretedTrees()
+export function EditImageName({open, onClose, node, reloadData}){
+
+    const {loadingEditImageName, editImageName} = useInterpretedTrees()
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -16,13 +17,6 @@ export function EditImageName({open, onClose, node}){
         setNewName((node || {}).Code)
     }, [open])
 
-    useEffect(() => {
-        if(getEditImageNameError){
-            messageApi.destroy()
-            messageApi.error(getEditImageNameError)
-        }
-    }, [getEditImageNameError])
-
     return(
         <div>
             {contextHolder}
@@ -31,14 +25,12 @@ export function EditImageName({open, onClose, node}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <Form>
                     <Form.Item>
-                        <small>Updated name</small>
+                        <small className="default-gray">Updated name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -55,7 +47,11 @@ export function EditImageName({open, onClose, node}){
                         data.append('Code',  newName)
                         data.append('ImageId', node.Id)
 
-                        editImageName(data).then(() => getAllInterpretedTrees())
+                        editImageName(data)
+                        .then((r) => handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                       }))
                        
                     }}
                     loading = {loadingEditImageName}

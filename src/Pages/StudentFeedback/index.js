@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../PagesWrapper";
-import { Button, Divider, Input, Space, DatePicker, message, Spin, Col, Badge, List } from "antd";
+import { Button, Divider, Input, Space, DatePicker, message, Spin, Col, Badge, Dropdown, Row } from "antd";
 import './StudentFeedback.css'
 import { useStudentFeedback } from "../../contexts/StudentFeedbackContext";
 import {MessageOutlined} from '@ant-design/icons';
 import { ViewFeedbackList } from "./ViewFeedbackList";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { QuestionPlayPocket } from "../Questions/QuestionPlayPocket/QuestionPlayPocket";
+import { useNavigate } from "react-router-dom";
+
+import { EditOutlined, TrophyOutlined } from '@ant-design/icons';
 
 const { RangePicker } = DatePicker;
 
@@ -16,19 +21,18 @@ export function StudentFeedback(){
     const [debugCode, setDebugCode] = useState('')
     const [showDebugCodeList, setShowDebugCodeList] = useState(false)
 
+    const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
+
     const [messageApi, contextHolder] = message.useMessage();
+
+    const navigate = useNavigate()
 
     const { 
         loadingStudentFeedback,
         studentFeedback,
         getStudentFeedbackError,
         getStudentFeedback,
-
-        loadingQuestionFeedback,
-        questionFeedback,
-        getQuestionFeedbackError,
-        getQuestionFeedback,
-
+        
         loadingDebugCodeDecryption,
         debugCodeDecryption,
         decryptDebugCodeError,
@@ -41,7 +45,7 @@ export function StudentFeedback(){
     const searchFeedback = () => {
         if(!(fromData && toData)) {
             messageApi.destroy()
-            messageApi.error('Please add date range for search')
+            messageApi.warning('Please add date range for search')
             
             return
         } 
@@ -59,7 +63,7 @@ export function StudentFeedback(){
         return(
             <Space align="start" className="qr-search-line">
                  <div className="qr-code-input">
-                    <p>Debug code</p>
+                    <small className="default-gray">Debug code</small>
                     <Input 
                         value={debugCode}
                         onChange={(v) => setDebugCode(v.target.value)}
@@ -82,7 +86,7 @@ export function StudentFeedback(){
     function FeedbackSearchLine(){
         return(
                 <div className="feedback-search-input">
-                    <p>Feedback date range</p>
+                    <small className="default-gray">Feedback date range</small>
                     <RangePicker 
                     
                     onChange={(v) => {
@@ -110,6 +114,22 @@ export function StudentFeedback(){
         )
     }
 
+    const questionActionList = (q) => [{
+        key: 'view_edit_question',
+        label: 'View edit question',
+        icon: <EditOutlined/>,
+        onClick: () => navigate('/question_view_edit/'+q.Id+'/'+q.Type)
+    },
+    {
+        key: 'play_question',
+        label: 'Play question',
+        icon: <TrophyOutlined style={{color:'green'}}/> ,
+        onClick: () => {
+            setSelectedQuestion(q)
+            setShowPlayQuestionModal(true)
+        }
+    }]
+
     return(
         <PagesWrapper>
             {contextHolder}
@@ -117,44 +137,64 @@ export function StudentFeedback(){
                 Student feedback
             </Divider>
             <Space align="start">
-            {FeedbackSearchLine()}
-            {QRSearchLine()}
+                {FeedbackSearchLine()}
+                {QRSearchLine()}
             </Space>
 
             <Divider/>
             {loadingStudentFeedback && <Spin tip="Loading..."/>}
+
+            {getStudentFeedbackError && !loadingStudentFeedback && 
+                <ErrorComponent 
+                    error={getStudentFeedbackError}
+                    onReload={() => {
+                        setShowDebugCodeList(false)    
+                        searchFeedback()
+                    }}
+                />}
+
+            {decryptDebugCodeError && !loadingDebugCodeDecryption && 
+                <ErrorComponent 
+                    error={decryptDebugCodeError}
+                    onReload={() => {
+                        setShowDebugCodeList(true)
+                        decryptDebugCode(debugCode)
+                    }}
+                />}
+
+
             {!(loadingStudentFeedback || getStudentFeedbackError) && studentFeedback && !showDebugCodeList &&
-            <List 
-
-            grid={{
-                gutter: 16,
-                column: 4
-            }}
-
-            dataSource={studentFeedback}
-
-            renderItem={(f, fi) => {
+            <Row>
+                {studentFeedback.map((f) => {
                 const {data, feedback} = f
+
+                const {Code, Base_ImageURL} = data
+
                 return(
-                    <List.Item>
-                        <Col> 
-                            <div className="feedback-box">
-                                <div className="feedback-box-internal">
-                                    <div className="question-info-section">
-                                        <p>{data.Code}</p>
+                        <Col xs={6}> 
+                            <Space className="hq-element-container hq-light-background" direction="vertical" align="start">
+                                <Space direction="vertical">
+                                    <Space direction="vertical" className="hq-full-width" align="center"> 
+                                        <Dropdown
+                                            menu={{
+                                                title:'Actions',
+                                                items:questionActionList(data)
+                                            }}
+                                        >
+                                            <p className="hoverable hoverable-plus">{Code}</p>
+                                        </Dropdown>
                                         <img
-                                            src = {data.Base_ImageURL}
+                                            src = {Base_ImageURL}
                                             alt="question"
-                                            className="question-image"
+                                            className="question-feedback-image"
                                         />
-                                    </div>
+                                    </Space>
                                     <Space 
                                     align="start" 
                                     className="sample-feedback-section" 
                                     onClick={() => {
                                         setShowViewFeedbackListModal(true)
                                         setSelectedQuestion(data)
-                                        getQuestionFeedback(data)
                                     }}
                                     >
                                             <div className="sample-feedback-icon">
@@ -168,13 +208,11 @@ export function StudentFeedback(){
                                             {feedback[0].FeedbackContent}
                                             </p>
                                     </Space>
-                                </div>
-                            </div>
-                        </Col>
-                    </List.Item>
-                )
-            }}
-            />}
+                                </Space>
+                            </Space>
+                        </Col>)
+            })}
+            </Row>}
 
             {loadingDebugCodeDecryption && <Spin tip="loading..."/>}
 
@@ -185,10 +223,14 @@ export function StudentFeedback(){
                 open={showViewFeedbackListModal}
                 onClose={()=> setShowViewFeedbackListModal(false)}
                 question={selectedQuestion}
-                
-                loading={loadingQuestionFeedback}
-                error={getQuestionFeedbackError}
-                data={questionFeedback}
+            />
+
+            <QuestionPlayPocket 
+                open={showPlayQuestionModal}
+                onClose={() => setShowPlayQuestionModal(false)}
+
+                Id={selectedQuestion.Id}
+                Type={selectedQuestion.Type}
             />
         </PagesWrapper>
     )

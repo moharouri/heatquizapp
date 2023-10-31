@@ -99,14 +99,12 @@ export function SendFeedback({open, onClose, question}){
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
 
         footer={
             <div>
-                    <p className="question-code">{question.Code}</p>
+                    <p className="default-totöe">{question.Code}</p>
                     <Space size={'large'} align="start">
                         <div>
                             <img

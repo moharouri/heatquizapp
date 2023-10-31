@@ -3,9 +3,10 @@ import React, {useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditTreeName({open, onClose, tree}){
-    const {loadingEditTree, getEditTreeError, editTree, getAllInterpretedTrees} = useInterpretedTrees()
+export function EditTreeName({open, onClose, tree, reloadData}){
+    const {loadingEditTree, editTree} = useInterpretedTrees()
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -15,13 +16,6 @@ export function EditTreeName({open, onClose, tree}){
         setNewName((tree || {}).Name)
     }, [open])
 
-    useEffect(() => {
-        if(getEditTreeError){
-            messageApi.destroy()
-            messageApi.error(getEditTreeError)
-        }
-    }, [getEditTreeError])
-
     return(
         <div>
             {contextHolder}
@@ -30,14 +24,12 @@ export function EditTreeName({open, onClose, tree}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <Form>
                     <Form.Item>
-                        <small>Updated name</small>
+                        <small className="default-gray">Updated name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -61,7 +53,10 @@ export function EditTreeName({open, onClose, tree}){
                         Name:newName
                        })
 
-                       editTree(VM).then(() => getAllInterpretedTrees())
+                       editTree(VM).then((r) => handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                        reloadData()
+                        onClose()
+                   }))
 
                     }}
                     loading = {loadingEditTree}

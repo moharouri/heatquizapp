@@ -1,13 +1,20 @@
-import { Button, Divider, Drawer, Row, Space } from "antd";
+import { Button, Drawer, Row, Space, Tooltip, message } from "antd";
 import React, {useEffect, useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { CompactQuestionComponent } from "../../Questions/SearchQuestionsList/CompactQuestionComponent";
+import { useSeries } from "../../../contexts/SeriesContext";
+import { handleResponse } from "../../../services/Auxillary";
 
-export function ReorderQuestionsInSeries({open, onClose, Series}){
+export function ReorderQuestionsInSeries({open, onClose, Series, reloadSeries}){
 
+    if(!open) return <div/>;
+
+    const {isLoadingRearrangeSeries, rearrangeSeries} = useSeries()
 
     const [movingIndex, setMovingIndex] = useState(null)
     const [selectedQuestions, setSelectedQuestions] = useState([])
+
+    const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
         if(!Series || !Series.Elements) return;
@@ -53,34 +60,37 @@ export function ReorderQuestionsInSeries({open, onClose, Series}){
                                     const isSelectedForMoving = (qi === movingIndex)
 
                                     return(
-                                    <p 
-                                    className={isSelectedForMoving ? "series-edit-view-element-selected-moving" : "series-edit-view-element-code"} 
-                                    onClick={() => {
-                                        if(movingIndex !== null){
-                                            if(isSelectedForMoving){
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>Click to select</p>}
+                                    >
+                                        <p 
+                                        className={"default-title hoverable " + (isSelectedForMoving ? "series-edit-view-element-selected-moving" : "series-edit-view-element-code")} 
+                                        onClick={() => {
+                                            if(movingIndex !== null){
+                                                if(isSelectedForMoving){
+                                                    setMovingIndex(null)
+                                                    return
+                                                }
+
+                                                const _selectedQuestions = [...selectedQuestions]
+                                                const finalSelectedQuestions = [...selectedQuestions]
+
+                                                const current= _selectedQuestions[movingIndex].Order
+                                                const other= _selectedQuestions[qi].Order
+
+                                                finalSelectedQuestions[movingIndex].Order = other
+                                                finalSelectedQuestions[qi].Order = current
+
+                                                setSelectedQuestions(finalSelectedQuestions)
                                                 setMovingIndex(null)
-                                                return
+
                                             }
-
-                                            const _selectedQuestions = [...selectedQuestions]
-                                            const finalSelectedQuestions = [...selectedQuestions]
-
-                                            const current= _selectedQuestions[movingIndex].Order
-                                            const other= _selectedQuestions[qi].Order
-
-                                            console.log(current, other, finalSelectedQuestions)
-
-                                            finalSelectedQuestions[movingIndex].Order = other
-                                            finalSelectedQuestions[qi].Order = current
-
-                                            setSelectedQuestions(finalSelectedQuestions)
-                                            setMovingIndex(null)
-
-                                        }
-                                        else{
-                                            setMovingIndex(qi)
-                                        }
-                                    }}>{i}{' '}{q.Code}</p>)
+                                            else{
+                                                setMovingIndex(qi)
+                                            }
+                                        }}>{i}{' '}{q.Code}</p>
+                                    </Tooltip>)
 
                                 }}
                             />
@@ -92,6 +102,8 @@ export function ReorderQuestionsInSeries({open, onClose, Series}){
     }
 
     return(
+        <div>
+            {contextHolder}
         <Drawer
         title={
             <Space size={'large'}>
@@ -101,8 +113,19 @@ export function ReorderQuestionsInSeries({open, onClose, Series}){
                     size='small'
                     type='primary'
                     onClick={() => {
-                        
+                        const VM = ({
+                            ...Series,
+                            Elements: selectedQuestions
+                        })
+
+                        rearrangeSeries(VM)
+                        .then((r) => handleResponse(r, api, 'Updated successfully', 1, () => {
+                            reloadSeries()
+                            onClose()
+                        }))
                     }}
+
+                    loading={isLoadingRearrangeSeries}
                 >
                         Update ordering
                 </Button>
@@ -154,13 +177,12 @@ export function ReorderQuestionsInSeries({open, onClose, Series}){
         width={'100%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         >
             {renderSelectedQuestions()}
         </Drawer>
+        </div>
     )
 }

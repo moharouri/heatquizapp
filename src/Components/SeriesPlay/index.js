@@ -20,12 +20,13 @@ import { useStudentFeedback } from "../../contexts/StudentFeedbackContext";
 import { SendFeedback } from "../../Pages/StudentFeedback/SendFeedback";
 import { useAuth } from "../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../ViewSolutionComponent";
+import { ErrorComponent } from "../ErrorComponent";
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
     const { 
-        isLoadingSeries, Series, getSeries,
+        isLoadingSeries, Series, getSeries, errorGetSeries,
         isLoadingSeriesStatistics, SeriesStatistics, getSeriesStatistics,
         postSeriesStatistic
     } = useSeries()
@@ -56,13 +57,16 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
     const [messageApi, contextHolder] = message.useMessage();
     const [notificationApi, notificationContextHolder] = notification.useNotification();
 
-
-    useEffect(() => {
+    const loadData = () => {
         getSeries(Code)
         setSeriesElements([])
         setCurrentIndex(0)
 
         setShowFinalPage(false)
+    }
+
+    useEffect(() => {
+       loadData()
     }, [Code])
 
     useEffect(() => {
@@ -156,7 +160,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
                     return(
                         <div key={e.Id}>
-                            <p >{ei + 1} {'- '} {Code}{' '} <span className="series-play-final-page-item-correct">{' '}{score.toFixed(0) + ' XP'}</span></p>
+                            <p >{ei + 1} {'- '} {Code}{' '} <span className="default-green">{' '}{score.toFixed(0) + ' XP'}</span></p>
                         </div>
                     )
                 })}
@@ -165,7 +169,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                     Total
                 </small>
 
-                <p className="series-play-final-page-item-correct">{totalScore.toFixed(0) + ' XP'}</p>
+                <p className="default-green">{totalScore.toFixed(0) + ' XP'}</p>
             </div>,
             duration: 0,
         })
@@ -451,10 +455,10 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                         latex={Latex}
                     />
                     <br/>
-                    <small className="series-play-final-page-item-gray-word">Your answer</small>
+                    <small className="default-gray">Your answer</small>
                     <LatexRenderer latex={"$$"+reducedLatex+"$$"} />
 
-                    <small className="series-play-final-page-item-gray-word">Correct answer(s)</small>
+                    <small className="default-gray">Correct answer(s)</small>
                     <List 
                         dataSource={correctAnswers}
                         renderItem={(a, ai) => {
@@ -735,11 +739,11 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                     <span>
                                     {Correct ? 
                                         <CheckCircleFilled
-                                        className="series-play-final-page-item-correct"
+                                        className="default-green"
                                         /> 
                                         : 
                                         <CloseCircleFilled
-                                        className="series-play-final-page-item-incorrect"
+                                        className="default-red"
                                         />
                                     }
                                     </span>
@@ -758,7 +762,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                             >
                                                 <Space size={'small'}>
                                                     <StarFilled 
-                                                        className="series-play-final-page-item-xp"
+                                                        className="default-orange"
                                                     />
                                                     <p>{score}</p>
                                                     {PDFURL && 
@@ -771,7 +775,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                                     <span><ClockCircleOutlined /> </span>
                                                     <p>{time} {''} <i>
                                                         <small
-                                                            className="series-play-final-page-item-gray-word"
+                                                            className="default-gray"
                                                         >
                                                         seconds
                                                         </small>
@@ -783,7 +787,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                             
                                             >
                                                 <small
-                                                    className="series-play-final-page-item-gray-word"
+                                                    className="default-gray"
                                                 >
                                                     How others performed
                                                 </small>
@@ -792,20 +796,20 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                                 {!isLoadingSeries && 
                                                 <div>
                                                      <p
-                                                         className="series-play-final-page-item-gray-word"
+                                                         className="default-gray"
                                                     >
                                                             Success rate
                                                     </p>
                                                     <Space size={'small'}>
                                                         <AreaChartOutlined  
-                                                            className="series-play-final-page-item-success-rate"
+                                                            className="default-green"
                                                         />
                                                         <p>{successPercentage}</p>
                                                         
                                                     </Space>   
                                                     <br/>
                                                     <p
-                                                         className="series-play-final-page-item-gray-word"
+                                                         className="default-gray"
                                                     >
                                                             Median play time
                                                     </p>
@@ -813,7 +817,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                                                         <span><ClockCircleOutlined /> </span>
                                                         <p>{medianPlayTime} {''} <i>
                                                             <small
-                                                                className="series-play-final-page-item-gray-word"
+                                                                className="default-gray"
                                                             >
                                                             seconds
                                                             </small>
@@ -874,6 +878,13 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
             {notificationContextHolder}
             {isLoadingSeries && <Skeleton />}
             {!isLoadingSeries && Series && renderSeries()}
+
+            {errorGetSeries && !isLoadingSeries && 
+                <ErrorComponent 
+                    error={errorGetSeries}
+                    onReload={() => loadData()}
+                />
+            }
 
             <QuestionPlayPocket 
                 open={showPlayQuestionModal}

@@ -9,24 +9,10 @@
 
 .search-datetime-section{
     width: 20vw;
-    margin-left: 1vw;
 }
 
 .search-datapool-section{
     width: 15vw;
-    margin-left: 1vw;
-}
-
-.fake-search-title{
-    color: white;
-}
-
-.stats-space-line{
-    align-items: flex-start;
-}
-
-.statistic-suffix{
-    color: gray;
 }
 
 .stats-block{
@@ -46,18 +32,6 @@
     width: 100%;
 }
 
-.list-item:hover{
-    background-color: whitesmoke;
-    cursor: pointer;
-    color: #0099cc;
-}
-
-.list-item-question-series{
-    flex-direction: column;
-    display: flex;
-    width: 100%;
-}
-
 .list-title{
     background-color: whitesmoke;
     width: 100%;
@@ -66,32 +40,11 @@
 
 
 .question-code-stats-line{
-    flex-direction: row;
-    display: flex;
-    justify-content: space-between;
     margin-bottom: 0.5vh;
 }
 
-.question-series-code-reports{
-    text-align: left;
-}
 
-.question-series-code-reports:hover{
-    background-color: whitesmoke;
-    cursor: pointer;
-    color: #0099cc;
-    padding-right: 0.25vw;
-    border-radius: 0.25em;
-    cursor: pointer;
-}
-
-.report-index{
-    padding-left: 0.125vw;
-    padding-right: 0.125vw;
-    color: rgba(0, 0, 0, 0.45);
-}
-
-.question-image{
+.report-question-image{
     width: 100%;
     height: 15vh;
     object-fit: contain;
@@ -110,19 +63,9 @@
 
 }
 
-.player-stats-line{
-    flex-direction: row;
-    display: flex;
-    justify-content: space-between;
-}
-
-.player-stats-name{
-    width: 20vw;
+.stats-name{
+    width: 15vw;
     text-align: left;
-}
-
-.player-star{
-    color: orange;
 }
 
 .player-stats-total-games{
@@ -142,13 +85,4 @@
     flex-direction: row;
     display: flex;
     justify-content: space-between;
-}
-
-.series-map-line-numbers{
-    flex-direction: row;
-    display: flex;
-}
-
-.series-map-line-numbers-value{
-    padding-right: 1vw;
 }

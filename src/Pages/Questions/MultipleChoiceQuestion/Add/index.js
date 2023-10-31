@@ -11,6 +11,7 @@ import { UploadImage } from "../../../../Components/UploadImage";
 import { SelectDefaultImage } from "../../../../Components/SelectDefaultImage";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { UploadPDF } from "../../../../Components/UploadPDF";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AddMutlipleChoiceQuestion(){
 
@@ -343,19 +344,7 @@ export function AddMutlipleChoiceQuestion(){
 
 
             addMultipleChoiceQuestion(data)
-            .then(
-                (r) => {
-                    const {Id} = r
-                    
-                    if(Id){
-                        api.destroy()
-                        api.success('Question added successfully', 1)
-                    }
-                    else{
-                        api.destroy()
-                        api.error(r)
-                    }
-            })
+            .then(r => handleResponse(r, api, 'Question added successfully', 1))
 
 
         }

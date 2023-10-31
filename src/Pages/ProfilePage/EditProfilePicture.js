@@ -2,18 +2,16 @@ import { Button, Drawer, Spin, message } from "antd";
 import React, {useState } from "react"
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
 import Dragger from "antd/es/upload/Dragger";
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../services/Auxillary";
 import { useUsers } from "../../contexts/UsersContext";
 
-export function EditProfilePicture({username, open, onClose}){
+export function EditProfilePicture({username, open, onClose, reloadData}){
 
     const [loadingImage, setLoadingImage] = useState(false);
     const [newImage, setNewImage] = useState(null);
     const [newImageURL, setNewImageURL] = useState(null);
 
-    const {loadingEditProfilePicture,
-        getEditProfilePictureError,
-        updateUserProfilePicture} = useUsers()
+    const {loadingEditProfilePicture, updateUserProfilePicture} = useUsers()
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -84,12 +82,12 @@ export function EditProfilePicture({username, open, onClose}){
                    data.append('Username', username)
                    data.append('Picture', newImage)
 
-                   updateUserProfilePicture(data).then(() => {
-                        if(getEditProfilePictureError){
-                            messageApi.destroy()
-                            messageApi.error(getEditProfilePictureError)
-                        }
-                   })
+                   updateUserProfilePicture(data)
+                   .then((r) => 
+                   handleResponse(r, messageApi, 'Picture updated successfully', 1, () => {
+                    onClose()
+                    reloadData()
+                    }))
 
                 }}
                 loading = {loadingEditProfilePicture}

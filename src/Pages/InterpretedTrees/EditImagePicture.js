@@ -1,29 +1,21 @@
 import { Button, Divider, Drawer, Spin, message } from "antd";
-import React, {useEffect, useState } from "react"
+import React, {useState } from "react"
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
 
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../services/Auxillary";
 import Dragger from "antd/es/upload/Dragger";
 
 import { useInterpretedTrees } from "../../contexts/InterpretedTreesContext";
 
-export function EditImagePicture({open, onClose, node}){
+export function EditImagePicture({open, onClose, node, reloadData}){
     console.log(node)
-    const {loadingEditImagePicture, getEditImagePictureError, editImagePicture, getAllInterpretedTrees} = useInterpretedTrees()
+    const {loadingEditImagePicture, editImagePicture} = useInterpretedTrees()
     
     const [messageApi, contextHolder] = message.useMessage();
     
     const [loadingImage, setLoadingImage] = useState(false);
     const [newImage, setNewImage] = useState(null);
     const [newImageURL, setNewImageURL] = useState(null);
-
-
-    useEffect(() => {
-        if(getEditImagePictureError){
-            messageApi.destroy()
-            messageApi.error(getEditImagePictureError)
-        }
-    }, [getEditImagePictureError])
 
     const handleChange = (info) => {
         if (info.file.status === 'uploading') {
@@ -50,9 +42,7 @@ export function EditImagePicture({open, onClose, node}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <div className="tree-picture-uploader">
@@ -73,7 +63,7 @@ export function EditImagePicture({open, onClose, node}){
                         <img 
                             src={newImageURL}
                             className="new-tree-picture"
-                            alt="course"
+                            alt="tree"
                         />}
                     </Dragger>
                 </div>
@@ -93,7 +83,11 @@ export function EditImagePicture({open, onClose, node}){
                         data.append('Picture', newImage)
                         data.append('ImageId', node.Id)
 
-                        editImagePicture(data).then(() => getAllInterpretedTrees())
+                        editImagePicture(data)
+                        .then((r) => handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                       }))
 
                         
                     }}
@@ -102,8 +96,8 @@ export function EditImagePicture({open, onClose, node}){
                 Update
                 </Button>
                 <Divider />
-                <small className="edit-image-tree-node-word">Node </small>
-                <p className="edit-image-tree-node-code">
+                <small className="default-gray">Node </small>
+                <p className="default-title">
                     {(node || {}).Code} 
                 </p>
             </Drawer>

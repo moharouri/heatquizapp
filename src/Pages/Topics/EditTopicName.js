@@ -2,16 +2,20 @@ import { Button, Drawer, Form, Input, message } from "antd";
 import React, { useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useTopics } from "../../contexts/TopicsContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditTopicName({open, onClose, topic}){
+export function EditTopicName({open, onClose, topic, reloadData}){
+    
     const [messageApi, contextHolder] = message.useMessage();
 
-    const {loadingEditName, getEditNameError, updateTopicName} = useTopics()
+    const {loadingEditName, updateTopicName} = useTopics()
 
     const [newName, setNewName] = useState('')
 
     useEffect(() => {   
-        setNewName(topic.Name)
+        if(open){
+            setNewName(topic.Name)
+        }
     }, [open])
 
     return(
@@ -22,14 +26,12 @@ export function EditTopicName({open, onClose, topic}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -41,6 +43,7 @@ export function EditTopicName({open, onClose, topic}){
                 </Form>
                 <Button 
                     type="primary" 
+                    size="small"
                     onClick={() => {
                         if(!newName.trim()){
                             messageApi.destroy()
@@ -53,12 +56,11 @@ export function EditTopicName({open, onClose, topic}){
                             Name: newName
                         })
 
-                        updateTopicName(VM).then(() => {
-                            if(getEditNameError){
-                                messageApi.destroy()
-                                messageApi.error(getEditNameError)
-                            }
-                        })
+                        updateTopicName(VM).then((r) => 
+                        handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                        }))
 
                         
                     }}

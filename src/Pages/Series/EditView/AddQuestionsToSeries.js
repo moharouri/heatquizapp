@@ -7,6 +7,7 @@ import { CompactQuestionComponent } from "../../Questions/SearchQuestionsList/Co
 import {DeleteOutlined} from '@ant-design/icons';
 import { QUESTION_TYPES_SEARCH_NAMES } from "../../Questions/List/constants";
 import { useSeries } from "../../../contexts/SeriesContext";
+import { handleResponse } from "../../../services/Auxillary";
 
 export function AddQuestionsToSeries({open, onClose, Series, reloadSeries, selectedQuestions, onSelectQuestions}){
     if(!open) return <div/>;
@@ -86,7 +87,7 @@ export function AddQuestionsToSeries({open, onClose, Series, reloadSeries, selec
         return(
             <div>
                 
-                {selectedQuestions.length &&
+                {selectedQuestions.length ?
                 <Space 
                 className="series-edit-view-add-questions"
                 size={'large'}>
@@ -176,28 +177,17 @@ export function AddQuestionsToSeries({open, onClose, Series, reloadSeries, selec
 
                                 addQuestionsToSeries(VM)
                                 .then(
-                                    (r) => {
-                                        const {Id} = r
-                                        
-                                        if(Id){
-                                            api.destroy()
-                                            api.success('Series added successfully', 1)
-                                            .then(() => {
-                                                reloadSeries()
-                                                onClose()
-                                            })
-                                        }
-                                        else{
-                                            api.destroy()
-                                            api.error(r)
-                                        }
-                                })
+                                    (r) => 
+                                    handleResponse(r, api, 'Questions added successfully', 1, () => {
+                                        reloadSeries()
+                                        onClose()
+                                    }))
                             }}
                         >
                             Add questions
                         </Button>
                     </Space>
-                </Space>}
+                </Space> : <div/>}
 
                 <Divider/>
 
@@ -309,9 +299,7 @@ export function AddQuestionsToSeries({open, onClose, Series, reloadSeries, selec
             width={'100%'}
             onClose={onClose}
             open={open}
-            bodyStyle={{
-            paddingBottom: 80,
-            }}
+            bodyStyle={{}}
             closeIcon={<ArrowLeftOutlined />}
             maskClosable={false}
             >

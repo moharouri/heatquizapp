@@ -60,7 +60,7 @@ export function UploadImage({className, classNameImage, imageURL, onSetImage, re
 
             {removable && imageURL &&
                 <Space direction="vertical" align="center">
-                    <small className="default-gray default-clickable" onClick={() => onSetImage(null, null)}>Remove</small>
+                    <small className="default-gray hq-clickable" onClick={() => onSetImage(null, null)}>Remove</small>
                 </Space>}
         </Tooltip>
     </div>

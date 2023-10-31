@@ -2,14 +2,13 @@ import { Button, Divider, Drawer, Form, Input, Spin, message } from "antd";
 import React, {useState } from "react"
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
 
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../services/Auxillary";
 import Dragger from "antd/es/upload/Dragger";
 
-import './AddImageTree.css'
 import { useClickTrees } from "../../contexts/ClickTreesContext";
 
-export function AddImageTree({open, onClose, baseTree}){
-    const {loadingAddImageTree, getAddImageTreeError, addImageTree, getAllClickTrees} = useClickTrees()
+export function AddImageTree({open, onClose, baseTree, reloadData}){
+    const {loadingAddImageTree, addImageTree} = useClickTrees()
 
 
     const [messageApi, contextHolder] = message.useMessage();
@@ -44,9 +43,7 @@ export function AddImageTree({open, onClose, baseTree}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <div className="tree-picture-uploader">
@@ -67,14 +64,14 @@ export function AddImageTree({open, onClose, baseTree}){
                         <img 
                             src={newImageURL}
                             className="new-tree-picture"
-                            alt="course"
+                            alt="tree"
                         />}
                     </Dragger>
                 </div>
                 <br/>
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -104,18 +101,11 @@ export function AddImageTree({open, onClose, baseTree}){
                        data.append('Picture', newImage)
                        data.append('GroupId', baseTree.Id)
 
-                       addImageTree(data).then(() => {
-
-                            if(getAddImageTreeError){
-                                messageApi.destroy()
-                                messageApi.error(getAddImageTreeError)
-                            }
-                            else{
-                                getAllClickTrees()
-                            }
-
-                       })
-
+                       addImageTree(data).then((r) => 
+                        handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                        }))
                         
                     }}
                     loading = {loadingAddImageTree}
@@ -123,8 +113,8 @@ export function AddImageTree({open, onClose, baseTree}){
                 Add
                 </Button>
                 <Divider />
-                <small className="add-image-tree-tree-word">Tree </small>
-                <p className="tree-name-add-image-tree">
+                <small className="default-gray">Tree </small>
+                <p className="default-title">
                     {(baseTree || {}).Name} 
                 </p>
             </Drawer>

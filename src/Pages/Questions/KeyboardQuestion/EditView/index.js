@@ -10,6 +10,7 @@ import { EditQuestionLatex } from "./EditQuestionLatex";
 import { EditQuestionImage } from "./EditQuestionImage";
 import { ViewWrongAnswers } from "./ViewWrongAnswers";
 import { AddNewAnswer } from "./AddNewAnswer";
+import { handleResponse } from "../../../../services/Auxillary";
 
 
 export function KeyboardQuestionEditView({reloadQuestion}){
@@ -52,7 +53,7 @@ export function KeyboardQuestionEditView({reloadQuestion}){
                         direction="vertical"
                     >
                         <Space align="start" size={'large'}>
-                            <p className="question-edit-view-gray">Question</p>
+                            <p className="default-gray">Question</p>
 
                             <LatexRenderer 
                                 latex={Latex}
@@ -60,15 +61,15 @@ export function KeyboardQuestionEditView({reloadQuestion}){
                         </Space>    
 
                         <Space align="start" size={'large'}>
-                            <p className="question-edit-view-gray">Keyboard</p>
+                            <p className="default-gray">Keyboard</p>
 
-                            <p className="question-edit-view-gray">{keyboardName}</p>
-                            {IsEnergyBalance && <p className="keyboard-question-edit-view-orange">Energy balance question</p>}
-                            {DisableDevision && <p className="keyboard-question-edit-view-orange">Division disabled</p>}
+                            <p className="default-gray">{keyboardName}</p>
+                            {IsEnergyBalance && <p className="default-orange">Energy balance question</p>}
+                            {DisableDevision && <p className="default-orange">Division disabled</p>}
                         </Space>  
 
                          <Space align="start" size={'large'}>
-                            <p className="question-edit-view-gray">Answers</p>
+                            <p className="default-gray">Answers</p>
 
                             <List 
                                 dataSource={Answers}
@@ -99,20 +100,8 @@ export function KeyboardQuestionEditView({reloadQuestion}){
                                                             })
 
                                                             removeKeyboardQuestionAnswer(VM)
-                                                            .then(
-                                                                (r) => {
-                                                                    const {Id} = r
-                                                                    
-                                                                    if(Id){
-                                                                        api.destroy()
-                                                                        api.success('Answer removed successfully', 1)
-                                                                        .then(() => reloadQuestion())
-                                                                    }
-                                                                    else{
-                                                                        api.destroy()
-                                                                        api.error(r)
-                                                                    }
-                                                            })
+                                                            .then(r => handleResponse(r, api, 'Answer removed successfully', 1, () => reloadQuestion()))
+                                                            
                                                         }}
                                                         onCancel={() => {}}
                                                         okText="Yes"
@@ -121,7 +110,7 @@ export function KeyboardQuestionEditView({reloadQuestion}){
                                                     >
                                                         <Button
                                                             size="small"
-                                                            className="keyboard-question-edit-view-answer-btn"
+                                                            className="hq-full-width"
                                                             loading={isLoadingRemoveKeyboardQuestionAnswer}
                                                             >
                                                             Remove answer 

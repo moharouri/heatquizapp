@@ -66,19 +66,13 @@ export function AssignBadgesToElement({open, onClose, system, map, reloadMap}){
                             assignBadgeSystemToElement(data)
                             .then(r => handleResponse(
                                 r,
+                                api,
+                                'Assigned successfuly',
+                                1,
                                 () => {
-                                    api.destroy()
-                                    api.success('Assigned successfuly')
-        
                                     reloadMap()
                                     onClose()
-                                },
-        
-                                () => {
-                                    api.destroy()
-                                    api.error(r)
-                                }
-                            ))
+                                }))
                         }}
 
                         loading={loadingAssignBadgeSystemToElement}

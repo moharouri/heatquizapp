@@ -1,24 +1,34 @@
-import {Divider, Drawer, Dropdown, List} from "antd";
+import {Divider, Drawer, Dropdown, List, Space} from "antd";
 import React from "react"
 import {ArrowLeftOutlined, EditOutlined, TrophyOutlined} from '@ant-design/icons';
+import { useNavigate } from "react-router-dom";
+import { QuestionPlayPocket } from "../Questions/QuestionPlayPocket/QuestionPlayPocket";
+import { useState } from "react";
 
-import './ViewSubtopicQuestions.css'
-
-export function ViewSubtopicQuestions({open, onClose, subtopic}){
+export function ViewSubtopicQuestions({open, onClose, subtopic, reloadData}){
 
     if(!open) return <div/>;
+
+    const navigate = useNavigate()
+
+    const [selectedQuestion, setSelectedQuestion] = useState({})
+    const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
+
 
     const questionActionList = (q) => [{
         key: 'view_edit_question',
         label: 'View edit question',
         icon: <EditOutlined/>,
-        onClick: () => {}
+        onClick: () => navigate('/question_view_edit/'+q.Id+'/'+q.Type)
     },
     {
         key: 'play_question',
         label: 'Play question',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => {
+            setSelectedQuestion(q)
+            setShowPlayQuestionModal(true)
+        }
     }]
 
     return(
@@ -44,10 +54,8 @@ export function ViewSubtopicQuestions({open, onClose, subtopic}){
                                         title:'Actions'
                                     }}
                                 >
-                                    <p className="question-code-subtopic-view-questions">
-                                        <span 
-                                        className="question-index-subtopic-view-questions"
-                                        >{qi+1}</span>
+                                    <p className="default-gray hoverable-plus">
+                                        <span className="default-gray">{qi+1}{' '}</span>
                                         {q.Code}
                                     </p>
                                 </Dropdown>
@@ -62,13 +70,23 @@ export function ViewSubtopicQuestions({open, onClose, subtopic}){
                     />
                 </div>
                 <Divider />
-                <p className="topic-name-view-question-modal">
-                    {subtopic.Topic.Name} 
-                    <span className="subtopic-name-view-question-modal">
-                        {subtopic.Name}
-                    </span>
-                </p>
+                <Space>
+                    <p className="default-gray">
+                        {subtopic.Topic.Name} 
+                    </p>
+                    <p className="default-title">
+                            {subtopic.Name}
+                    </p>
+                </Space>
             </Drawer>
+
+            <QuestionPlayPocket 
+                open={showPlayQuestionModal}
+                onClose={() => setShowPlayQuestionModal(false)}
+
+                Id={selectedQuestion.Id}
+                Type={selectedQuestion.Type}
+            />
         </div>
     )
 }

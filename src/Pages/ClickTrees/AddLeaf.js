@@ -2,14 +2,13 @@ import { Button, Divider, Drawer, Form, Input, Spin, message } from "antd";
 import React, {useState } from "react"
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
 
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../services/Auxillary";
 import Dragger from "antd/es/upload/Dragger";
 
-import './AddImageTree.css'
 import { useClickTrees } from "../../contexts/ClickTreesContext";
 
-export function AddLeaf({open, onClose, baseTree, baseImage}){
-    const {loadingAddImageTree, getAddImageTreeError, addImageTree, getAllClickTrees} = useClickTrees()
+export function AddLeaf({open, onClose, baseTree, baseImage, reloadData}){
+    const {loadingAddImageTree, addImageTree} = useClickTrees()
 
 
     const [messageApi, contextHolder] = message.useMessage();
@@ -44,9 +43,7 @@ export function AddLeaf({open, onClose, baseTree, baseImage}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <div className="tree-picture-uploader">
@@ -74,7 +71,7 @@ export function AddLeaf({open, onClose, baseTree, baseImage}){
                 <br/>
                 <Form>
                     <Form.Item>
-                        <small>Name</small>
+                        <small className="default-gray">Name</small>
                         <Input 
                         placeholder="New name"
                         value={newName}
@@ -106,27 +103,19 @@ export function AddLeaf({open, onClose, baseTree, baseImage}){
                        data.append('RootId', baseImage.Id)
 
 
-                       addImageTree(data).then(() => {
-
-                            if(getAddImageTreeError){
-                                messageApi.destroy()
-                                messageApi.error(getAddImageTreeError)
-                            }
-                            else{
-                                getAllClickTrees()
-                            }
-
-                       })
-
-                        
+                       addImageTree(data).then((r) =>
+                       handleResponse(r, messageApi, 'Added successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                       }))                        
                     }}
                     loading = {loadingAddImageTree}
                 >
                 Add
                 </Button>
                 <Divider />
-                <small className="subtopic-name-topic-word">Tree {' / '} base image</small>
-                <p className="topic-name-add-subtopic">
+                <small className="default-gray">Tree {' / '} base image</small>
+                <p className="default-title">
                     {(baseTree || {}).Name} {' / '} {(baseImage ||{}).Name}
                 </p>
             </Drawer>

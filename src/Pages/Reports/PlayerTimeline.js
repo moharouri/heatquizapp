@@ -4,6 +4,10 @@ import {ArrowLeftOutlined, InsertRowLeftOutlined, SolutionOutlined, EditOutlined
 import { useReports } from "../../contexts/ReportsContext";
 import './PlayerTimeline.css'
 import { beautifyDatetime } from "../../services/Auxillary";
+import { useNavigate } from "react-router-dom";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { QuestionPlayPocket } from "../Questions/QuestionPlayPocket/QuestionPlayPocket";
+import { SeriesPlayPocket } from "../Series/Play/SeriesPlayPocket";
 
 const QUESTION_TYPE = 0
 const SERIES_TYPE = 2
@@ -11,16 +15,27 @@ const SERIES_TYPE = 2
 export function PlayerTimeline({open, onClose, selectedPlayer}){
 
     const {
-        loadingPlayerTimelineReport,
-        playerTimelineReport,
+        loadingPlayerTimelineReport, getPlayerTimelineReportError, playerTimelineReport, getPlayerTimelineReport
     } = useReports()
+
+    const navigate = useNavigate()
 
     const [seriesRefs, setSeriesRefs] = useState([])
     const [currentSeriesIndex, setCurrentSeriesIndex] = useState(1)
 
+    const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
+    const [selectedQuestion, setSelectedQuestion] = useState(false)
+
+    const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
+    const [selectedSeries, setSelectedSeries] = useState({Code:''})
+
+    const {player} = selectedPlayer
+
     useEffect(() => {
         setSeriesRefs([])
         setCurrentSeriesIndex(1)
+
+        getPlayerTimelineReport(selectedPlayer)
 
     }, [open])
 
@@ -34,8 +49,6 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                 const newRef = React.createRef()
                 newSeriesRefs.push(newRef)
             })
-
-
         }
        
         setSeriesRefs(newSeriesRefs)
@@ -45,7 +58,6 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
 
 
     const onSeriesChange = (p) => {
-        console.log(seriesRefs[p-1])
         seriesRefs[p-1]
         .current.scrollIntoView({
             behavior: "smooth",
@@ -60,34 +72,40 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
         key: 'view_edit_question',
         label: 'View edit question',
         icon: <EditOutlined/>,
-        onClick: () => {}
+        onClick: () => navigate('/question_view_edit/'+q.Id+'/'+q.Type)
     },
     {
         key: 'play_question',
         label: 'Play question',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => {
+            setSelectedQuestion(q)
+            setShowPlayQuestionModal(true)
+        }
     }]
 
-    const seriesActionList = (q) => [{
+    const seriesActionList = (s) => [{
         key: 'view_edit_series',
         label: 'View edit series',
         icon: <EditOutlined/>,
-        onClick: () => {}
+        onClick: () => navigate('/series_edit_view/'+s.Code)
     },
     {
         key: 'play_series',
         label: 'Play series',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => {
+            setShowPlaySeriesModal(true)
+            setSelectedSeries(s)
+        }
     }]
     
     return(
         <div>
             <Drawer
                 title={
-                <div className="player-timeline-header">
-                    <p>Player timeline:  {' ' + selectedPlayer}</p>
+                <div className="hq-opposite-arrangement">
+                    <p>Player timeline:  {' ' + player}</p>
 
                     {seriesRefs.length && 
                     <Space size={'middle'}>
@@ -105,13 +123,19 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >
             {loadingPlayerTimelineReport && <Spin/>}
-            <div className="timeline-container">
+
+            {getPlayerTimelineReportError && !loadingPlayerTimelineReport && 
+                <ErrorComponent 
+                    error={getPlayerTimelineReportError}
+                    onReload={() => getPlayerTimelineReport(selectedPlayer)}
+                />
+            }
+
+            <div>
             {!loadingPlayerTimelineReport && playerTimelineReport && 
                 <Timeline 
                     items={playerTimelineReport.map((r, ri) => {
@@ -132,7 +156,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                 color: Correct ? 'green' : 'red',
                                 children: (
                                     <>
-                                        <div className="player-timeline-info-line">
+                                        <div className="hq-opposite-arrangement">
                                             <div>
                                                 
                                                 <Dropdown
@@ -144,7 +168,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                                         title:'Actions'
                                                     }}
                                                 >
-                                                    <p className="player-timeline-code">{QuestionCode}</p>
+                                                    <p className="default-title hoverable">{QuestionCode}</p>
                                                 </Dropdown>
                                                 <small className="player-timeline-datetime-score">
                                                     {Score} 
@@ -155,7 +179,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                                 <p className="player-timeline-datetime-score">{beautifyDatetime(DateCreated)}</p>
                                                 {MapKey && 
                                                 <Space size={'small'}>
-                                                        <SolutionOutlined className="player-timeline-map-key"/>
+                                                        <SolutionOutlined className="default-orange"/>
                                                         <small className="player-timeline-datetime-score">
                                                             {MapKey}
                                                         </small>
@@ -183,7 +207,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                         ref={seriesRefs[seriesIndex]}
                                         className="player-timeline-series-line"
                                     >
-                                        <div className="player-timeline-info-line">
+                                        <div className="hq-opposite-arrangement">
                                             <div>
                                                 <Dropdown
                                                     menu={{
@@ -194,7 +218,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                                         title:'Actions'
                                                     }}
                                                 >
-                                                <p className="player-timeline-code">{SeriesCode}</p>
+                                                <p className="default-title hoverable">{SeriesCode}</p>
                                                 </Dropdown>
                                                 <small className="player-timeline-datetime-score">
                                                     {Score} 
@@ -205,7 +229,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                                 <p className="player-timeline-datetime-score">{beautifyDatetime(DateCreated)}</p>
                                                 {MapKey && 
                                                 <Space size={'small'}>
-                                                        <SolutionOutlined className="player-timeline-map-key" />
+                                                        <SolutionOutlined className="default-orange" />
                                                         <small className="player-timeline-datetime-score">
                                                             {MapKey}
                                                         </small>
@@ -214,7 +238,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                                                 
                                             </div>
                                         </div>
-                                        <div className="player-timeline-info-line">
+                                        <div className="hq-opposite-arrangement">
                                             <p>{Map} {' / '} {MapElement}</p>
                                         </div>
                                         <br/>
@@ -227,7 +251,21 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                 />
             }
             </div>
-        </Drawer>
+            </Drawer>
+
+            <QuestionPlayPocket 
+                open={showPlayQuestionModal}
+                onClose={() => setShowPlayQuestionModal(false)}
+
+                Id={selectedQuestion.Id}
+                Type={selectedQuestion.Type}
+            />
+
+            <SeriesPlayPocket 
+                open={showPlaySeriesModal}
+                onClose={() => setShowPlaySeriesModal(false)}
+                Code={selectedSeries.Code}
+            />
         </div>
     )
 }

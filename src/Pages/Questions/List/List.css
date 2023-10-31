@@ -91,16 +91,6 @@
     width: 20vw;
 }
 
-.question-list-item-code{
-    color: #0275d8;
-    width: fit-content;
-}
-
-.question-list-item-index{
-    color: #777;
-    padding-left: 0.125vw;
-    padding-right: 0.125vw;
-}
 
 .question-list-item-code:hover{
     padding-left: 0.125vw;
@@ -110,15 +100,6 @@
     cursor: pointer;
     width: fit-content;
 }
-
-.question-list-item-code-adder-date-stats{
-    color: #777;
-}
-
-.question-list-item-code-adder-date-stats-red{
-    color:red;
-}
-
 
 .question-list-item-img{
     height: 25vh;
@@ -134,8 +115,4 @@
     display: flex;
     padding-left: 0.125vw;
     padding-right: 0.125vw;
-}
-
-.question-list-item-play-numbers-correct{
-    color: green;
 }

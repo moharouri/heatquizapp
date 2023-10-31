@@ -1,28 +1,20 @@
 import { Button, Divider, Drawer, Spin, message } from "antd";
-import React, {useEffect, useState } from "react"
+import React, {useState } from "react"
 import {ArrowLeftOutlined, InboxOutlined} from '@ant-design/icons';
 
-import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64 } from "../../services/Auxillary";
+import { ALLOWED_IMAGE_EXTENSIONS, dummyRequest, getBase64, handleResponse } from "../../services/Auxillary";
 import Dragger from "antd/es/upload/Dragger";
 
-import './EditNodeImage.css'
 import { useClickTrees } from "../../contexts/ClickTreesContext";
 
-export function EditNodeImage({open, onClose, node}){
-    const {loadingEditNode, getEditNodeError, editNode, getAllClickTrees} = useClickTrees()
+export function EditNodeImage({open, onClose, node, reloadData}){
+    const {loadingEditNode, editNode} = useClickTrees()
 
     const [messageApi, contextHolder] = message.useMessage();
     
     const [loadingImage, setLoadingImage] = useState(false);
     const [newImage, setNewImage] = useState(null);
     const [newImageURL, setNewImageURL] = useState(null);
-
-    useEffect(() => {
-        if(getEditNodeError){
-            messageApi.destroy()
-            messageApi.error(getEditNodeError)
-        }
-    }, [getEditNodeError])
 
     const handleChange = (info) => {
         if (info.file.status === 'uploading') {
@@ -48,9 +40,7 @@ export function EditNodeImage({open, onClose, node}){
                 width={'50%'}
                 onClose={onClose}
                 open={open}
-                bodyStyle={{
-                paddingBottom: 80,
-                }}
+                bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >   
                 <div className="tree-picture-uploader">
@@ -71,7 +61,7 @@ export function EditNodeImage({open, onClose, node}){
                         <img 
                             src={newImageURL}
                             className="new-tree-picture"
-                            alt="course"
+                            alt="tree"
                         />}
                     </Dragger>
                 </div>
@@ -94,7 +84,11 @@ export function EditNodeImage({open, onClose, node}){
                        data.append('Picture', newImage)
                        data.append('SameImage', false)
 
-                       editNode(data).then(() => getAllClickTrees())
+                       editNode(data)
+                       .then((r) => handleResponse(r, messageApi, 'Updated successfully', 1, () => {
+                            reloadData()
+                            onClose()
+                       }))
                         
                     }}
                     loading = {loadingEditNode}
@@ -102,8 +96,8 @@ export function EditNodeImage({open, onClose, node}){
                 Update
                 </Button>
                 <Divider />
-                <small className="add-image-tree-tree-word">Node </small>
-                <p className="tree-name-add-image-tree">
+                <small className="default-gray">Node </small>
+                <p className="default-title">
                     {(node || {}).Name} 
                 </p>
             </Drawer>

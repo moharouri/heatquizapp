@@ -67,6 +67,10 @@
     color: white;
 }
 
+.default-orange{
+    color: orange;
+}
+
 .default-large{
     font-size: large;
 }
@@ -94,6 +98,14 @@
 
 .hq-clickable{
     cursor: pointer;
+}
+
+.hq-normal-font-weight{
+    font-weight: normal;
+}
+
+.hq-bold-font-weight{
+    font-weight: bold;
 }
 
 .please-select-area{
@@ -209,3 +221,18 @@
     background-color: whitesmoke;
 }
 
+.hq-light-background{
+    background-color: rgb(253, 253, 253);
+}
+
+.hq-upload-img{
+    height: 20vh;
+    width: 100%;
+    object-fit: contain;
+}
+
+.hq-img-size-1{
+    object-fit: contain;
+    height: 20vh;
+    width: 100%;
+}

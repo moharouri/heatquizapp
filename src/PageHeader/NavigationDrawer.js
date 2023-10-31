@@ -113,6 +113,37 @@ const NavigationDrawer = () => {
         icon: <ControlTwoTone     style={{...iconStyle}}/>
     },    
     {
+        label:'Keyboards',
+        children:[
+        {
+            label:'Keyboards list',
+            key:'/keyboards_list',
+            icon:<DatabaseTwoTone style={{...iconStyle}}/>
+        },
+        {
+            label:'Keyboard',
+            key:'/add_keyboard',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Key lists',
+            key:'/key_list_list',
+            icon:<DatabaseTwoTone style={{...iconStyle}}/>
+        },
+        {
+            label:'Keys',
+            key:'/keys_list',
+            icon:<DatabaseTwoTone style={{...iconStyle}}/>
+        },
+        {
+            label:'Key',
+            key:'/add_key',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        ],
+        type:'group'
+    },    
+    {
         label:'Questions',
         children:[
         {
@@ -146,6 +177,22 @@ const NavigationDrawer = () => {
             key:'/add_series',
             icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
+        ],
+        type:'group'
+    }, 
+    {
+        label:'Auxilliary',
+        children:[
+            {
+                label:'Map click images',
+                key:'/map_click_images_list',
+                icon:<DatabaseTwoTone style={{...iconStyle}}/>
+            },
+            {
+                label:'Question explanations',
+                key:'/information_list',
+                icon:<DatabaseTwoTone style={{...iconStyle}}/>
+            },
         ],
         type:'group'
     }

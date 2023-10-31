@@ -1,4 +1,4 @@
-import {Button, Drawer, Space, message, Form, Input, Select, Switch} from "antd";
+import {Button, Drawer, Space, message, Form, Input, Switch} from "antd";
 import React, { useEffect, useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useMaps } from "../../../../contexts/MapsContext";
@@ -117,15 +117,12 @@ export function EditMapBasicInfo({open, onClose, map, reloadMap}){
                     .then(r => 
                         handleResponse(
                             r,
+                            api,
+                            'Updated successfuly',
+                            1,
                             () => {
-                                api.destroy()
-                                api.success('Update successful', 1)
                                 reloadMap()
                                 onClose()
-                            },
-                            () => {
-                                api.destroy()
-                                api.error(r)
                             })) 
                 }}
 

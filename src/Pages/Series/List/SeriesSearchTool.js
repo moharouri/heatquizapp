@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
 import './List.css'
 import { useState } from "react";
-import { Button, Col, Input, Row, Select, Space, Spin, Switch, message } from "antd";
+import { Button, Col, Input, Row, Select, Space, Spin, Switch } from "antd";
 import { useSeries } from "../../../contexts/SeriesContext";
 import { GetPagesArray } from "../../../services/Auxillary";
 import { useDatapools } from "../../../contexts/DatapoolsContext";
 
 export function SeriesSearchTool({onSetFirstIndex}){
-    const {isLoadingSeriesAdders, errorGetSeriesAdders, SeriesAdders, getSeriesAdders,
-        isLoadingSeriesQuery, errorGetSeriesQuery, SeriesQuery, searchSeries,
-        isLoadingSeriesByIdsQuery, errorGetSeriesByIdsQuery, SeriesByIdsQuery, searchSeriesByIds
+    const {isLoadingSeriesAdders, SeriesAdders, getSeriesAdders,
+        isLoadingSeriesQuery, SeriesQuery, searchSeries,
     } = useSeries() 
 
     const {selectedDatapool} = useDatapools()
@@ -23,12 +22,11 @@ export function SeriesSearchTool({onSetFirstIndex}){
 
     const [getUnusedSeries, setGetUnusedSeries] = useState(false)
 
-    const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
         setGetUnusedSeries(false)
         setSelectedPage(1)
-    })
+    }, [])
 
     useEffect(() => {
         getSeriesAdders()
@@ -69,7 +67,7 @@ export function SeriesSearchTool({onSetFirstIndex}){
     const renderPagesCols = () => {
         const {Codes, NumberOfSeries, SeriesIds} = SeriesQuery
         const pageCols = GetPagesArray(NumberOfSeries, selectedPerPage, Codes)
-
+        console.log(selectedPage)
         return(
             <div>
                 <Row
@@ -79,17 +77,18 @@ export function SeriesSearchTool({onSetFirstIndex}){
                     {pageCols.map((c, ci) => 
                     <Col 
                         key={ci}
-                        className={(selectedPage === ci+1) ? "pages-single-col-selected" : "pages-single-col"}
+                        className={(selectedPage === (ci+1)) ? "pages-single-col-selected" : "pages-single-col"}
 
                         onClick={() => {
+                            console.log(ci)
                             setSelectedPage(ci+1)
                             onSetFirstIndex(ci*selectedPerPage)
 
                             const Ids = SeriesIds.slice(ci*selectedPerPage, (ci + 1)*selectedPerPage)
 
-                            const VM = ({Ids})
+                            const VM = ({Ids, Codes, NumberOfSeries, SeriesIds})
 
-                            searchSeriesByIds(VM)
+                            searchSeries(VM, true)
                         }}
                     >
                         <p className="pages-single-value">{c.Index + ' ' + c.Character}</p>
@@ -103,7 +102,6 @@ export function SeriesSearchTool({onSetFirstIndex}){
 
     return(
         <div className="series-search-container">
-            {contextHolder}
             <div className="series-search-inner-container">
                 <Row
                     gutter={12}
@@ -179,13 +177,6 @@ export function SeriesSearchTool({onSetFirstIndex}){
                         onClick={getAllData}
                     >
                         Get all series
-                    </Button>
-                    <Button
-
-                        size="small"
-                        onClick={() => {}}
-                    >
-                        Get owned series
                     </Button>
                 </Space>
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PagesWrapper } from "../../../PagesWrapper";
 import { useCourses } from "../../../contexts/CoursesContext";
-import {Divider, Dropdown, List, Space, Spin, message } from "antd";
+import {Divider, Dropdown, List, Space, Spin } from "antd";
 import {EditOutlined, PlusOutlined, DeleteOutlined, TrophyOutlined} from '@ant-design/icons';
 
 import './CourseView.css'
@@ -160,6 +160,7 @@ export function CourseView(){
                 open={showEditCourseModal}
                 selectedCourse={Course}
                 onClose={() => setShowEditCourseModal(false)}
+                reloadData={() => getCourseView(id)}
             />
         </PagesWrapper>
     )

@@ -35,15 +35,15 @@ export function copyQuestionRequest(b){
 }
 
 export function editQuestionBasicInfoRequest(b){
-    return ADD_REQUEST_BODY_API('SimpleClickable/EditQuestionBaseInfo', b)
+    return ADD_REQUEST_BODY_API('SimpleClickable/EditQuestionBaseInfo', b, true)
 }
 
 export function removeQuestionSolutionRequest(b){
-    return ADD_REQUEST_BODY_API('SimpleClickable/RemoveQuestionSolution', b)
+    return EDIT_REQUEST_FILE_API('SimpleClickable/RemoveQuestionSolution', b)
 }
 
 export function addQuestionSolutionRequest(b){
-    return ADD_REQUEST_BODY_API('SimpleClickable/AddEditQuestionPDF', b)
+    return ADD_REQUEST_FILE_API('SimpleClickable/AddEditQuestionPDF', b, true)
 }
 
 

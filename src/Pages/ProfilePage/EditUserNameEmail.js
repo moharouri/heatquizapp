@@ -2,14 +2,11 @@ import { Button, Drawer, Form, Input, message } from "antd";
 import React, { useEffect, useState } from "react"
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useUsers } from "../../contexts/UsersContext";
+import { handleResponse } from "../../services/Auxillary";
 
-export function EditUserNameEmail({user, open, onClose}){
-    const {loadingEditNameEmail,
-            getEditNameEmailError,
-            updateUserNameEmail} = useUsers()
+export function EditUserNameEmail({user, open, onClose, reloadData}){
+    const {loadingEditNameEmail, updateUserNameEmail} = useUsers()
     
-    console.log(getEditNameEmailError)
-
     const [messageApi, contextHolder] = message.useMessage();
 
 
@@ -74,13 +71,13 @@ export function EditUserNameEmail({user, open, onClose}){
                             Email: newEmail
                         })
 
-                        updateUserNameEmail(VM).then(() => {
-
-                            if(getEditNameEmailError){
-                                messageApi.destroy()
-                                messageApi.error(getEditNameEmailError)
-                            }
-                        })
+                        updateUserNameEmail(VM)
+                        .then(r => 
+                        handleResponse(r, messageApi, 'Picture updated successfully', 1, () => {
+                            onClose()
+                            reloadData()
+                        }))
+                        
                     }}
                     loading = {loadingEditNameEmail}
                 >

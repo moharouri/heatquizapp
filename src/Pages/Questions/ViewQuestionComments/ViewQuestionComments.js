@@ -1,4 +1,4 @@
-import {Avatar, Button, Divider, Drawer, List, Skeleton, Space, Spin, message } from "antd";
+import {Avatar, Button, Divider, Drawer, List, Skeleton, Space, message } from "antd";
 import React, { useState } from "react";
 import {ArrowLeftOutlined, MessageTwoTone } from '@ant-design/icons';
 import { LatexRenderer } from "../../../Components/LatexRenderer";
@@ -7,9 +7,9 @@ import { useEffect } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 
 import './ViewQuestionComments.css'
-import { beautifyDatetime, getShortenedName } from "../../../services/Auxillary";
+import { beautifyDatetime, getShortenedName, handleResponse } from "../../../services/Auxillary";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
 import { useUsers } from "../../../contexts/UsersContext";
-import { useAuth } from "../../../contexts/AuthContext";
 
 export function ViewQuestionComments({open, onClose, question}){
 
@@ -17,10 +17,10 @@ export function ViewQuestionComments({open, onClose, question}){
 
     const {
         loadingQuestionComments, questionComments, getQuestionCommentsError, getQuestionComments,
-        loadingAddComment, addCommentResult, addCommentError, addComment} = useComments()
-    
-    const {users, loadingUsers, getUserError, getUsers} = useUsers()
-    const {userfullname} = useAuth()
+        loadingAddComment, addComment
+    } = useComments()
+
+    const {users} = useUsers()
 
     const [newComment, setNewComment] = useState('')
 
@@ -30,41 +30,11 @@ export function ViewQuestionComments({open, onClose, question}){
         if(open){
             setNewComment('')
             getQuestionComments(question)
-            getUsers()
         }
     }, [open])
 
-    useEffect(() => {
-        if(getQuestionCommentsError){
-            api.destroy()
-            api.error(getQuestionCommentsError)
-
-            return
-        }
-
-        if(getUserError){
-            api.destroy()
-            api.error(getUserError)
-
-            return
-        }
-
-        if(addCommentError){
-            api.destroy()
-            api.error(addCommentError)
-        }
-    }, [getQuestionCommentsError, getUserError, addCommentError])
 
     const renderAddComment = () => {
-
-        if(loadingUsers) {
-            return(
-                <div>
-                    <Spin />
-                    <Divider />
-                </div>
-            )
-        } 
 
         return(
             <div>
@@ -165,10 +135,11 @@ export function ViewQuestionComments({open, onClose, question}){
                                     tags.forEach(t => data.append("Tags", t))
                                 }
 
-                                addComment(data).then(() => {
+                                addComment(data).then((r) => 
+                                handleResponse(r, api, 'Comment added successfully', 0.75, () => {
                                     setNewComment('')
                                     getQuestionComments(question)
-                                })
+                                }))
                             }}
 
                             icon={<MessageTwoTone  />}
@@ -298,6 +269,14 @@ export function ViewQuestionComments({open, onClose, question}){
         {contextHolder}
     
         {loadingQuestionComments && <Skeleton />}
+
+        {getQuestionCommentsError && !loadingQuestionComments && 
+            <ErrorComponent
+                error={getQuestionCommentsError}
+                onReload={() => {getQuestionComments(question)}}
+            />
+        }
+
         {(!loadingQuestionComments) && renderAddComment()}
         {(!loadingQuestionComments && questionComments) && renderComments()}
          

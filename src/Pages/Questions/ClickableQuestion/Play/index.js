@@ -19,7 +19,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
     } = useQuestions()
 
 
-    const {interpretedValues, errorGetInterpretedValues, isLoadingInterpretedValues, getAllInterpretedValues,} = useInterpretedTrees()
+    const {interpretedValues, isLoadingInterpretedValues, getAllInterpretedValues,} = useInterpretedTrees()
 
     const {currentPlayerKey} = useAuth()
 

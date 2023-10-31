@@ -5,10 +5,9 @@ import { NUMERIC_KEY, VARIABLE_KEY } from "./constants";
 import { LatexRenderer } from "../LatexRenderer";
 
 import './Keyboard.css'
+import { ErrorComponent } from "../ErrorComponent";
 
 export function Keyboard({Id, enableDivision, isEnergyBalance, List, onEnterKey}){
-    console.log(List)
-
     const { isLoadingKeyboard, errorGetKeyboard, Keyboard, getKeyboard} = useKeyboard()
 
     const [variableKeyElements, setVariableKeyElements] = useState([])
@@ -500,6 +499,16 @@ export function Keyboard({Id, enableDivision, isEnergyBalance, List, onEnterKey}
         <div>
             {isLoadingKeyboard && <Skeleton />}
             {!isLoadingKeyboard && Keyboard && renderKeyboard()}
+
+            {errorGetKeyboard && !isLoadingKeyboard && 
+                <ErrorComponent 
+                    error={errorGetKeyboard}
+                    onReload={() => {
+                        getKeyboard(Id)
+                        setVariableKeyElements([])
+                    }}
+                />
+            }
         </div>
     )
 }

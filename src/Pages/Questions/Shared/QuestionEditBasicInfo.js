@@ -9,6 +9,8 @@ import { MAX_QUESTION_CODE } from "./Constants";
 
 import './QuestionEditView.css'
 import { useQuestions } from "../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../services/Auxillary";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
 
 export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion}){
 
@@ -17,7 +19,7 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
     const { isLoadingLODs, errorGetLODs, LODs, getAllLODs} = useLevelsOfDifficulty()
     const {topics, errorGetTopics, isLoadingTopics, getAllTopics} = useTopics()
 
-    const {editQuestionBasicInfoResult, errorEditQuestionBasicInfo, isLoadingEditQuestionBasicInfo, editQuestionBasicInfo} = useQuestions()
+    const {isLoadingEditQuestionBasicInfo, editQuestionBasicInfo} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -53,23 +55,6 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
         }
     }, [topics, selectedTopic])
 
-    useEffect(() => {
-        if(errorGetTopics){
-            api.destroy()
-            api.error(errorGetTopics)
-        }
-
-        if(errorGetLODs){
-            api.destroy()
-            api.error(errorGetLODs)
-        }
-
-        if(errorEditQuestionBasicInfo){
-            api.destroy()
-            api.error(errorEditQuestionBasicInfo)
-        }
-    }, [errorGetTopics, errorGetLODs, errorEditQuestionBasicInfo])
-
 
     return(
         <Drawer
@@ -77,15 +62,13 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        bodyStyle={{}}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
 
         footer={
           <div>
-          <p className="question-code">{question.Code}</p>
+          <p className="default-title">{question.Code}</p>
           <Space size={'large'} align="start">
               <div>
                   <img
@@ -105,7 +88,7 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
     
         <Form>
             <Form.Item>
-                <small>Code</small>
+                <small className="default-gray">Code</small>
                 <Input 
                     placeholder="New code"
                     value={newCode}
@@ -115,7 +98,7 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
                 />
             </Form.Item>
             <Form.Item>
-                <small>Level of difficulty</small>
+                <small className="default-gray">Level of difficulty</small>
                 {isLoadingLODs ?
                     <Spin/>
                     :
@@ -133,6 +116,13 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
                             }))}
 
                     />}
+
+                {errorGetLODs && !isLoadingLODs && 
+                    <ErrorComponent 
+                        error={errorGetLODs}
+                        onReload={() => getAllLODs()}
+                    />
+                }
             </Form.Item>
             <Form.Item>
                 {isLoadingTopics ?
@@ -141,7 +131,7 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
                     <Space
                         direction="vertical"
                     >
-                        <small>Topic / Subtopic</small>
+                        <small className="default-gray">Topic / Subtopic</small>
                         <Space>
                             <div
                                 className="question-edit-view-edit-basic-info-topic-subtopic-section-select"
@@ -188,6 +178,13 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
                             
                         </Space>
                 </Space>}
+
+                {errorGetTopics && !isLoadingTopics && 
+                    <ErrorComponent 
+                        error={errorGetTopics}
+                        onReload={() => getAllTopics()}
+                    />
+                }
             </Form.Item>
             
         </Form>
@@ -211,7 +208,7 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
                     return
                 }
 
-                if(!newSubtopic.trim()){
+                if(!newSubtopic){
                     api.destroy()
                     api.warning('Please select a subtopic')
 
@@ -225,10 +222,11 @@ export function QuestionEditBasicInfo({open, onClose, question, reloadQuestion})
                     SubtopicId: newSubtopic.Id
                 })
 
-                editQuestionBasicInfo(VM).then(() => {
+                editQuestionBasicInfo(VM)
+                .then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
                     onClose()
-                    if(reloadQuestion) reloadQuestion();   
-                })
+                    reloadQuestion()   
+                }))
             }}
 
             loading={isLoadingEditQuestionBasicInfo}

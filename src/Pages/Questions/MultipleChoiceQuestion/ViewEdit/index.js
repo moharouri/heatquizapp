@@ -12,6 +12,7 @@ import { EditQuestionLatex } from "./EditQuestionLatex";
 import { EditQuestionAdditionalInformation } from "./EditQuestionAdditionalInformation";
 import { AddChoice } from "./AddChoice";
 import { EditQuestionImage } from "./EditQuestionImage";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function MultipleChoiceQuestionEditView({reloadQuestion}){
 
@@ -43,20 +44,8 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
         data.append("Correct", !c.Correct)
         
         editMultipleChoiceQuestionChoice(data)
-        .then(
-        (r) => {
-            const {Id} = r
-            
-            if(Id){
-                api.destroy()
-                api.success('Edited successfully', 1)
-                .then(() => reloadQuestion())
-            }
-            else{
-                api.destroy()
-                api.error(r)
-            }
-        })
+        .then(r => handleResponse(r, api, 'Updated successfully',1, () => reloadQuestion()))
+       
     }
 
     const removeChoice = (c) => {
@@ -67,20 +56,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
         })
         
         removeMultipleChoiceQuestionChoice(VM)
-        .then(
-        (r) => {
-            const {Id} = r
-            
-            if(Id){
-                api.destroy()
-                api.success('Removed successfully', 1)
-                .then(() => reloadQuestion())
-            }
-            else{
-                api.destroy()
-                api.error(r)
-            }
-        })
+        .then(r => handleResponse(r, api, 'Removed successfully',1, () => reloadQuestion()))
     }
 
     const removeChoiceLatex = (c) => {
@@ -90,20 +66,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
         data.append("AnswerId", c.Id)
         
         removeMultipleChoiceQuestionChoiceLatex(data)
-        .then(
-        (r) => {
-            const {Id} = r
-            
-            if(Id){
-                api.destroy()
-                api.success('Removed successfully', 1)
-                .then(() => reloadQuestion())
-            }
-            else{
-                api.destroy()
-                api.error(r)
-            }
-        })
+        .then(r => handleResponse(r, api, 'Removed successfully',1, () => reloadQuestion()))
     }
 
     const removeChoiceImage = (c) => {
@@ -113,20 +76,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
         data.append("AnswerId", c.Id)
         
         removeMultipleChoiceQuestionChoiceImage(data)
-        .then(
-        (r) => {
-            const {Id} = r
-            
-            if(Id){
-                api.destroy()
-                api.success('Removed successfully', 1)
-                .then(() => reloadQuestion())
-            }
-            else{
-                api.destroy()
-                api.error(r)
-            }
-        })
+        .then(r => handleResponse(r, api, 'Removed successfully',1, () => reloadQuestion()))
     }
 
     return(
@@ -153,7 +103,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
                         direction="vertical"
                     >
                         <Space align="start" size={'large'}>
-                            <p className="question-edit-view-gray">Question</p>
+                            <p className="default-gray">Question</p>
 
                             <LatexRenderer 
                                 latex={Latex}
@@ -161,12 +111,12 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
                         </Space>
 
                         <Space align="start" size={'large'}>
-                            <p className="question-edit-view-gray">Additional info</p>
+                            <p className="default-gray">Additional info</p>
                             <p>*{AdditionalInfo}</p>
                         </Space>
 
                         <Space align="start" size={'large'}>
-                            <p className="question-edit-view-gray">Choices</p>
+                            <p className="default-gray">Choices</p>
                             <List 
                                 dataSource={Choices.sort((a, b) => b.Correct ? +1 : -1)}
                                 renderItem={(c, ci) => {
@@ -191,7 +141,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
                                                     >
                                                         <Button
                                                             size="small"
-                                                            className="multiple-choice-question-edit-view-choice-btn"
+                                                            className="hq-full-width"
                                                             loading={isLoadingRemoveMultipleChoiceQuestionChoice}
                                                             >
                                                             Remove choice 
@@ -211,7 +161,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
                                                     >
                                                         <Button
                                                             size="small"
-                                                            className="multiple-choice-question-edit-view-choice-btn"
+                                                            className="hq-full-width"
                                                             loading={isLoadingRemoveMultipleChoiceQuestionChoiceLatex}
                                                             onClick={() => {}}  
                                                         >
@@ -232,7 +182,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
                                                     >
                                                         <Button
                                                             size="small"
-                                                            className="multiple-choice-question-edit-view-choice-btn"
+                                                            className="hq-full-width"
                                                             onClick={() => {}}  
                                                             loading={isLoadingRemoveMultipleChoiceQuestionChoiceImage}
                                                         >
@@ -243,7 +193,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
 
                                                     <Button
                                                         size="small"
-                                                        className="multiple-choice-question-edit-view-choice-btn"
+                                                        className="hq-full-width"
                                                         loading={isLoadingEditMultipleChoiceQuestionChoice}
                                                         onClick={() => flipCorrect(c)}  
                                                     >
@@ -252,7 +202,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
 
                                                     <Button
                                                         size="small"
-                                                        className="multiple-choice-question-edit-view-choice-btn"
+                                                        className="hq-full-width"
                                                         onClick={() => {
                                                             setShowEditChoiceLatex(true)
                                                             setSelectedChoice({...c, index: ci})
@@ -263,7 +213,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
 
                                                     <Button
                                                         size="small"
-                                                        className="multiple-choice-question-edit-view-choice-btn"
+                                                        className="hq-full-width"
                                                         onClick={() => {
                                                             setShowEditChoiceImage(true)
                                                             setSelectedChoice({...c, index: ci})
@@ -283,7 +233,7 @@ export function MultipleChoiceQuestionEditView({reloadQuestion}){
                                                 align="start"
                                             >
                                                 <p 
-                                                    className={Correct ? 'multiple-choice-question-edit-view-correct-choice' : 'multiple-choice-question-edit-view-incorrect-choice'}
+                                                    className={Correct ? 'default-green hq-bold-font-weight' : 'default-red hq-bold-font-weight'}
                                                 >
                                                     {ci+1}
                                                 </p>

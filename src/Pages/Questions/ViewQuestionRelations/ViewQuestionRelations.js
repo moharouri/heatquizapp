@@ -1,4 +1,4 @@
-import {Divider, Drawer, Dropdown, Skeleton, Space, message,} from "antd";
+import {Divider, Drawer, Dropdown, Skeleton, Space,} from "antd";
 import React, { useEffect } from "react";
 import {ArrowLeftOutlined, TrophyOutlined, EditOutlined} from '@ant-design/icons';
 import { LatexRenderer } from "../../../Components/LatexRenderer";
@@ -6,15 +6,19 @@ import { LatexRenderer } from "../../../Components/LatexRenderer";
 import './ViewQuestionRelations.css'
 import { useQuestions } from "../../../contexts/QuestionsContext";
 import { useNavigate } from "react-router-dom";
+import { ErrorComponent } from "../../../Components/ErrorComponent";
+import { SeriesPlayPocket } from "../../Series/Play/SeriesPlayPocket";
+import { useState } from "react";
 
 export function ViewQuestionRelations({open, onClose, question}){
 
     if(!open) return <div/>;
 
     const {questionRelations, errorGetQuestionRelations, isLoadingGetQuestionRelations, getQuestionRelations} = useQuestions()
-    const naviagate = useNavigate()
+    const navigate = useNavigate()
 
-    const [api, contextHolder] = message.useMessage()
+    const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
+    const [selectedSeries, setSelectedSeries] = useState({Code:''})
 
     useEffect(() => {
         if(open){
@@ -26,27 +30,29 @@ export function ViewQuestionRelations({open, onClose, question}){
         key: 'play_map',
         label: 'Play',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => naviagate('/playcoursemap/'+m.Id)
+        onClick: () => navigate('/playcoursemap/'+m.Id)
     },
     {
         key: 'view_edit_map',
         label: 'View / edit map',
         icon: <EditOutlined/> ,
-        onClick: () => {
-        }
+        onClick: () => navigate('/edit_view_map/'+m.Id)
     }]
 
     const seriesActionList = (s) => [{
         key: 'play_series',
         label: 'Play',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => naviagate('/series_play/'+s.Code)
+        onClick: () => {
+            setShowPlaySeriesModal(true)
+            setSelectedSeries(s)
+        }
     },
     {
         key: 'view_edit_series',
         label: 'View / edit series',
         icon: <EditOutlined/> ,
-        onClick: () => naviagate('/series_edit_view/'+s.Code)
+        onClick: () => navigate('/series_edit_view/'+s.Code)
     }]
 
     const renderRelations = () => {
@@ -58,14 +64,14 @@ export function ViewQuestionRelations({open, onClose, question}){
                     return(
                         <div
                             key={Id}
-                            className="question-relation-line"
+                            className="hq-full-width"
                         >
                             <Space 
                                 direction="vertical"
                             >
                                     <Space 
                                         size={'large'}
-                                        className="question-edit-view-element-other-info"
+                                        
                                     >
                                         <Dropdown
                                             menu={{
@@ -73,7 +79,7 @@ export function ViewQuestionRelations({open, onClose, question}){
                                                 title:'Actions'
                                                 }}
                                         >
-                                            <p className="question-relation-map-name">{Title}</p>
+                                            <p className="default-title hoverable">{Title}</p>
                                         </Dropdown>
                                     </Space>
                                     <Space
@@ -102,7 +108,7 @@ export function ViewQuestionRelations({open, onClose, question}){
                                                                     title:'Actions'
                                                                     }}
                                                             >
-                                                                <span className="question-relation-series-code">{QuestionSeries.Code}</span>
+                                                                <span className="default-title hoverable">{QuestionSeries.Code}</span>
                                                             </Dropdown>
 
                                                         </p>
@@ -149,11 +155,22 @@ export function ViewQuestionRelations({open, onClose, question}){
           </Space>
       </div>}
     >   
-        {contextHolder}
-
         {isLoadingGetQuestionRelations && <Skeleton/>}
 
         {(!isLoadingGetQuestionRelations && questionRelations) && renderRelations()}
+
+        {errorGetQuestionRelations && !isLoadingGetQuestionRelations && 
+            <ErrorComponent 
+                error={errorGetQuestionRelations}
+                onReload={() => getQuestionRelations(question.Id)}
+            />
+        }
+
+        <SeriesPlayPocket 
+            open={showPlaySeriesModal}
+            onClose={() => setShowPlaySeriesModal(false)}
+            Code={selectedSeries.Code}
+        />
     </Drawer>
     )
 }

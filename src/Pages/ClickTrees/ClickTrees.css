@@ -2,15 +2,8 @@
     width: 25vw;
 }
 
-.click-tree-item-container{
-    flex-direction: row;
-    display: flex;
-}
-
 .click-tree-head-container{
     width: 15vw;
-    flex-direction: column;
-    display: flex;
 }
 
 .click-tree-leaf-container{
@@ -33,27 +26,14 @@
     width: 8vw;
 }
 
-.click-tree-head-title{
-    color: #0275d8;
-    width: fit-content;
+.tree-picture-uploader{
+    width: 35vh;
+    height: 35vh;
 }
 
-.click-tree-usage-times{
-    color: #777;
-    margin-bottom: 0.5vh;
+.new-tree-picture{
+    width: 32vh;
+    height: 32vh;
+    object-fit: contain;
 }
 
-.click-tree-leaf-title{
-    width: fit-content;
-    margin-bottom: 0.5vh;
-}
-
-
-.click-tree-clickable-title:hover{
-    cursor: pointer;
-    background-color: whitesmoke;
-    padding-left: 0.25vw;
-    padding-right: 0.25vw;
-    border-radius: 0.5em;
-    color: #0275d8;
-}

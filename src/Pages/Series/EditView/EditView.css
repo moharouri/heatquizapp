@@ -1,15 +1,4 @@
 
-.series-edit-view-info-card-base{
-    flex-direction: row;
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-}
-
-.series-edit-view-info-title{
-    font-size: large;
-}
-
 .series-edit-view-info-card{
     flex-direction: column;
     display: flex;
@@ -24,23 +13,9 @@
     margin-left: 0.5vw;
 }
 
-.series-edit-view-info-card-gray{
-    font-size: small;
-    color: gray;
-}
-
 .series-edit-view-pools-number{
     color: gray;
     margin-top: 1vh;
-}
-
-.series-edit-view-pools-number-assign{
-    color: gray;
-}
-
-.series-edit-view-info-card-orange{
-    font-size: small;
-    color: orange;
 }
 
 .series-edit-view-element{
@@ -62,31 +37,11 @@
     color: gray;
 }
 
-.series-edit-view-element-other-info{
-    color: gray;
-}
-
-
 .series-edit-view-element-img{
     object-fit: contain;
     height: 20vh;
 }
 
-.series-relation-line{
-    width: 100%;
-}
-
-.series-relation-map-name{
-    color: blue;
-}
-
-.series-relation-map-name:hover{
-    padding-left: 0.25vw;
-    padding-right: 0.25vw;
-    border-radius: 0.25em;
-    background-color: whitesmoke;
-    cursor: pointer;
-}
 
 .series-relation-map-img{
     width: 15vw;
