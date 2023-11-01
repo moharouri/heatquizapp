@@ -193,6 +193,16 @@ const NavigationDrawer = () => {
                 key:'/information_list',
                 icon:<DatabaseTwoTone style={{...iconStyle}}/>
             },
+            {
+                label:'Default images',
+                key:'/default_images_list',
+                icon:<DatabaseTwoTone style={{...iconStyle}}/>
+            },
+            {
+                label:'Background images',
+                key:'/background_images_list',
+                icon:<DatabaseTwoTone style={{...iconStyle}}/>
+            },
         ],
         type:'group'
     }

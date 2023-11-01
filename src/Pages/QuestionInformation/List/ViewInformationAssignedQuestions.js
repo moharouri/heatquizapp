@@ -8,6 +8,7 @@ import { ErrorComponent } from "../../../Components/ErrorComponent";
 import { useNavigate } from "react-router-dom";
 import { QuestionPlayPocket } from "../../Questions/QuestionPlayPocket/QuestionPlayPocket";
 import { QUESTION_TYPES_SEARCH_NAMES } from "../../Questions/List/constants";
+import { handleResponse } from "../../../services/Auxillary";
 
 export function ViewInformationAssignedQuestions({open, onClose, info, reloadData}){
 
@@ -17,7 +18,13 @@ export function ViewInformationAssignedQuestions({open, onClose, info, reloadDat
     
     const {
         informationList,
-        isLoadinggQuestionsAssignedInformation, getAllQuestionsAssignedInformation, errorGetQuestionsAssignedInformation, QuestionsAssignedInformation: questions} = useAssistanceObjects()
+        isLoadinggQuestionsAssignedInformation, getAllQuestionsAssignedInformation, errorGetQuestionsAssignedInformation, QuestionsAssignedInformation: questions,
+        
+        isLoadingAssignQuestionsInformation, assignQuestionsInformation,
+        isLoadingUnassignQuestionsInformation, unassignQuestionsInformation
+
+    
+    } = useAssistanceObjects()
 
     const [selectedReassignQuestions, setSelectedReassignQuestions] = useState([])
 
@@ -179,9 +186,30 @@ export function ViewInformationAssignedQuestions({open, onClose, info, reloadDat
                             messageApi.warning("Please select an explanation")
                             return
                         }
+
+                        if(!selectedReassignQuestions.length){
+                            messageApi.destroy()
+                            messageApi.warning("Please select questions to perform this action")
+
+                            return
+                        }
+
+                        let data = new FormData()
+
+                        data.append("Id", selectedReassignInfo.Id)
+
+                        for(let q of selectedReassignQuestions){
+                            data.append("QuestionIds", q.Id)
+                        }
+
+                        assignQuestionsInformation(data)
+                        .then(r => handleResponse(r, messageApi, 'Assigned successfully', 1, () => {
+                            onClose()
+                            reloadData()
+                        }))
                     }}
 
-                    loading={false}
+                    loading={isLoadingAssignQuestionsInformation}
                 >
                     ({selectedReassignQuestions.length}){' '}Reassign
                 </Button>
@@ -192,10 +220,27 @@ export function ViewInformationAssignedQuestions({open, onClose, info, reloadDat
                     size="small"
                     type="primary"
                     onClick={() => {
+                        if(!selectedReassignQuestions.length){
+                            messageApi.destroy()
+                            messageApi.warning("Please select questions to perform this action")
 
+                            return
+                        }
+
+                        let data = new FormData()
+
+                        for(let q of selectedReassignQuestions){
+                            data.append("QuestionIds", q.Id)
+                        }
+
+                        unassignQuestionsInformation(data)
+                        .then(r => handleResponse(r, messageApi, 'Unassigned successfully', 1, () => {
+                            onClose()
+                            reloadData()
+                        }))
                     }}
 
-                    loading={false}
+                    loading={isLoadingUnassignQuestionsInformation}
                 >
                     Unassign
                 </Button>

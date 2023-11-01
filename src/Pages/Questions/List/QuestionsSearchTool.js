@@ -351,7 +351,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
                             <Input 
                                 placeholder="Questions code or part of it"
                                 value={questionCode}
-                                onChange={(v) => setQuestionCode(v.target.value.trim())}
+                                onChange={(v) => setQuestionCode(v.target.value)}
                                 suffix = {<small className="suffix-word">Code</small>}
                             />
                         </div>

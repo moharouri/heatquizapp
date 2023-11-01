@@ -34,6 +34,8 @@ import { KeysList } from "./Pages/Keyboards/Keys/List";
 import { KeyboardEditView } from "./Pages/Keyboards/EditView";
 import { MapClickImagesList } from "./Pages/MapClickImages/List";
 import { QuestionInformationList } from "./Pages/QuestionInformation/List";
+import { DefaultImagesList } from "./Pages/DefaultImages/List";
+import { BackgroundImagesList } from "./Pages/BackgroundImages/List";
 
 export function SelectRoutes({}){
     const {roles, isStudent,} = useAuth()
@@ -112,6 +114,10 @@ export function SelectRoutes({}){
                 <Route path="/map_click_images_list" element={<MapClickImagesList/>}/>
 
                 <Route path="/information_list" element={<QuestionInformationList/>}/>
+
+                <Route path="/default_images_list" element={<DefaultImagesList/>}/>
+
+                <Route path="/background_images_list" element={<BackgroundImagesList/>}/>
                 
                 
                 <Route path="*" exact element={<NotFoundPage />}/>

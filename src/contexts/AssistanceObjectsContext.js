@@ -2,7 +2,7 @@ import React, { useContext} from "react"
 
 import { useAsyncFn } from "../hooks/useAsync"
 import {} from "../services/Topics"
-import {addMapClickImageListRequest, addQuestionInformationRequest, editMapClickImageListImageRequest, editMapClickImageListNameRequest, editQuestionInformationDocumentRequest, editQuestionInformationLatexRequest, editQuestionInformationNameRequest, getAllMapClickImageListsRequest, getAllQuestionInformationRequest, getAllQuestionsAssignedInformationRequest, removeQuestionInformationDocumentRequest } from "../services/AssistanceObjects"
+import {addMapClickImageListRequest, addQuestionInformationRequest, assignQuestionsInformationRequest, editMapClickImageListImageRequest, editMapClickImageListNameRequest, editQuestionInformationDocumentRequest, editQuestionInformationLatexRequest, editQuestionInformationNameRequest, getAllMapClickImageListsRequest, getAllQuestionInformationRequest, getAllQuestionsAssignedInformationRequest, removeQuestionInformationDocumentRequest, unassignQuestionsInformationRequest } from "../services/AssistanceObjects"
 
 const Context = React.createContext()
 
@@ -29,6 +29,8 @@ export function AssistanceObjectsProvider ({children}){
     const {value: removeQuestionInformationDocumentResult, errorRemoveQuestionInformationDocument, loading:isLoadingRemoveQuestionInformationDocument, execute: removeQuestionInformationDocument} = useAsyncFn((b) => removeQuestionInformationDocumentRequest(b))
 
     const {value: QuestionsAssignedInformation, errorGetQuestionsAssignedInformation, loading:isLoadinggQuestionsAssignedInformation, execute: getAllQuestionsAssignedInformation} = useAsyncFn((b) => getAllQuestionsAssignedInformationRequest(b))
+    const {value: assignQuestionsInformationResult, errorAssignQuestionsInformation, loading:isLoadingAssignQuestionsInformation, execute: assignQuestionsInformation} = useAsyncFn((b) => assignQuestionsInformationRequest(b))
+    const {value: unassignQuestionsInformationResult, errorUnassignQuestionsInformation, loading:isLoadingUnassignQuestionsInformation, execute: unassignQuestionsInformation} = useAsyncFn((b) => unassignQuestionsInformationRequest(b))
 
 
     return(
@@ -86,7 +88,17 @@ export function AssistanceObjectsProvider ({children}){
             QuestionsAssignedInformation,
             errorGetQuestionsAssignedInformation,
             isLoadinggQuestionsAssignedInformation,
-            getAllQuestionsAssignedInformation
+            getAllQuestionsAssignedInformation,
+
+            assignQuestionsInformationResult,
+            errorAssignQuestionsInformation,
+            isLoadingAssignQuestionsInformation,
+            assignQuestionsInformation,
+
+            unassignQuestionsInformationResult,
+            errorUnassignQuestionsInformation,
+            isLoadingUnassignQuestionsInformation,
+            unassignQuestionsInformation
         }}>
             {children}
         </Context.Provider>

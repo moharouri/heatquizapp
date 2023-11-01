@@ -14,6 +14,7 @@ import { EditInformationLatex } from "./EditInformationLatex";
 import { EditInformationDocument } from "./EditInformationDocument";
 import { handleResponse } from "../../../services/Auxillary";
 import { ViewInformationAssignedQuestions } from "./ViewInformationAssignedQuestions";
+import { AssignQuestionsToInformation } from "./AssignQuestionsToInformation";
 
 export function QuestionInformationList(){
     
@@ -32,6 +33,7 @@ export function QuestionInformationList(){
     const [showEditInfoDocument, setShowEditInfoDocument] = useState(false)
 
     const [showViewAssignedQuestions, setShowViewAssignedQuestions] = useState(false)
+    const [showAssignQuestions, setShowAssignQuestions] = useState(false)
 
     const {selectedDatapool} = useDatapools()
     
@@ -97,6 +99,15 @@ export function QuestionInformationList(){
             icon: <EyeOutlined/>,
             onClick: () => {
                 setShowViewAssignedQuestions(true)
+                setSelectedInfo(l)
+            }
+        },
+        {
+            key: 'ssigned_questions',
+            label: 'Asign new questions',
+            icon: <PlusOutlined style={{color:'green'}}/>,
+            onClick: () => {
+                setShowAssignQuestions(true)
                 setSelectedInfo(l)
             }
         },
@@ -249,6 +260,14 @@ export function QuestionInformationList(){
             <ViewInformationAssignedQuestions 
                 open={showViewAssignedQuestions}
                 onClose={() => setShowViewAssignedQuestions(false)}
+                reloadData={() => getAllQuestionInformation()}
+
+                info={selectedInfo}
+            />
+
+            <AssignQuestionsToInformation 
+                open={showAssignQuestions}
+                onClose={() => setShowAssignQuestions(false)}
                 reloadData={() => getAllQuestionInformation()}
 
                 info={selectedInfo}

@@ -24,6 +24,14 @@ export function getAllQuestionsAssignedInformationRequest(b){
     return ADD_REQUEST_BODY_API('Information/SearchInformationQuestions', b, true)
 }
 
+export function assignQuestionsInformationRequest(b){
+    return EDIT_REQUEST_FILE_API('Information/AssignQuestions', b, true)
+}
+
+export function unassignQuestionsInformationRequest(b){
+    return EDIT_REQUEST_FILE_API('Information/DeassignQuestions', b)
+}
+
 export function addQuestionInformationRequest(b){
     return ADD_REQUEST_FILE_API('Information/AddInfo', b, true)
 }
