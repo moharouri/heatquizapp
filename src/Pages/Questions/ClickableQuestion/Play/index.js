@@ -131,7 +131,6 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
 
         const statsVM = ({
             QuestionId: Question.Id,
-            Key: "",
             Player: currentPlayerKey,
             Correct: isCorrect,
             TotalTime: Math.trunc(0.001 * (Date.now() - startTime)),

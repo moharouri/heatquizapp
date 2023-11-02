@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Drawer, Timeline, Space, Pagination, Dropdown, Skeleton } from "antd";
+import { Drawer, Timeline, Space, Pagination, Dropdown, Skeleton } from "antd";
 import {ArrowLeftOutlined, InsertRowLeftOutlined, SolutionOutlined, EditOutlined, TrophyOutlined} from '@ant-design/icons';
 import { useReports } from "../../contexts/ReportsContext";
 import './PlayerTimeline.css'

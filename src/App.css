@@ -221,6 +221,10 @@
     background-color: whitesmoke;
 }
 
+.hq-light-green-background{
+    background-color: rgba(3, 255, 3, 0.10);
+}
+
 .hq-light-background{
     background-color: rgb(253, 253, 253);
 }

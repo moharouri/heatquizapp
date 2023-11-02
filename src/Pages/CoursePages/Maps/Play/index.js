@@ -387,6 +387,7 @@ export function MapPlay(){
         >
              <img 
                 src = {toBeDrawBadge.URL}
+                alt="badge"
                 style = {{
                     width: '100%',
                     height:'100%'

@@ -122,6 +122,7 @@ export function QuestionEditSupplementaryMaterial({open, onClose, question, relo
             {loadingPDF && <Spin size="small"/>}
             {newPDFURL && 
                 <iframe 
+                title="question-solution"
                 className="question-edit-view-upload-solution-pdf"
                 src={newPDFURL}></iframe>
             }

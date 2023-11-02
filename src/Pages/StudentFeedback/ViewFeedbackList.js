@@ -1,4 +1,4 @@
-import {Avatar, Button, Divider, Drawer, Space, Spin } from "antd";
+import {Avatar, Divider, Drawer, Space, Spin } from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { LatexRenderer } from "../../Components/LatexRenderer";

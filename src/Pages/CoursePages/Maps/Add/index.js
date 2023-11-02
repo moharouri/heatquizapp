@@ -11,7 +11,6 @@ import './index.css'
 import { UploadImage } from "../../../../Components/UploadImage";
 import { SelectSeries } from "./SelectSeries";
 import { SelectBackgroundImage } from "../../../../Components/SelectBackgroundImage";
-import { FixURL } from "../../../../services/Auxillary";
 import { useMaps } from "../../../../contexts/MapsContext";
 
 export function AddMap(){

@@ -117,7 +117,6 @@ export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements
 
                             const statsVM = ({
                                 QuestionId: multipleChoiceQuestionPlay.Id,
-                                Key: "",
                                 Player: currentPlayerKey,
                                 Key: mapKey,
                                 Correct: isCorrect,

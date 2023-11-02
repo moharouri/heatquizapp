@@ -122,13 +122,22 @@ export function ProfilePage(){
               key: 'edit_name_email',
               label: 'Edit name / email',
               icon: <EditOutlined/>,
-              onClick: () => setShowEditNameEmailModal(true)
+              onClick: () => {
+
+                if(loadingUsers) return;
+
+                setShowEditNameEmailModal(true)
+              }
             },
             {
                 key: 'edit_picture',
                 label: 'Edit picture',
                 icon: <PictureOutlined />,
-                onClick: () => setShowEditProfilePictureModal(true)
+                onClick: () => {
+                    if(loadingUsers) return;
+
+                    setShowEditProfilePictureModal(true)
+                }
             },
             ...(userData.ProfilePicture ? [
                 {
@@ -136,12 +145,14 @@ export function ProfilePage(){
                   label: loadingRemoveProfilePicture ? 'Removing ... ':'Remove picture',
                   icon: <CloseOutlined />,
                   onClick: () => {
-                      if(loadingRemoveProfilePicture) return
+                    if(loadingUsers) return;
+
+                    if(loadingRemoveProfilePicture) return;
   
-                      let data = new FormData()
-                      data.append('Username', currentUser.Username)
+                    const data = new FormData()
+                    data.append('Username', currentUser.Username)
                       
-                      deleteUserProfilePicture(data).then((r) => handleResponse(r, api, 'Picture removed successfully', 1, () => getUsers()))
+                    deleteUserProfilePicture(data).then((r) => handleResponse(r, api, 'Picture removed successfully', 1, () => getUsers()))
                      
                   }
                 }] : []),

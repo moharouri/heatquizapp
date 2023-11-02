@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {ArrowLeftOutlined, SwitcherTwoTone} from '@ant-design/icons';
 import './index.css'
-import { Col, Drawer, Row, Skeleton, Space, message, Tooltip} from "antd";
+import { Col, Drawer, Row, Skeleton, Space, Tooltip} from "antd";
 import { useDefaultValues } from "../../contexts/DefaultValuesContext";
 
 export function SelectDefaultImage({className, classNameImage, imageURL, onSetImage}){
@@ -9,20 +9,10 @@ export function SelectDefaultImage({className, classNameImage, imageURL, onSetIm
 
     const [showSelectionModal, setShowSelectionModal] = useState(false)
 
-    const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
         getDefaultImages()
     }, [])
-
-    useEffect(() => {
-        if(errorGetDefaultImages){
-            message.destroy()
-            message.error(errorGetDefaultImages)
-        }
-    }, [errorGetDefaultImages])
-
-    console.log(imageURL)
 
     const renderModal = () => {
 

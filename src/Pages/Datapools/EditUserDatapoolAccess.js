@@ -1,4 +1,4 @@
-import {Button, Divider, Drawer, Space, Transfer, message} from "antd";
+import {Button, Drawer, Space, Transfer, message} from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useEffect } from "react";
@@ -10,7 +10,7 @@ export function EditUserDatapoolAccess({open, onClose, DP}){
 
     if(!open) return <div/>;
 
-    const {errorEditDataPoolAccess, isLoadingEditDataPoolAccess, EditDataPoolAccessResult, EditDataPoolAccess, getAllDatapoolsAdmin} = useDatapools()
+    const {errorEditDataPoolAccess, isLoadingEditDataPoolAccess, EditDataPoolAccess, getAllDatapoolsAdmin} = useDatapools()
     const [api, contextHolder] = message.useMessage()
 
     const {users, loadingUsers, getUserError, getUsers} = useUsers()

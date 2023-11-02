@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { AddDataPoolRequest, EditDataPoolAccessRequest, EditDataPoolRequest, getCurrentDatapool, getDatapools, getDatapoolsAdmin, setCurrentDatapool } from "../services/Datapools"
+import { AddDataPoolRequest, EditDataPoolAccessRequest, EditDataPoolRequest, getCurrentDatapool, getDatapools, getDatapoolsAdmin, getUserNotificationSubscriptionsRequest, setCurrentDatapool, subscribeQuestionFeedbackRequest, unsubscribeQuestionFeedbackRequest } from "../services/Datapools"
 import { useAsyncFn } from "../hooks/useAsync"
 
 const Context = React.createContext()
@@ -12,9 +12,16 @@ export function DatapoolsProvider ({children}){
     //Fetch datapools from API
     const {value: datapools, errorGetDatapools, loading:isLoadingDatapools, execute: getAllDatapools} = useAsyncFn(() => getDatapools())
     const {value: datapoolsAdmin, errorGetDatapoolsAdmin, loading:isLoadingDatapoolsAdmin, execute: getAllDatapoolsAdmin} = useAsyncFn(() => getDatapoolsAdmin())
+
     const {value: AddDataPoolResult, errorAddDataPool, loading:isLoadingAddDataPool, execute: AddDataPool} = useAsyncFn(() => AddDataPoolRequest())
+
     const {value: EditDataPoolResult, errorEditDataPool, loading:isLoadingEditDataPool, execute: EditDataPool} = useAsyncFn(() => EditDataPoolRequest())
-    const {value: EditDataPoolAccessResult, errorEditDataPoolAccess, loading:isLoadingEditDataPoolAccess, execute: EditDataPoolAccess} = useAsyncFn(() => EditDataPoolAccessRequest())
+
+    const {value: EditDataPoolAccessResult, errorEditDataPoolAccess, loading:isLoadingEditDataPoolAccess, execute: EditDataPoolAccess} = useAsyncFn((b) => EditDataPoolAccessRequest(b))
+
+    const {value: subscribeQuestionFeedbackResult, errorSubscribeQuestionFeedback, loading:isLoadingSubscribeQuestionFeedback, execute: subscribeQuestionFeedback} = useAsyncFn((b) => subscribeQuestionFeedbackRequest(b))
+    const {value: unsubscribeQuestionFeedbackResult, errorUnsubscribeQuestionFeedback, loading:isLoadingUnsubscribeQuestionFeedback, execute: unsubscribeQuestionFeedback} = useAsyncFn((b) => unsubscribeQuestionFeedbackRequest(b))
+    const {value: getUserNotificationSubscriptionsResult, errorGetUserNotificationSubscriptions, loading:isLoadingGetUserNotificationSubscriptions, execute: getUserNotificationSubscriptions} = useAsyncFn(() => getUserNotificationSubscriptionsRequest())
 
     const [selectedDatapool, setSelectedDatapool] = useState(null)
 
@@ -79,7 +86,22 @@ export function DatapoolsProvider ({children}){
             errorEditDataPoolAccess,
             isLoadingEditDataPoolAccess,
             EditDataPoolAccessResult,
-            EditDataPoolAccess
+            EditDataPoolAccess,
+
+            subscribeQuestionFeedbackResult,
+            isLoadingSubscribeQuestionFeedback,
+            errorSubscribeQuestionFeedback,
+            subscribeQuestionFeedback,
+
+            unsubscribeQuestionFeedbackResult,
+            isLoadingUnsubscribeQuestionFeedback,
+            errorUnsubscribeQuestionFeedback,
+            unsubscribeQuestionFeedback,
+
+            getUserNotificationSubscriptionsResult,
+            errorGetUserNotificationSubscriptions,
+            isLoadingGetUserNotificationSubscriptions,
+            getUserNotificationSubscriptions
         }}>
             {children}
         </Context.Provider>

@@ -10,6 +10,7 @@ import { AddDatapool } from "./AddDatapool";
 import { useState } from "react";
 import { EditDatapool } from "./EditDatapool";
 import { EditUserDatapoolAccess } from "./EditUserDatapoolAccess";
+import { ErrorComponent } from "../../Components/ErrorComponent";
 
 export function Datapools(){
 
@@ -18,8 +19,6 @@ export function Datapools(){
     const [showEditDPModal, setShowEditDPModal] = useState(false)
     const [showEditDPAccessModal, setShowEditDPAccessModal] = useState(false)
     const [selectedDP, setSelectedDP] = useState(null)
-
-
 
     useEffect(() => {
         getAllDatapoolsAdmin()
@@ -129,6 +128,13 @@ export function Datapools(){
             {isLoadingDatapoolsAdmin && <Skeleton/>}
 
             {(!isLoadingDatapoolsAdmin && datapoolsAdmin) && renderDatapools()}
+
+            {errorGetDatapoolsAdmin && !isLoadingDatapoolsAdmin && 
+                <ErrorComponent 
+                    error={errorGetDatapoolsAdmin}
+                    onReload={() => getAllDatapoolsAdmin()}
+                />
+            }
 
             <AddDatapool 
                 open={showAddDPModal}

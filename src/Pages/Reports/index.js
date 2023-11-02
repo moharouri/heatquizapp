@@ -13,6 +13,7 @@ import { ErrorComponent } from "../../Components/ErrorComponent";
 import { useNavigate } from "react-router-dom";
 import { QuestionPlayPocket } from "../Questions/QuestionPlayPocket/QuestionPlayPocket";
 import { SeriesPlayPocket } from "../Series/Play/SeriesPlayPocket";
+import { ReportGraphicalStatistics } from "../../Components/ReportGraphicalStatistics";
 
 const { RangePicker } = DatePicker;
 
@@ -51,10 +52,7 @@ export function Reports(){
         loadingGraphicalStats,
         graphicalStats,
         getGraphicalStatsError,
-        getGraphicalStats,
-
-        getPlayerTimelineReportError,
-        getPlayerTimelineReport
+        getGraphicalStats
     } = useReports()
 
     const onRangeChange = (d) => {
@@ -105,8 +103,8 @@ export function Reports(){
         const VM = ({
             Code:searchKey,
             datapool_id:selectedDatapool.value,
-            From:fromTimeData,
-            To:toTimeData
+            From:fromTimeData.substring(0, 10) + " 00:00:00",
+            To:toTimeData.substring(0, 10) + " 00:00:00"
         })
         
         getGraphicalStats(VM)
@@ -384,6 +382,17 @@ export function Reports(){
                 defaultActiveKey = '1'
                 type="card"
                 items={tabs}
+            />
+        )
+    }
+
+    function renderGraphicalStatistics(){
+        const {DailyQuestionStatsEveryDay, HourlyQuestionStatsAllDays} = graphicalStats
+
+        return(
+            <ReportGraphicalStatistics
+                data ={DailyQuestionStatsEveryDay}
+                style = {{width: 1200, height: 700}}
             />
         )
     }
@@ -867,6 +876,8 @@ export function Reports(){
             {(loadingGraphicalStats || loadingNumericStats) && <Skeleton />}
             {!(loadingGraphicalStats || loadingNumericStats) && numericStats && showNumericStats && renderNumericStatistics()}
 
+            {!(loadingGraphicalStats || loadingNumericStats) && graphicalStats && !showNumericStats && renderGraphicalStatistics()}
+
             {getNumericStatsError && !loadingNumericStats &&
                 <ErrorComponent 
                     error={getNumericStatsError}
@@ -874,7 +885,7 @@ export function Reports(){
                     onReload={() =>  loadNumericStatistics()}
                 />}
 
-                {getGraphicalStatsError && !loadingGraphicalStats &&
+            {getGraphicalStatsError && !loadingGraphicalStats &&
                 <ErrorComponent 
                     error={getGraphicalStatsError}
                     

@@ -12,9 +12,7 @@ export const handleResponse = (r, api, successMessage, delay, postSuccess, postE
     if(!r){
       return
     }
-    const {error, data} = r
-
-    console.log(api)
+    const {error} = r
 
     api.destroy()
 

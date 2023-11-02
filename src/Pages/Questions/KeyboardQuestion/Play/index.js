@@ -129,7 +129,6 @@ export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, 
 
                                 const statsVM = ({
                                     QuestionId: keyboardQuestionPlay.Id,
-                                    Key: "",
                                     Player: currentPlayerKey,
                                     Key: mapKey,
                                     Correct: isCorrect,
