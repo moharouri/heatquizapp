@@ -12,7 +12,7 @@ import { useInterpretedTrees } from "../../../../contexts/InterpretedTreesContex
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 import { NextButton } from "../../../../Components/NextButton";
 
-export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction}){
+export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
     const {
         clickableQuestionPlay, errorGetClickableQuestionPlay, isLoadingClickableQuestionPlay, getClickableQuestionPlay,
         postQuestionStatistic
@@ -135,7 +135,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
             Player: currentPlayerKey,
             Correct: isCorrect,
             TotalTime: Math.trunc(0.001 * (Date.now() - startTime)),
-
+            Key: mapKey,
             Score: score
         })
 

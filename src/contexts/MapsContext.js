@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
-import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
+import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
 
 const Context = React.createContext()
 
@@ -12,6 +12,8 @@ export function MapsProvider ({children}){
     
     //Fetch courses from API
     const {loading: loadingMap, value: map, error: getMapError, execute: getMap} = useAsyncFn((Id) => getMapRequest(Id))
+    const {loading: loadingAddMapPDFStatistic, value: addMapPDFStatisticResult, error: addMapPDFStatisticError, execute: addMapPDFStatistic} = useAsyncFn((b) => addMapPDFStatisticRequest(b))
+
     const {loading: loadingEditMapBasicInfo, value: editMapBasicInfoResult, error: editMapBasicInfoError, execute: editMapBasicInfo} = useAsyncFn((Id) => editMapBasicInfoRequest(Id))
     const {loading: loadingDeleteMapElement, value: deleteMapElementResult, error: deleteMapElementError, execute: deleteMapElement} = useAsyncFn((b) => deleteMapElementRequest(b))
 
@@ -57,6 +59,11 @@ export function MapsProvider ({children}){
             getMapError,
             map,
             getMap,
+
+            loadingAddMapPDFStatistic,
+            addMapPDFStatisticError,
+            addMapPDFStatisticResult,
+            addMapPDFStatistic,
 
             loadingMapExtended,
             getMapExtendedError,

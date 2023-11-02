@@ -8,7 +8,7 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 import { NextButton } from "../../../../Components/NextButton";
 
-export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction}){
+export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
 
     const {multipleChoiceQuestionPlay, errorGetMultipleChoiceQuestionPlay, isLoadingMultipleChoiceQuestionPlay, getMultipleChoiceQuestionPlay, postQuestionStatistic} = useQuestions()
     const {currentPlayerKey} = useAuth()
@@ -119,6 +119,7 @@ export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements
                                 QuestionId: multipleChoiceQuestionPlay.Id,
                                 Key: "",
                                 Player: currentPlayerKey,
+                                Key: mapKey,
                                 Correct: isCorrect,
                                 TotalTime: Math.trunc(0.001 * (Date.now() - startTime)),
                     

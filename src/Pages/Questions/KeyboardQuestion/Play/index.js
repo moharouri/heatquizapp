@@ -10,7 +10,7 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 import { NextButton } from "../../../../Components/NextButton";
 
-export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction}){
+export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
 
     const {keyboardQuestionPlay, errorGetKeyboardQuestionPlay, isLoadingKeyboardQuestionPlay, getKeyboardQuestionPlay, postQuestionStatistic} = useQuestions()
 
@@ -131,6 +131,7 @@ export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, 
                                     QuestionId: keyboardQuestionPlay.Id,
                                     Key: "",
                                     Player: currentPlayerKey,
+                                    Key: mapKey,
                                     Correct: isCorrect,
                                     TotalTime: Math.trunc(0.001 * (Date.now() - startTime)),
                         

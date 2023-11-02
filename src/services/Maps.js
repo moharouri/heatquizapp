@@ -7,6 +7,10 @@ export function getMapRequest(Id){
     return GET_REQUEST_API('CourseMap/GetCourseMapPlayById_PORTAL/'+Id, null, false)
 }
 
+export function addMapPDFStatisticRequest(b){
+    return ADD_REQUEST_FILE_API('CourseMap/AddPDFStatistic/', b)
+}
+
 export function getMapExtendedRequest(Id){
     return GET_REQUEST_API('CourseMap/GetCourseMapViewEditById_PORTAL/'+Id, null, false)
 }

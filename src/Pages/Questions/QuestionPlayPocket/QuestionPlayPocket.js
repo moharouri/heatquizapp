@@ -12,7 +12,7 @@ export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
 
     const selectedPlayQuestion = (Id, Type) => {
         const selectionList = {
-            [CLICKABLE_QUESTION_PARAMETER]: () => <ClickableQuestionPlay Id={Id} showSolution = {true} deadLoad={deadLoad}/>,
+            [CLICKABLE_QUESTION_PARAMETER]: () => <ClickableQuestionPlay Id={Id} showSolution = {true} deadLoad={deadLoad} />,
             [KEYBOARD_QUESTION_PARAMETER]: () => <KeyboardQuestionPlay Id={Id} showSolution = {true} deadLoad={deadLoad}/>,
             [MULTIPLE_CHOICE_QUESTION_PARAMETER]: () => <MultipleChoiceQuestion Id={Id} showSolution={true} deadLoad={deadLoad}/>,
         }

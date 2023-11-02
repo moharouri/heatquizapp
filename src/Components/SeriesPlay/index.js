@@ -23,7 +23,7 @@ import { ViewSolutionComponent } from "../ViewSolutionComponent";
 import { ErrorComponent } from "../ErrorComponent";
 var timer
 
-export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
+export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
 
     const { 
         isLoadingSeries, Series, getSeries, errorGetSeries,
@@ -115,12 +115,24 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
 
     useEffect(() => {
         if(showFinalPage){
-
             //Post series play statistics to the database
             let statData = new FormData()
 
             statData.append('SeriesId', Series.Id)
             statData.append('Player', currentPlayerKey)
+
+            if(mapKey){
+                statData.append('MapKey', mapKey)
+            }
+
+            if(mapName){
+                statData.append('MapName', mapName)
+            }
+
+            if(mapElementName){
+                statData.append('MapElementName', mapElementName)
+            }
+
             statData.append('SuccessRate', playedElements.filter(a => a.Correct).length+"/"+playedElements.length)
             statData.append('TotalTime', playTime)
             statData.append('OnMobile',  false)
@@ -339,6 +351,8 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                 showSolution={true}
 
                 nextAction = {() => goNext()}
+
+                mapKey={mapKey}
             />,
             [KEYBOARD_QUESTION_PARAMETER]: () => 
             <KeyboardQuestionPlay 
@@ -347,6 +361,8 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                 showSolution={true}
 
                 nextAction = {() => goNext()}
+
+                mapKey={mapKey}
             />,
             [MULTIPLE_CHOICE_QUESTION_PARAMETER]: () => 
             <MultipleChoiceQuestion 
@@ -355,6 +371,8 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries}){
                 showSolution={true}
                 
                 nextAction = {() => goNext()}
+
+                mapKey={mapKey}
             />,
         }
         

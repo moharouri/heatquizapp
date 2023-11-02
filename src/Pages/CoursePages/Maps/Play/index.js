@@ -12,15 +12,19 @@ import { FixURL, goToMapPlay } from "../../../../services/Auxillary";
 
 import './Play.css'
 import { getMapKey_LS, getMapPlayStatisticsRequest_LS, updateMapKey_LS, updateMapPlayStatisticsRequest_LS } from "../../../../services/Maps";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 export function MapPlay(){
     const {
-        loadingMap, getMapError, map, getMap
+        loadingMap, getMapError, map, getMap,
+        addMapPDFStatistic
     } = useMaps()
     const {id} = useParams()
 
     const [api, contextHolder] = message.useMessage()
     const [notificationApi, notificationContextHolder] = notification.useNotification();
+
+    const {currentPlayerKey} = useAuth()
 
     const [playStats, setPlayStats] = useState(null)
 
@@ -93,10 +97,11 @@ export function MapPlay(){
         top:  ((imageWidth)/BackgroundImageWidth)*p.Badge_Y + topOffset,
     })
 
-    const playSeriesActivate = (s) => {
+    const playSeriesActivate = (s, e) => {
         notificationApi.destroy()
         setPlaySeries(true)
         setSelectedPlaySeries(s)
+        setSelectedMapElement(e)
     }   
 
     const renderRequiredElement = (e) => {
@@ -129,6 +134,14 @@ export function MapPlay(){
         })
     }
 
+    const addPDFStat = (e) => {
+        const data = new FormData()
+        data.append('ElementId', e.Id)
+        data.append('Player', currentPlayerKey)
+
+        addMapPDFStatistic(data)
+    }
+
     const onClickElement = (e) => {
         notificationApi.destroy()
         setSelectedMapElement(e)
@@ -157,13 +170,14 @@ export function MapPlay(){
 
         //Only question series 
         if(QuestionSeries && !(PDFURL || ExternalVideoLink || VideoURL || MapAttachment)){
-            playSeriesActivate(QuestionSeries)
+            playSeriesActivate(QuestionSeries, e)
             return
         }
 
         //Only pdf
         if(PDFURL && !(QuestionSeries || ExternalVideoLink || VideoURL|| MapAttachment)){
             window.open(PDFURL)
+            addPDFStat(e)
             return
         }   
 
@@ -203,24 +217,30 @@ export function MapPlay(){
              >
                 {QuestionSeries && 
                 (!seriesImage ? 
-                <Button onClick={() => playSeriesActivate(QuestionSeries)}>Series </Button> 
+                <Button onClick={() => playSeriesActivate(QuestionSeries, e)}>Series </Button> 
                 : 
                 <img 
                     alt="series"
                     className="map-element-modal-img"
                     src={seriesImage}
-                    onClick={() => playSeriesActivate(QuestionSeries)}
+                    onClick={() => playSeriesActivate(QuestionSeries, e)}
                 />)}
 
                 {PDFURL && 
                 (!pdfImage ? 
-                <Button onClick={() => window.open(PDFURL)}>PDF</Button>
+                <Button onClick={() => {
+                    addPDFStat(e)
+                    window.open(PDFURL)
+                }}>PDF</Button>
                 :
                 <img 
                     alt="pdf"
                     className="map-element-modal-img"
                     src={pdfImage}
-                    onClick={() => window.open(PDFURL)}
+                    onClick={() => {
+                        addPDFStat(e)
+                        window.open(PDFURL)
+                    }}
                 />)}
                 
                 {ExternalVideoLink && 
@@ -521,6 +541,10 @@ const setLocalKey = () => {
                             const updatedPlayStats = updateMapPlayStatisticsRequest_LS(({..._playStats, Id: id}))
                             setPlayStats(updatedPlayStats)
                         }}
+
+                        mapKey = {localMapKey}
+                        mapName={map.Title}
+                        mapElementName={selectedMapElement.Title}
                     />
                 }
 

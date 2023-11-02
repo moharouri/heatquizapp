@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Drawer, Timeline, Space, Pagination, Dropdown } from "antd";
+import { Spin, Drawer, Timeline, Space, Pagination, Dropdown, Skeleton } from "antd";
 import {ArrowLeftOutlined, InsertRowLeftOutlined, SolutionOutlined, EditOutlined, TrophyOutlined} from '@ant-design/icons';
 import { useReports } from "../../contexts/ReportsContext";
 import './PlayerTimeline.css'
@@ -29,13 +29,15 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
     const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
     const [selectedSeries, setSelectedSeries] = useState({Code:''})
 
-    const {player} = selectedPlayer
+    const {Code: player} = selectedPlayer
 
     useEffect(() => {
-        setSeriesRefs([])
-        setCurrentSeriesIndex(1)
+        if(open){
+            setSeriesRefs([])
+            setCurrentSeriesIndex(1)
 
-        getPlayerTimelineReport(selectedPlayer)
+            getPlayerTimelineReport(selectedPlayer)
+        }
 
     }, [open])
 
@@ -126,7 +128,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                 bodyStyle={{}}
                 closeIcon={<ArrowLeftOutlined />}
             >
-            {loadingPlayerTimelineReport && <Spin/>}
+            {loadingPlayerTimelineReport && <Skeleton/>}
 
             {getPlayerTimelineReportError && !loadingPlayerTimelineReport && 
                 <ErrorComponent 
