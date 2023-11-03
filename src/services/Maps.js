@@ -1,10 +1,15 @@
-import { ADD_REQUEST_BODY_API, ADD_REQUEST_FILE_API, EDIT_REQUEST_BODY_API, EDIT_REQUEST_FILE_API, GET_REQUEST_API } from "./APIRequests";
+import { ADD_REQUEST_BODY_API, ADD_REQUEST_FILE_API, EDIT_REQUEST_BODY_API, EDIT_REQUEST_FILE_API, GET_REQUEST_API, GET_REQUEST_BODY_API } from "./APIRequests";
 
 const MAP_LS_STORAGE_NAME = 'MAP_HEAT_QUIZ_2023_ABCDEFG'
 const MAP_KEY_LS_STORAGE_NAME = 'MAP_HEAT_QUIZ_2023_ABCDEFG_KEY'
+const MAP_VISITS_LS_STORAGE_NAME = 'MAP_HEAT_QUIZ_2023_ABCDEFG_VISITS'
 
 export function getMapRequest(Id){
     return GET_REQUEST_API('CourseMap/GetCourseMapPlayById_PORTAL/'+Id, null, false)
+}
+
+export function getRecentlyVistedMapsRequest(Ids){
+    return ADD_REQUEST_FILE_API('CourseMap/GetRecentlyVisitedCourseMapsByIds/', Ids)
 }
 
 export function addMapPDFStatisticRequest(b){
@@ -150,4 +155,41 @@ export function getMapKey_LS(Id){
 export function updateMapKey_LS(Id, key){
     localStorage.setItem(MAP_KEY_LS_STORAGE_NAME + Id, key)
     return key
+}
+
+export function getMapVisit_LS(){
+    const results_LS = localStorage.getItem(MAP_VISITS_LS_STORAGE_NAME)
+
+    return results_LS.split(',')
+}
+
+export function recordMapVisit_LS(Id){
+    //read from local storage
+    let results_LS = localStorage.getItem(MAP_VISITS_LS_STORAGE_NAME) || ""
+
+    //convert to list
+    //omit empty or null values
+    results_LS = results_LS.split(',').filter(a => a)
+
+    //check if already included
+    if(!results_LS.includes(Id)){
+
+        //Top 5 visited
+        if(results_LS.length < 5) {
+            results_LS.push(Id);
+        }
+        //First in last out data structure
+        else{
+            let new_list = results_LS.slice(1)
+            new_list.push(Id)
+
+            results_LS = new_list
+        }
+    }
+
+    //convert back to string 
+    results_LS = results_LS.join(',')
+
+    //save to local storage
+    localStorage.setItem(MAP_VISITS_LS_STORAGE_NAME, results_LS)
 }

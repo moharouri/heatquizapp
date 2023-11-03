@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
-import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
+import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, getRecentlyVistedMapsRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
 
 const Context = React.createContext()
 
@@ -12,6 +12,8 @@ export function MapsProvider ({children}){
     
     //Fetch courses from API
     const {loading: loadingMap, value: map, error: getMapError, execute: getMap} = useAsyncFn((Id) => getMapRequest(Id))
+    const {loading: loadingRecentlyVistedMaps, value: recentlyVistedMaps, error: getRecentlyVistedMapsError, execute: getRecentlyVistedMaps} = useAsyncFn((Ids) => getRecentlyVistedMapsRequest(Ids))
+    
     const {loading: loadingAddMapPDFStatistic, value: addMapPDFStatisticResult, error: addMapPDFStatisticError, execute: addMapPDFStatistic} = useAsyncFn((b) => addMapPDFStatisticRequest(b))
 
     const {loading: loadingEditMapBasicInfo, value: editMapBasicInfoResult, error: editMapBasicInfoError, execute: editMapBasicInfo} = useAsyncFn((Id) => editMapBasicInfoRequest(Id))
@@ -193,7 +195,12 @@ export function MapsProvider ({children}){
             loadingDeattachMapToElement,
             deattachMapToElementResult,
             deattachMapToElementError,
-            deattachMapToElement
+            deattachMapToElement,
+
+            loadingRecentlyVistedMaps,
+            recentlyVistedMaps,
+            getRecentlyVistedMapsError,
+            getRecentlyVistedMaps
         }}>
             {children}
         </Context.Provider>

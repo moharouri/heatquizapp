@@ -70,6 +70,12 @@ export const goToMapPlay = (m) => {
   goToPageRelativePath('playcoursemap/'+Id)
 }
 
+export const goToMapPlaySamePage = (navigate, m) => {
+  const {Id} = m
+
+  navigate('playcoursemap/'+Id)
+}
+
 
 //Function to convert user name to short letters
 export const getShortenedName = (name) => {

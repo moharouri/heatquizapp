@@ -11,7 +11,7 @@ import { SeriesPlay } from "../../../../Components/SeriesPlay";
 import { FixURL, goToMapPlay } from "../../../../services/Auxillary";
 
 import './Play.css'
-import { getMapKey_LS, getMapPlayStatisticsRequest_LS, updateMapKey_LS, updateMapPlayStatisticsRequest_LS } from "../../../../services/Maps";
+import { getMapKey_LS, getMapPlayStatisticsRequest_LS, recordMapVisit_LS, updateMapKey_LS, updateMapPlayStatisticsRequest_LS } from "../../../../services/Maps";
 import { useAuth } from "../../../../contexts/AuthContext";
 
 export function MapPlay(){
@@ -53,9 +53,12 @@ export function MapPlay(){
         setPlaySeries(false)
         setSelectedPlaySeries(null)
 
+        //Get locally stored map-specific key
         const key = getMapKey_LS(id)
-
         setLocalMapKey(key)
+
+        //Record a visit
+        recordMapVisit_LS(id)
     }
 
     useEffect(() => {
