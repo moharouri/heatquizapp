@@ -106,9 +106,10 @@ export function StudentFeedback(){
                         >
                             Search 
                         </Button>
+                        {studentFeedback &&
                         <p>
-                            {studentFeedback && (studentFeedback.reduce((r, c) => r += c.feedback.length, 0) + " comments")} 
-                        </p>
+                             {studentFeedback.reduce((r, c) => r += c.feedback.length, 0)} <strong>new</strong> comments
+                        </p>}
                     </Space>
                 </div>
         )

@@ -88,8 +88,8 @@ const NavigationDrawer = () => {
         type:'group'
     },    
     {
-        label:'Notifications',
-        key:'/notifications',
+        label:'User comments',
+        key:'/user_comments',
         icon: <BellTwoTone  style={{...iconStyle}}/>
     },    
     {

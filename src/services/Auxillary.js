@@ -49,6 +49,12 @@ export const goToQuestionViewEdit = (q) => {
   goToPageRelativePath('question_view_edit/'+Id+'/'+Type)
 }
 
+export const goToQuestionViewEditSamePage = (navigate, q) => {
+  const {Id, Type} = q
+
+  navigate('/question_view_edit/'+Id+'/'+Type)
+}
+
 
 //Function to open a new window with for a certin series
 export const goToSeriesViewEdit = (s) => {
@@ -84,6 +90,11 @@ export const beautifyDatetime = (dt) => {
 //Function to convert date to proper format 
 export const beautifyDate = (dt) => {
   return (dt.substring(0, 10))
+}
+
+//Function to convert time to proper format 
+export const beautifyTime = (dt) => {
+  return (dt.substring(11, 19))
 }
 
 
@@ -219,4 +230,33 @@ export function getUniqueValues(array){
 
 function onlyUnique(value, index, self) { 
   return self.indexOf(value) === index;
+}
+
+//Function to convert datetime to (time) ago 
+export function timeSince(_date) {
+    let date = Date.parse(_date);
+    var seconds = Math.floor((new Date() - date) / 1000);
+
+    var interval = seconds / 31536000;
+
+    if (interval > 1) {
+      return Math.floor(interval) + " years";
+    }
+    interval = seconds / 2592000;
+    if (interval > 1) {
+      return Math.floor(interval) + " months";
+    }
+    interval = seconds / 86400;
+    if (interval > 1) {
+      return Math.floor(interval) + " days";
+    }
+    interval = seconds / 3600;
+    if (interval > 1) {
+      return Math.floor(interval) + " hours";
+    }
+    interval = seconds / 60;
+    if (interval > 1) {
+      return Math.floor(interval) + " minutes";
+    }
+    return Math.floor(seconds) + " seconds";
 }

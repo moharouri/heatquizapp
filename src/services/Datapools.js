@@ -34,6 +34,10 @@ export function unsubscribeQuestionFeedbackRequest(data){
     return EDIT_REQUEST_FILE_API('DataPools/UnsubscribeNotifications', data, false)
 }
 
+export function registerFeedbackSeenRequest(){
+    return GET_REQUEST_API('DataPools/RegisterSeenNotifications')
+}
+
 
 
 export function getCurrentDatapool(){

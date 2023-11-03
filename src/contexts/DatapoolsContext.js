@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { AddDataPoolRequest, EditDataPoolAccessRequest, EditDataPoolRequest, getCurrentDatapool, getDatapools, getDatapoolsAdmin, getUserNotificationSubscriptionsRequest, setCurrentDatapool, subscribeQuestionFeedbackRequest, unsubscribeQuestionFeedbackRequest } from "../services/Datapools"
+import { AddDataPoolRequest, EditDataPoolAccessRequest, EditDataPoolRequest, getCurrentDatapool, getDatapools, getDatapoolsAdmin, getUserNotificationSubscriptionsRequest, registerFeedbackSeenRequest, setCurrentDatapool, subscribeQuestionFeedbackRequest, unsubscribeQuestionFeedbackRequest } from "../services/Datapools"
 import { useAsyncFn } from "../hooks/useAsync"
 
 const Context = React.createContext()
@@ -22,6 +22,7 @@ export function DatapoolsProvider ({children}){
     const {value: subscribeQuestionFeedbackResult, errorSubscribeQuestionFeedback, loading:isLoadingSubscribeQuestionFeedback, execute: subscribeQuestionFeedback} = useAsyncFn((b) => subscribeQuestionFeedbackRequest(b))
     const {value: unsubscribeQuestionFeedbackResult, errorUnsubscribeQuestionFeedback, loading:isLoadingUnsubscribeQuestionFeedback, execute: unsubscribeQuestionFeedback} = useAsyncFn((b) => unsubscribeQuestionFeedbackRequest(b))
     const {value: getUserNotificationSubscriptionsResult, errorGetUserNotificationSubscriptions, loading:isLoadingGetUserNotificationSubscriptions, execute: getUserNotificationSubscriptions} = useAsyncFn(() => getUserNotificationSubscriptionsRequest())
+    const {value: registerFeedbackSeenResult, errorRegisterFeedbackSeen, loading:isLoadingRegisterFeedbackSeen, execute: registerFeedbackSeen} = useAsyncFn(() => registerFeedbackSeenRequest())
 
     const [selectedDatapool, setSelectedDatapool] = useState(null)
 
@@ -101,7 +102,12 @@ export function DatapoolsProvider ({children}){
             getUserNotificationSubscriptionsResult,
             errorGetUserNotificationSubscriptions,
             isLoadingGetUserNotificationSubscriptions,
-            getUserNotificationSubscriptions
+            getUserNotificationSubscriptions,
+
+            registerFeedbackSeenResult,
+            errorRegisterFeedbackSeen,
+            isLoadingRegisterFeedbackSeen,
+            registerFeedbackSeen
         }}>
             {children}
         </Context.Provider>
