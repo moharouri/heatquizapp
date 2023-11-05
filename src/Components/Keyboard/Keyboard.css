@@ -6,6 +6,8 @@
     margin-right: 0.5vw;
     margin-bottom: 0.5vw;
 
+    min-width: 50px;
+
     flex-direction: row;
     display: flex;
     align-items: center;

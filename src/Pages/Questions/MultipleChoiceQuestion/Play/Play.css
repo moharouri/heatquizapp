@@ -65,7 +65,11 @@
 
 .multiple-choice-question-play-choice-img{
     width: 5vw;
+    min-width: 140px;
+
     height: 5vw;
+    min-height: 140px;
+
     object-fit: contain;
 }
 

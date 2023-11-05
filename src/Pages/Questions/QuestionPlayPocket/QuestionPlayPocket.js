@@ -38,9 +38,6 @@ export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
         width={maginificationValue}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         >

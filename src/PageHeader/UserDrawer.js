@@ -1,10 +1,10 @@
 import React from 'react';
-import {Avatar, Badge, Button, Divider, Drawer, Dropdown, List, Select, Space, Spin, Tooltip } from 'antd';
+import {Avatar, Badge, Button, Col, Divider, Drawer, Dropdown, List, Row, Select, Space, Spin, Tooltip } from 'antd';
 import {UserOutlined, BellOutlined, LogoutOutlined} from '@ant-design/icons';
 import { useDatapools } from '../contexts/DatapoolsContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import {beautifyTime, getShortenedName, goToQuestionViewEditSamePage, timeSince } from '../services/Auxillary';
+import {getShortenedName, goToQuestionViewEditSamePage, timeSince } from '../services/Auxillary';
 import { useComments } from '../contexts/CommentsContext';
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -20,6 +20,8 @@ const UserDrawer = () => {
   const [showUnseenComments, setShowUnseenComments] = useState(false)
 
   useEffect(() => {
+    if(isStudent) return;
+
     getUnreadComments()
     setShowUnseenComments(false)
 
@@ -73,6 +75,8 @@ const UserDrawer = () => {
   const unseenComments = getUnseenComments()
 
   const renderNotificationsList = () => {
+    if(isStudent) return;
+
     if(!unseenComments.CountInactive) return;
 
     const notifications = unseenComments.Comments
@@ -82,7 +86,6 @@ const UserDrawer = () => {
       <Drawer
           title="Notifications"
           placement="right"
-          width={'35%'}
           closable={false}
           onClose={() => setShowUnseenComments(false)}
           open={showUnseenComments}
@@ -115,29 +118,29 @@ const UserDrawer = () => {
                     registerCommentView(CommentSection.Id)
                   }}
                   className='hoverable hq-full-width'>
-                  <Space
-                    size={'large'}
-                    align='start'
+                  <Row
+                    gutter={[4,4]}
                     className="hq-full-width"
                   >
-                    <Avatar 
-                      className='commenter-avatar'
-                      src = {AddedByProfilePicture}
-                    >
-                      {shortenedName}
-                    </Avatar>
+                    <Col>
                       <Space
-                        direction="vertical"
-                        className="hq-full-width"
+                        size={'large'}
                       >
                         <Space
-                          size={'large'}
-                          className='hq-full-width hq-opposite-arrangement'
+                          size={'small'}
                         >
-                          <p className="default-title">{AddedByName}</p>
-                          <p className="default-gray">{timeSince(DateCreated)}{' '}ago</p>
+                          <Avatar 
+                            className='commenter-avatar'
+                            src = {AddedByProfilePicture}
+                          >
+                            {shortenedName}
+                          </Avatar>
+                          <p className='default-title'>{AddedByName}</p>
                         </Space>
-                        <MentionsInput
+                        <p className='default-gray'>{timeSince(DateCreated)}{' '}ago</p>
+
+                      </Space>
+                      <MentionsInput
                           value={Text}
                           disabled
                           style={{
@@ -163,23 +166,22 @@ const UserDrawer = () => {
                               style = {{}}
                             />
                           </MentionsInput>
-                        </Space>
-                        &nbsp;
-                        &nbsp;
-                        &nbsp;
-                        <Space direction='vertical' align='center'>
-                            <p className="default-gray">{Code}</p>
+                    </Col>
+                    
+                    <Col>
+                      <Space direction='vertical' align='center'>
+                        <p className="default-gray">{Code}</p>
 
-                            <img 
-                              alt={Code}
-                              className='notification-question-img'
-                              src={Base_ImageURL}
-                            />
-                        </Space>
-                      </Space>      
-                      
-                      <Divider/>
-                    </div>
+                        <img 
+                          alt={Code}
+                          className='notification-question-img'
+                          src={Base_ImageURL}
+                        />
+                      </Space>
+                    </Col>                        
+                  </Row>      
+                  <Divider/>
+                </div>
                 </Tooltip>)
               }}
             />
@@ -209,8 +211,9 @@ const UserDrawer = () => {
                 }}
               >
                 <div className='hq-full-width hoverable'>
-                  <Space size='large' align='start'>
-                  <div >
+                  <Row 
+                  gutter={[4,4]}>
+                  <Col>
                     <Space
                       size={'large'}
                     >
@@ -224,27 +227,23 @@ const UserDrawer = () => {
                         </Avatar>
                         <p className='default-title'>{Player}</p>
                       </Space>
+                      <p className='default-gray'>{timeSince(DateCreated)}{' '}ago {New && <span className='default-large default-orange'>*</span>}</p>
 
-                      <Space direction='vertical' align='start' size={'small'}>
-                        <p className='default-gray'>{timeSince(DateCreated)}{' '}ago {New && <span className='default-large default-orange'>*</span>}</p>
-                        <small className='default-gray'>{beautifyTime(DateCreated)}</small>
-                      </Space>
-                      
                     </Space>
                     <p>{FeedbackContent}</p>
-                  </div>
-                  &nbsp;
-                  &nbsp;
-                  &nbsp;
-                  <Space direction='vertical' align='center'>
-                    <p className="default-gray">{Code}</p>
-                    <img 
-                      alt={Code}
-                      className='notification-question-img'
-                      src={Base_ImageURL}
-                    />
-                  </Space>
-                </Space>
+                  </Col>
+                  
+                  <Col>
+                    <Space direction='vertical' align='center'>
+                      <p className="default-gray">{Code}</p>
+                      <img 
+                        alt={Code}
+                        className='notification-question-img'
+                        src={Base_ImageURL}
+                      />
+                    </Space>
+                  </Col>
+                </Row>
                 <Divider/>
               </div>
                 

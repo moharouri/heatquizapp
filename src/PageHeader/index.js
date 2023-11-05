@@ -3,7 +3,8 @@ import './PageHeader.css';
 import React from 'react';
 import NavigationDrawer from './NavigationDrawer';
 import UserDrawer from './UserDrawer';
-import logo from '../Sources/heatquizlogo_transparent.png'; 
+import logoLarge from '../Sources/heatquizlogo_transparent.png'; 
+import logoSmall from '../Sources/heatquizlogo_transparent_small.png'; 
 
 const PageHeader = () => {
 
@@ -16,8 +17,14 @@ const PageHeader = () => {
                 <NavigationDrawer />
             </div>
             <img 
-                src={logo}
-                className="app-logo"
+                src={logoLarge}
+                className="hq-app-logo-large"
+                alt='Heat quiz app logo'
+            />
+
+            <img 
+                src={logoSmall}
+                className="hq-app-logo-small"
                 alt='Heat quiz app logo'
             />
 

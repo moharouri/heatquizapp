@@ -29,6 +29,7 @@
 
 .navigation-bar-datapools-select{
     width: 15vw;
+    min-width: 160px;
     align-items: center;
 }
 
@@ -56,11 +57,30 @@
     background-color: rgba(0, 191, 255, 0.8);
 }
 
-.app-logo{
-    height: 43px;
-    width: '100%';
+.hq-app-logo-large{
+    width: 20vw;
+    max-height: 43px;
     object-fit: contain;
     float: left;
+}
+
+.hq-app-logo-small{
+    width: 30px;
+    max-height: 30px;
+    object-fit: contain;
+    float: left;
+}
+
+@media screen and (max-width:420px) {
+    .hq-app-logo-large{
+        display: none;
+    }
+}
+
+@media screen and (min-width:421px) {
+    .hq-app-logo-small{
+        display: none;
+    }
 }
 
 .notification-question-img{

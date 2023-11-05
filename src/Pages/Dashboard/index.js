@@ -57,9 +57,7 @@ export function Dashboard(){
                             return(
                             <Col 
                                 key={Id}
-                                xs={3} 
                                 className="hoverable hq-element-container"
-
                                 onClick={() => goToMapPlaySamePage(navigate, m)}
                             >
                                 <Space 

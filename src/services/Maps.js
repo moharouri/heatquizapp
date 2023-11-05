@@ -158,7 +158,7 @@ export function updateMapKey_LS(Id, key){
 }
 
 export function getMapVisit_LS(){
-    const results_LS = localStorage.getItem(MAP_VISITS_LS_STORAGE_NAME)
+    const results_LS = localStorage.getItem(MAP_VISITS_LS_STORAGE_NAME) || ""
 
     return results_LS.split(',')
 }

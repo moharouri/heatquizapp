@@ -256,8 +256,8 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                     </Col>
                 </Row>
                 <br/>
-
-                {!showScore && <Button
+                {!showScore && 
+                <Button
                     type="primary"
                     size="small"
                     onClick={() => checkAnswer()}
@@ -265,12 +265,13 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                     Check answer
                 </Button>}
 
-                {showScore && 
-                <div>
-                    <Divider />
-                    <p>Score: {' '} {finalScore}</p>
-                    <br/>
-                    <Space size={'large'}>
+                {showScore && <Divider />}
+                    
+                {showScore && <p>Score: {' '} {finalScore}</p>}
+                
+                {showScore &&
+                <Row gutter={[4,4]}>
+                    <Col>
                         {showSolution && !showCorrectSolution &&
                         <Button
                             size="small"
@@ -278,17 +279,22 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                         >
                             Show correct solution
                         </Button>}
+                    </Col>
+
+                    <Col>
                         {PDFURL && 
                         <ViewSolutionComponent 
-                        question={clickableQuestionPlay.Question}
-                        correct={correctAnswer}
-                      />}
+                            question={clickableQuestionPlay.Question}
+                            correct={correctAnswer}
+                        />}
+                    </Col>
 
+                    <Col>
                     {nextAction && <NextButton 
                         nextAction={() => nextAction()}
                       />}
-                    </Space>    
-                </div>}
+                    </Col>
+                </Row>}
             </div>
         )
     }

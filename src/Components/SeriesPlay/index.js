@@ -21,6 +21,7 @@ import { SendFeedback } from "../../Pages/StudentFeedback/SendFeedback";
 import { useAuth } from "../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../ViewSolutionComponent";
 import { ErrorComponent } from "../ErrorComponent";
+import { ImageModal } from "../ImageModal";
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
@@ -389,11 +390,15 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             <Space 
                 size={'large'}
             >
-                <img 
-                    src={Base_ImageURL}
-                    alt={Code}
-                    className="series-play-final-page-item-img"
-                />
+                <ImageModal
+                    URL={Base_ImageURL}
+                >
+                    <img 
+                        src={Base_ImageURL}
+                        alt={Code}
+                        className="series-play-final-page-item-img"
+                    />
+                </ImageModal>
 
                 <div>
                     <LatexRenderer 
@@ -462,12 +467,16 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             <Space 
                 size={'large'}
             >
-                <img 
-                    src={Base_ImageURL}
-                    alt={Code}
-                    className="series-play-final-page-item-img"
-                />
-
+                <ImageModal
+                    URL={Base_ImageURL}
+                >
+                    <img 
+                        src={Base_ImageURL}
+                        alt={Code}
+                        className="series-play-final-page-item-img"
+                    />
+                </ImageModal>
+                
                 <div>
                     <LatexRenderer 
                         latex={Latex}
@@ -731,7 +740,10 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                     return( 
                         <Col
                             key={e.Id}
-                            xs={12}
+                            lg={{span:12}}
+                            md={{span:12}}
+                            sm={{span:12}}
+                            xs={{span:24}}
                             className="series-play-final-page-item-container-base"
                         >
                             <div className="series-play-final-page-item-container">

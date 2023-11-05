@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Col, Divider, Skeleton, Space, message } from "antd";
+import { Button, Col, Divider, Row, Skeleton, Space, message } from "antd";
 
 import './Play.css'
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 import { NextButton } from "../../../../Components/NextButton";
+import { ImageModal } from "../../../../Components/ImageModal";
 
 export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
 
@@ -70,11 +71,15 @@ export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements
                 <Space 
                 className="multiple-choice-question-play-info-row"
                 size={'large'}>
-                    <img 
-                        alt={Code}
-                        src={Base_ImageURL}
-                        className="multiple-choice-question-play-img"
-                    />
+                    <ImageModal
+                        URL={Base_ImageURL}
+                    >
+                        <img 
+                            alt={Code}
+                            src={Base_ImageURL}
+                            className="multiple-choice-question-play-img"
+                        />
+                    </ImageModal>
                     <LatexRenderer 
                         latex={Latex}
                     />
@@ -130,33 +135,40 @@ export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements
                     >
                         Check answer
                     </Button>}
-                    {showScore && 
-                    <Space size={'large'}>
-                    <p>Your answer is {' '} 
-                    {isScoreCorrect ? 
-                    <span
-                            className="multiple-choice-question-play-result-correct"
-                            >
-                                correct
-                            </span>
-                        : 
+
+                    {showScore &&
+                    <Row gutter={[4,4]}>
+                        <Col>
+                        <p>
+                            Your answer is {' '} 
+                            {isScoreCorrect ? 
                             <span
-                            className="multiple-choice-question-play-result-incorrect"
-                            >
-                                incorrect
-                            </span>
-                        }</p>  
-
-                      {PDFURL && 
-                      <ViewSolutionComponent 
-                        question={multipleChoiceQuestionPlay}
-                        correct={isScoreCorrect}
-                      />}
-
-                    {nextAction && <NextButton 
-                        nextAction={() => nextAction()}
-                    />}
-                    </Space>}
+                                    className="multiple-choice-question-play-result-correct"
+                                    >
+                                        correct
+                                    </span>
+                                : 
+                                    <span
+                                    className="multiple-choice-question-play-result-incorrect"
+                                    >
+                                        incorrect
+                                    </span>
+                                }</p>
+                        </Col>
+                        <Col>
+                            {PDFURL && 
+                            <ViewSolutionComponent 
+                                question={multipleChoiceQuestionPlay}
+                                correct={isScoreCorrect}
+                            />}
+                        </Col>
+                        <Col>
+                            {nextAction && <NextButton 
+                                nextAction={() => nextAction()}
+                            />}
+                        </Col>
+                    </Row>}
+                   
                 </Divider>
                 <Space direction="vertical">
                     {randomChoices.map((c, ci) => {

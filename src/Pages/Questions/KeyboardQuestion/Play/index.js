@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Divider, List, Skeleton, Space, message } from "antd";
+import { Button, Col, Divider, List, Row, Skeleton, Space, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { Keyboard } from "../../../../Components/Keyboard";
 
@@ -9,6 +9,7 @@ import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../Functio
 import { useAuth } from "../../../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 import { NextButton } from "../../../../Components/NextButton";
+import { ImageModal } from "../../../../Components/ImageModal";
 
 export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
 
@@ -74,11 +75,16 @@ export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, 
                 <Space 
                 className="keyboard-question-play-info-row"
                 size={'large'}>
-                    <img 
-                        alt={Code}
-                        src={Base_ImageURL}
-                        className="keyboard-question-play-img"
-                    />
+                    <ImageModal
+                        URL={Base_ImageURL}
+                    >
+                        <img 
+                            alt={Code}
+                            src={Base_ImageURL}
+                            className="keyboard-question-play-img"
+                        />
+                    </ImageModal>
+                    
                    <div className="keyboard-question-play-info-answer-line">
                     <LatexRenderer 
                             latex={Latex}
@@ -93,9 +99,9 @@ export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, 
                     
                    </div>
                 </Space>
-                <Divider 
-                    
-                    orientation="left">
+                <Divider orientation="left">  
+                    <Row gutter={[4,4]}>
+                        <Col>
                         {!showAnswer && <Button
                             size="small"
                             type="primary"
@@ -142,38 +148,50 @@ export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, 
                         >
                             Check answer
                         </Button>}
+                        </Col>
 
-                        {showAnswer && 
-                        <Space
-                            size={'large'}
-                        >
-                            <p>You answer is {answerResult.answerStatus ? 
-                                <span
-                                className="keyboard-question-play-result-correct"
-                                >
-                                    correct
-                                </span>
-                            : 
-                                <span
-                                className="keyboard-question-play-result-incorrect"
-                                >
-                                    incorrect
-                                </span>
-                            }</p>
-                            {PDFURL && 
-                            <ViewSolutionComponent 
-                            question={keyboardQuestionPlay}
-                            correct={answerResult.answerStatus}
-                          />}
-                          {nextAction && <NextButton
+                        <Col>
+                            {showAnswer && 
+                            <Space
+                                size={'large'}
+                            >
+                                <p>You answer is {answerResult.answerStatus ? 
+                                    <span
+                                    className="keyboard-question-play-result-correct"
+                                    >
+                                        correct
+                                    </span>
+                                : 
+                                    <span
+                                    className="keyboard-question-play-result-incorrect"
+                                    >
+                                        incorrect
+                                    </span>
+                                }</p>
+                                
+                            
+                            </Space>
+                            }
+                        </Col>
+
+                        <Col>
+                            {showAnswer && PDFURL && 
+                                <ViewSolutionComponent 
+                                question={keyboardQuestionPlay}
+                                correct={answerResult.answerStatus}
+                            />}
+                        </Col>
+
+                        <Col>
+                            {showAnswer && nextAction && 
+                            <NextButton
                                 nextAction={() => nextAction()}
                             />}
-                        </Space>
-                        }
+                        </Col>
+                    </Row>
 
-
-                    </Divider>
-                    {!showAnswer &&
+                </Divider>
+                {!showAnswer &&
                     <div>
                         <Keyboard 
                             Id={keyboard.Id}

@@ -42,6 +42,7 @@
 
 .series-play-final-page-item-img{
     width: 10vw;
+    min-width: 70px;
     height: auto;
     object-fit: contain;
 }

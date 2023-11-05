@@ -3,7 +3,7 @@ import { PagesWrapper } from "../../../../PagesWrapper";
 import { useParams } from "react-router-dom";
 import { useMaps } from "../../../../contexts/MapsContext";
 import { useEffect } from "react";
-import { Button, FloatButton, Input, Modal, Result, Skeleton, Space, message, notification } from "antd";
+import { Button, Col, FloatButton, Input, Modal, Result, Row, Skeleton, Space, message, notification } from "antd";
 import { useState } from "react";
 import { ZoomInOutlined, ZoomOutOutlined, FlagTwoTone, LockTwoTone, PushpinOutlined } from '@ant-design/icons';
 import { MAP_SCALE_REDUCTION } from "./constants";
@@ -114,7 +114,7 @@ export function MapPlay(){
 
         notificationApi.open({
             message: Title,
-            style:{width:'25vw'},
+            style:{width:'25vw', minWidth:'400px'},
             description:
             <Result 
                 icon={<LockTwoTone />}
@@ -211,74 +211,85 @@ export function MapPlay(){
         }
 
         notificationApi.open({
-            style:{width:'36vw'},
+            style:{width:'36vw', minWidth:'400px'},
             message: Title,
             description:
-             <Space
-                size={'large'}
-                align="center"
+             <Row
+                gutter={[4,4]}
              >
                 {QuestionSeries && 
-                (!seriesImage ? 
-                <Button onClick={() => playSeriesActivate(QuestionSeries, e)}>Series </Button> 
-                : 
-                <img 
-                    alt="series"
-                    className="map-element-modal-img"
-                    src={seriesImage}
-                    onClick={() => playSeriesActivate(QuestionSeries, e)}
-                />)}
+                <Col>
+                    {(!seriesImage ? 
+                    <Button onClick={() => playSeriesActivate(QuestionSeries, e)}>Series </Button> 
+                    : 
+                    <img 
+                        alt="series"
+                        className="map-element-modal-img"
+                        src={seriesImage}
+                        onClick={() => playSeriesActivate(QuestionSeries, e)}
+                    />)}
+                </Col>}
 
                 {PDFURL && 
-                (!pdfImage ? 
-                <Button onClick={() => {
-                    addPDFStat(e)
-                    window.open(PDFURL)
-                }}>PDF</Button>
-                :
-                <img 
-                    alt="pdf"
-                    className="map-element-modal-img"
-                    src={pdfImage}
-                    onClick={() => {
+                <Col>
+                    {(!pdfImage ? 
+                    <Button onClick={() => {
                         addPDFStat(e)
                         window.open(PDFURL)
-                    }}
-                />)}
+                    }}>PDF</Button>
+                    :
+                    <img 
+                        alt="pdf"
+                        className="map-element-modal-img"
+                        src={pdfImage}
+                        onClick={() => {
+                            addPDFStat(e)
+                            window.open(PDFURL)
+                        }}
+                    />)}
+                </Col>}
                 
                 {ExternalVideoLink && 
-                (!linkImage ?
-                <Button  onClick={() => window.open(ExternalVideoLink)}>Link</Button>
-                :
-                <img 
-                    alt="link"
-                    className="map-element-modal-img"
-                    src={linkImage}
-                    onClick={() => window.open(ExternalVideoLink)}
-                />)}
+                    <Col>
+                        {(!linkImage ?
+                        <Button  onClick={() => window.open(ExternalVideoLink)}>Link</Button>
+                        :
+                        <img 
+                            alt="link"
+                            className="map-element-modal-img"
+                            src={linkImage}
+                            onClick={() => window.open(ExternalVideoLink)}
+                        />)}
+                    </Col>
+                }
                 
                 {VideoURL && 
-                (!videoImage ? 
-                <Button  onClick={() => window.open(VideoURL)}>VideoURL</Button> 
-                : 
-                <img 
-                    alt="video"
-                    className="map-element-modal-img"
-                    src={videoImage}
-                    onClick={() => window.open(VideoURL)}
-                />)}
+                    <Col>
+                        {(!videoImage ? 
+                        <Button  onClick={() => window.open(VideoURL)}>VideoURL</Button> 
+                        : 
+                        <img 
+                            alt="video"
+                            className="map-element-modal-img"
+                            src={videoImage}
+                            onClick={() => window.open(VideoURL)}
+                        />)}
+                    </Col>}
 
             {MapAttachment && 
-                <Space direction="vertical" align="center">
-                    <img 
-                        alt="map"
-                        className="map-element-modal-img"
-                        src={MapAttachment.Map.LargeMapURL}
-                        onClick={() => goToMapPlay(MapAttachment.Map)}
-                    />
-                    <small className="default-gray">{MapAttachment.Map.Title}</small>
-                </Space>}
-             </Space>,
+                <Col>
+                    <Space direction="vertical" align="center">
+                        <img 
+                            alt="map"
+                            className="map-element-modal-img"
+                            src={MapAttachment.Map.LargeMapURL}
+                            onClick={() => goToMapPlay(MapAttachment.Map)}
+                        />
+                        <small className="default-gray">{MapAttachment.Map.Title}</small>
+                    </Space>
+                </Col>
+            }
+             </Row>,
              duration: 0,
              placement:'top',
              icon:<FlagTwoTone/>
