@@ -2,15 +2,29 @@ import {Col, Drawer, Dropdown, Row, Skeleton, Space} from "antd";
 import React from "react";
 import { useLevelsOfDifficulty } from "../../contexts/LevelOfDifficultyContext";
 import { beautifyDate } from "../../services/Auxillary";
-import {ArrowLeftOutlined, EditOutlined, TrophyOutlined} from '@ant-design/icons';
+import {ArrowLeftOutlined, TrophyOutlined} from '@ant-design/icons';
 
 import { QUESTION_TYPES_SEARCH_NAMES } from "../Questions/List/constants";
+import { ErrorComponent } from "../../Components/ErrorComponent";
+import { useEffect } from "react";
+import { QuestionPlayPocket } from "../Questions/QuestionPlayPocket/QuestionPlayPocket";
+import { useState } from "react";
 
 export function ViewLevelOfDifficultyQuestions({open, onClose, LOD}){
-    const { isLoadingLODQuestions, errorGetLODQuestions, LODQuestions} = useLevelsOfDifficulty()
 
     if(!open) return <div/>;
 
+    const { isLoadingLODQuestions, errorGetLODQuestions, LODQuestions, getLODQuestions} = useLevelsOfDifficulty()
+
+    const [showPlayQuestionModal, setShowPlayQuestionModal] = useState(false)
+    const [selectedQuestion, setSelectedQuestion] = useState(false)
+
+
+    useEffect(() => {
+        if(open){
+            getLODQuestions(LOD.Id)
+        }
+    }, [open])
 
     const colorLine = (color) => (
         <div style={{width:'100%', height:4, backgroundColor: color, marginTop:1, marginBottom:1}}></div>
@@ -20,17 +34,20 @@ export function ViewLevelOfDifficultyQuestions({open, onClose, LOD}){
     const {Name, HexColor} = LOD
 
 
-    const questionActionList = (q) => [{
+    const questionActionList = (q) => [/*{
         key: 'view_edit_question',
         label: 'View edit question',
         icon: <EditOutlined/>,
         onClick: () => {}
-    },
+    },*/
     {
         key: 'play_question',
         label: 'Play question',
         icon: <TrophyOutlined style={{color:'green'}}/> ,
-        onClick: () => {}
+        onClick: () => {
+            setShowPlayQuestionModal(true)
+            setSelectedQuestion(q)
+        }
     }]
 
     const renderQuestions = () => {
@@ -50,41 +67,36 @@ export function ViewLevelOfDifficultyQuestions({open, onClose, LOD}){
                             key={q.Id}
                             xs={12}>
                                 <div
-                                    className={"series-edit-view-element"}
+                                    className="hq-element-container"
                                 >
-                                    <div
-                                        className="series-edit-view-element-internal"
-                                    >
+                                    <div>
                                             <Dropdown
                                                menu={{
                                                     items:questionActionList(q),
                                                     title:'Actions'
                                                 }}
                                             >
-                                            <p  className="series-edit-view-element-code"> {qi+1}{' '}{Code} </p>   
-                                            </Dropdown>         
-                                            <p className="series-edit-view-element-other-info">{AddedByName}</p>
-                                            <p className="series-edit-view-element-other-info">{beautifyDate(DateCreated)}</p>
+                                            <p  className="hoverable-plus"> {qi+1}{' '}{Code} </p>   
+                                            </Dropdown>   
+                                            <br/>      
+                                            <p className="default-gray">{AddedByName}</p>
+                                            <p className="default-gray">{beautifyDate(DateCreated)}</p>
                 
                 
                                             <img
                                                 alt={Code}
                                                 src={Base_ImageURL}
-                                                className="series-edit-view-element-img"
+                                                className="hq-img-size-1"
                                             />
-                                            <div className="series-edit-view-element-other-info">
-                                                            
-                                                <Space
-                                                    size={'large'}
-                                                >   
-                                                    <p>{qType}</p>
-                                                    <p>-</p>
-                                                    <p>{qTopic}</p>
-                                                    <p>-</p>
-                                                    <strong><p>{DatapoolName}</p></strong>
-                                                </Space>
-                                                
-                                            </div>
+                                            <Space
+                                                size={'large'}
+                                            >   
+                                                <p>{qType}</p>
+                                                <p>-</p>
+                                                <p>{qTopic}</p>
+                                                <p>-</p>
+                                                <strong><p>{DatapoolName}</p></strong>
+                                            </Space>
                                         </div>
                                     </div>
                                 </Col>)
@@ -100,14 +112,12 @@ export function ViewLevelOfDifficultyQuestions({open, onClose, LOD}){
         width={'80%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+        
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         footer={
             <div>
-                 <p  className="lod-edit-view-element-code">{Name}</p>
+                <p  className="default-gray">{Name}</p>
                 {colorLine(HexColor)}
             </div>
         }
@@ -116,6 +126,21 @@ export function ViewLevelOfDifficultyQuestions({open, onClose, LOD}){
             {isLoadingLODQuestions && <Skeleton />}
 
             {(!isLoadingLODQuestions && LODQuestions) && renderQuestions()}
+
+            {errorGetLODQuestions && !isLoadingLODQuestions && 
+                <ErrorComponent 
+                    error={errorGetLODQuestions}
+                    onReload={() => getLODQuestions(LOD)}
+                />
+            }
+
+            <QuestionPlayPocket 
+                open={showPlayQuestionModal}
+                onClose={() => setShowPlayQuestionModal(false)}
+
+                Id={selectedQuestion.Id}
+                Type={selectedQuestion.Type}
+            />
             
         </Drawer>
     )

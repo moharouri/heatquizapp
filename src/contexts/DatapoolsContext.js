@@ -13,9 +13,9 @@ export function DatapoolsProvider ({children}){
     const {value: datapools, errorGetDatapools, loading:isLoadingDatapools, execute: getAllDatapools} = useAsyncFn(() => getDatapools())
     const {value: datapoolsAdmin, errorGetDatapoolsAdmin, loading:isLoadingDatapoolsAdmin, execute: getAllDatapoolsAdmin} = useAsyncFn(() => getDatapoolsAdmin())
 
-    const {value: AddDataPoolResult, errorAddDataPool, loading:isLoadingAddDataPool, execute: AddDataPool} = useAsyncFn(() => AddDataPoolRequest())
+    const {value: AddDataPoolResult, errorAddDataPool, loading:isLoadingAddDataPool, execute: AddDataPool} = useAsyncFn((b) => AddDataPoolRequest(b))
 
-    const {value: EditDataPoolResult, errorEditDataPool, loading:isLoadingEditDataPool, execute: EditDataPool} = useAsyncFn(() => EditDataPoolRequest())
+    const {value: EditDataPoolResult, errorEditDataPool, loading:isLoadingEditDataPool, execute: EditDataPool} = useAsyncFn((b) => EditDataPoolRequest(b))
 
     const {value: EditDataPoolAccessResult, errorEditDataPoolAccess, loading:isLoadingEditDataPoolAccess, execute: EditDataPoolAccess} = useAsyncFn((b) => EditDataPoolAccessRequest(b))
 

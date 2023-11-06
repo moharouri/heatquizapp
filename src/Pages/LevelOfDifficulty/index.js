@@ -2,19 +2,18 @@ import React, { useState } from "react";
 import { PagesWrapper } from "../../PagesWrapper"
 import { useLevelsOfDifficulty } from "../../contexts/LevelOfDifficultyContext";
 import { useEffect } from "react";
-import { Button, Col, Divider, Dropdown, Empty,  Row, Skeleton, Space, message } from "antd";
+import { Button, Col, Divider, Dropdown, Empty,  Row, Skeleton, Space, Tooltip, message } from "antd";
 import {EditOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons';
 
-import './LevelOfDifficulty.css'
 import { AddLevelOfDifficulty } from "./AddLevelOfDifficulty";
 import { EditLevelOfDifficulty } from "./EditLevelOfDifficulty";
 import { ViewLevelOfDifficultyQuestions } from "./ViewLevelOfDifficultyQuestions";
+import { ErrorComponent } from "../../Components/ErrorComponent";
 
 export function LevelOfDifficulty(){
     
     const {isLoadingLODsExtended, errorGetLODsExtended, LODsExtended, getAllLODsExtended,
-        getLODQuestions,
-        isLoadingAddLOD, addLODResult, errorAddLOD, addLOD
+        
     } = useLevelsOfDifficulty()
 
     const [messageApi, contextHolder] = message.useMessage()
@@ -29,17 +28,6 @@ export function LevelOfDifficulty(){
     
     }, [])
 
-    useEffect(() => {
-        if(errorGetLODsExtended){
-            messageApi.destroy()
-            messageApi.error(errorGetLODsExtended)
-        }
-
-        if(errorAddLOD){
-            messageApi.destroy()
-            messageApi.error(errorAddLOD)
-        }
-    }, [errorGetLODsExtended, errorAddLOD])
 
     const colorLine = (color) => (
         <div style={{width:'100%', height:4, backgroundColor: color, marginTop:1, marginBottom:1}}></div>
@@ -65,7 +53,6 @@ export function LevelOfDifficulty(){
     const viewQuestions = (lod) => {
         setShowViewLODQuestionsModal(true)
         setSelectedLOD(lod)
-        getLODQuestions(lod.Id)
     }
 
     const renderLODs = () => {
@@ -81,14 +68,14 @@ export function LevelOfDifficulty(){
                         return(
                             <Col 
                             key={lod.Id}
-                            
-                            xs={3}>
+                            lg={{span:6}}
+                            md={{span:8}}
+                            sm={{span:12}}
+                            xs={{span:24}}>
                                 <div
-                                    className="lod-edit-view-element"
+                                    className="hq-element-container"
                                 >
-                                    <div
-                                        className="lod-edit-view-element-internal"
-                                    >
+                                    <div>
                                         <Dropdown
                                             menu={{
                                                 items:LODAction(lod),
@@ -96,7 +83,7 @@ export function LevelOfDifficulty(){
                                                 }}
                                         >
                                             <p
-                                                className="lod-edit-view-element-code"
+                                                className="hoverable"
                                             >{lodi+1}{' '}{Name}</p>
                                         </Dropdown>
 
@@ -104,9 +91,13 @@ export function LevelOfDifficulty(){
 
                                     {colorLine(HexColor)}
                                     <br/>
-                                    <p 
-                                    onClick={() => viewQuestions(lod)}
-                                    className="lod-edit-view-element-used-questions">{NUsedQuestions} questions</p>
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>Click to view questions</p>}
+                                        placement="bottom"
+                                    >
+                                        <p onClick={() => viewQuestions(lod)} className="hoverable-plus">{NUsedQuestions} questions</p>
+                                    </Tooltip>
                                 </div>
                             </Col>)
                     })
@@ -121,7 +112,7 @@ export function LevelOfDifficulty(){
                 orientation="left"
             >
                 <Space>
-                    LevelOfDifficulty   
+                    <p>Levels Of Difficulty</p>   
 
                     <Button
                         size="small"
@@ -137,15 +128,27 @@ export function LevelOfDifficulty(){
             {isLoadingLODsExtended && <Skeleton/>}
             {(!isLoadingLODsExtended && LODsExtended) && renderLODs()}
 
+            {errorGetLODsExtended && !isLoadingLODsExtended && 
+                <ErrorComponent 
+                    error={errorGetLODsExtended}
+                    onReload={() => getAllLODsExtended()}
+                />
+            }
+
             <AddLevelOfDifficulty 
                 open={showAddLODModal}
                 onClose={() => setShowAddLODModal(false)}
+
+                reloadData={() => getAllLODsExtended()}
             />
 
             <EditLevelOfDifficulty 
                 open={showEditLODModal}
                 onClose={() => setShowEditLODModal(false)}
                 LOD={selectedLOD}
+
+                reloadData={() => getAllLODsExtended()}
+
             />
 
             <ViewLevelOfDifficultyQuestions 

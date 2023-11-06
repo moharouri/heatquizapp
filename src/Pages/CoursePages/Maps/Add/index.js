@@ -172,12 +172,8 @@ export function AddMap(){
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
 
         return(
-            <Row 
-            gutter={24}
-            size={'large'}>
-                <Col
-                   
-                >
+            <Row gutter={24}>
+                <Col>
                     <div>
 
                     <img 

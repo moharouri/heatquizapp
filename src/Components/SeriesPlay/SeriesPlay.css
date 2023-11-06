@@ -29,11 +29,6 @@
     justify-content: center;
 }
 
-
-.series-play-final-page-item-statistics-section{
-    align-items: flex-start;
-}
-
 .series-play-final-page-item-statistics-score-time{
     flex-direction: column;
     display: flex;

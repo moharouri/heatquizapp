@@ -710,7 +710,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                                     <Space size={'large'}>
                                         <Space
                                             size={'large'}
-                                            className="series-play-final-page-item-statistics-section"
+                                            align="start"
                                         >
                                             <div
                                             className="series-play-final-page-item-statistics-score-time"
@@ -736,11 +736,10 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                                                         </small>
                                                         </i></p>
                                                     
-                                                </Space>                                           
+                                                </Space>   
+                                                                                         
                                             </div>
-                                            <div
-                                            
-                                            >
+                                            <div>
                                                 <small
                                                     className="default-gray"
                                                 >
@@ -780,6 +779,17 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                                                         
                                                     </Space> 
                                                 </div>}
+                                            </div>
+                                            <div>
+                                                <Button
+                                                    icon={<NotificationOutlined style={{color:'blueviolet'}} />}
+                                                    size="small"
+                                                    onClick={() => {                                                
+                                                        setShowSendFeedbackModal(true)
+                                                        setSelectedQuestion(Question)
+                                                    }}>
+                                                    Send feedback
+                                                </Button>
                                             </div>
 
                                         </Space>

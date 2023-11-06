@@ -4,7 +4,7 @@ import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useState } from "react";
 import { useEffect } from "react";
 
-export function EditLevelOfDifficulty({open, onClose, LOD}){
+export function EditLevelOfDifficulty({open, onClose, LOD, reloadData}){
 
     if(!open) return <div/>;
 
@@ -31,7 +31,7 @@ export function EditLevelOfDifficulty({open, onClose, LOD}){
         >
           <Form>
             <Form.Item>
-              <small>Name</small>
+              <small className="default-gray">Name</small>
               <Input 
                 placeholder="New name for level of difficulty"
                 value={name}
@@ -44,7 +44,7 @@ export function EditLevelOfDifficulty({open, onClose, LOD}){
                 direction="vertical"
                 size={'small'}
               >
-                <small>Color</small>
+                <small className="default-gray">Color</small>
                 <Space
                   size={'small'}
                 >

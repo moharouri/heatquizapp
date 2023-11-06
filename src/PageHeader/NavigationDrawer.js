@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, {useState } from "react";
 import {MenuOutlined, BuildTwoTone, SettingTwoTone, IdcardTwoTone, ContactsTwoTone, SnippetsTwoTone, BellTwoTone, SoundTwoTone,DatabaseTwoTone, ContainerTwoTone, FlagTwoTone, AppstoreTwoTone, ControlTwoTone, SlidersTwoTone, PlusSquareTwoTone } from '@ant-design/icons';
 import { Button, Drawer, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ const NavigationDrawer = () => {
 
     const navigate = useNavigate()
 
-    const {myCourses, courses} = useCourses()
+    const {/*myCourses,*/ courses} = useCourses()
 
     const onChangePage = (e) => {        
         setCurrentPage(e.key)
@@ -157,6 +157,11 @@ const NavigationDrawer = () => {
             icon:<DatabaseTwoTone style={{...iconStyle}}/>
         },
         {
+            label:'Clickable question',
+            key:'/add_c_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
             label:'Keyboard question',
             key:'/add_k_q',
             icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
@@ -213,13 +218,13 @@ const NavigationDrawer = () => {
     }
 ]   
 
-    let navigationList = navigationItems
+    let navigationList = []
     const isAdmin = roles.includes('admin')
     const isNormalUser = roles.includes('course_editor')
 
     if(isStudent) navigationList = studentNavigationItems
     if(isAdmin) navigationList = adminNavigationItems
-    //if(isNormalUser) navigationList = navigationItems
+    if(isNormalUser) navigationList = navigationItems
 
     return(
         <div>
@@ -232,7 +237,6 @@ const NavigationDrawer = () => {
             <Drawer
                 title="Pages"
                 placement="left"
-                closable={false}
                 onClose={() => setDrawerOpen(false)}
                 open={drawerOpen}
             >

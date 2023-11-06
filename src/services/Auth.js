@@ -6,6 +6,7 @@ const TOKEN_KEY = 'TOKEN_HEAT_QUIZ_APP'
 
 const USER_KEY = 'USER_HEAT_QUIZ_APP'
 const USERNAME_KEY = 'USERNAME_HEAT_QUIZ_APP'
+const USER_ROLES_KEY = 'USER_ROLES_HEAT_QUIZ_APP'
 
 //Function to add player key to local storage (5 random chars + date now)
 export function setPlayerKey(){
@@ -88,6 +89,24 @@ export function setUserFullname_LS(username){
 export function getUserFullname(){
     return localStorage.getItem(USERNAME_KEY)
 }
+
+
+//Function to add user roles to local storage 
+export function setUserRoles_LS(roles){
+    const saveRoles = roles.join(',')
+    localStorage.setItem(USER_ROLES_KEY, saveRoles)
+}
+
+//Function to get user roles from local storage 
+export function getUserRoles_LS(){
+    let results = localStorage.getItem(USER_ROLES_KEY) || ''
+
+    results = results.split(',')
+
+    return results
+}
+
+
 
 //Function to create and Id of 5 charactars - randomly selected
 function makeid(length) {

@@ -77,8 +77,6 @@ const UserDrawer = () => {
   const renderNotificationsList = () => {
     if(isStudent) return;
 
-    if(!unseenComments.CountInactive) return;
-
     const notifications = unseenComments.Comments
     const feedback = unseenComments.StudentFeedback
 
@@ -86,7 +84,6 @@ const UserDrawer = () => {
       <Drawer
           title="Notifications"
           placement="right"
-          closable={false}
           onClose={() => setShowUnseenComments(false)}
           open={showUnseenComments}
         >
@@ -304,7 +301,7 @@ const UserDrawer = () => {
             type="light"
             onClick = {() =>{
               registerFeedbackSeen()
-              setShowUnseenComments(unseenComments.CountInactive)
+              setShowUnseenComments(true)
             }}
             icon = {
                 <Badge

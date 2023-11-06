@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { checkAuthData, getAuthData, getIsStudent_LS, setIsStudent_LS, setUserFullname_LS, setUsername_LS } from "../services/Auth"
+import { checkAuthData, getAuthData, getIsStudent_LS, getUserRoles_LS, setIsStudent_LS, setUserFullname_LS, setUserRoles_LS, setUsername_LS } from "../services/Auth"
 import { useNavigate } from "react-router-dom"
 import { useAsyncFn } from "../hooks/useAsync"
 
@@ -14,7 +14,7 @@ export function AuthProvider ({children}){
 
     const [username, setUsername] = useState('')
     const [userfullname, setUserfullname] = useState('')
-    const [roles, setRoles] = useState([])
+    const [roles, setRoles] = useState(getUserRoles_LS())
     const [profilePicture, setProfilePicture] = useState(null)
     
     const [isStudent, setIsStudent] = useState(false)    
@@ -23,24 +23,23 @@ export function AuthProvider ({children}){
 
     const navigate = useNavigate()
 
-    useEffect(() => {
+    useEffect(() => {        
         const isStudent = getIsStudent_LS()
         const {playerKey, username, user} = getAuthData()
 
         if(!isStudent){
-            authenticateToken().then((res) => {
-                console.log(res)
-                
+            authenticateToken().then((res) => {                
                 const {data} = res
                 if(!data) navigate('/login')
                 else {
                     const {name, username, userProfile, roles} = data
-
+                    
                     setProfilePicture(userProfile)
                     setUsername_LS(username)
                     setUserFullname_LS(name)
     
                     setRoles(roles)
+                    setUserRoles_LS(roles)
                 }
             })
     

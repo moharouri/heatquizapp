@@ -387,7 +387,7 @@ export function Reports(){
     }
 
     function renderGraphicalStatistics(){
-        const {DailyQuestionStatsEveryDay, HourlyQuestionStatsAllDays} = graphicalStats
+        const {DailyQuestionStatsEveryDay} = graphicalStats
 
         return(
             <ReportGraphicalStatistics

@@ -4,7 +4,7 @@ import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useState } from "react";
 import { useEffect } from "react";
 
-export function AddLevelOfDifficulty({open, onClose}){
+export function AddLevelOfDifficulty({open, onClose, reloadData}){
 
     if(!open) return <div/>;
 
