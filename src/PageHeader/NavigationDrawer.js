@@ -1,5 +1,5 @@
 import React, {useEffect, useState } from "react";
-import {MenuOutlined, BuildTwoTone, SettingTwoTone, IdcardTwoTone, SnippetsTwoTone, BellTwoTone, SoundTwoTone,DatabaseTwoTone, ContainerTwoTone, FlagTwoTone, AppstoreTwoTone, ControlTwoTone, SlidersTwoTone, PlusSquareTwoTone } from '@ant-design/icons';
+import {MenuOutlined, BuildTwoTone, SettingTwoTone, IdcardTwoTone, ContactsTwoTone, SnippetsTwoTone, BellTwoTone, SoundTwoTone,DatabaseTwoTone, ContainerTwoTone, FlagTwoTone, AppstoreTwoTone, ControlTwoTone, SlidersTwoTone, PlusSquareTwoTone } from '@ant-design/icons';
 import { Button, Drawer, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useCourses } from "../contexts/CoursesContext";
@@ -34,6 +34,11 @@ const NavigationDrawer = () => {
         key:'/',
         icon: <BuildTwoTone style={{...iconStyle}}/>
     },
+    {
+        label:'Users',
+        key:'/users_list',
+        icon: <ContactsTwoTone  style={{...iconStyle}}/>
+    },,
     {
         label:'Level of difficulty',
         key:'/level_of_difficulty',
