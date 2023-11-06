@@ -4,12 +4,13 @@ import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useState } from "react";
 import { useEffect } from "react";
 import { useDatapools } from "../../contexts/DatapoolsContext";
+import { handleResponse } from "../../services/Auxillary";
 
 export function EditDatapool({open, onClose, DP}){
 
     if(!open) return <div/>;
 
-    const { errorEditDataPool, isLoadingEditDataPool, EditDataPoolResult, EditDataPool, getAllDatapoolsAdmin} = useDatapools()
+    const {isLoadingEditDataPool, EditDataPool, getAllDatapoolsAdmin} = useDatapools()
     const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
@@ -19,13 +20,6 @@ export function EditDatapool({open, onClose, DP}){
       setIsHidden(IsHidden)
     }, [open])
 
-    useEffect(() => {
-      if(errorEditDataPool)
-      {
-        api.destroy()
-        api.error(errorEditDataPool)
-      }
-    }, [errorEditDataPool])
 
     const [name, setName] = useState('')
     const [nickName, setNickName] = useState('')
@@ -37,16 +31,14 @@ export function EditDatapool({open, onClose, DP}){
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
+
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         >
           {contextHolder}
           <Form>
             <Form.Item>
-              <small>Name</small>
+              <small className="default-gray">Name</small>
               <Input 
                 placeholder="datapool's name"
                 value={name}
@@ -55,7 +47,7 @@ export function EditDatapool({open, onClose, DP}){
           
             </Form.Item>
             <Form.Item>
-              <small>Nickname</small>
+              <small className="default-gray">Nickname</small>
               <Input 
                 placeholder="datapool's nickname"
                 value={nickName}
@@ -68,7 +60,7 @@ export function EditDatapool({open, onClose, DP}){
                 <Space
                     direction='vertical'
                 >
-                    <small>Is hidden</small>
+                    <small className="default-gray">Is hidden</small>
                     <Switch
                         checked={isHidden}
                         checkedChildren={'Datapool is hidden'}
@@ -98,9 +90,10 @@ export function EditDatapool({open, onClose, DP}){
 
               })
 
-              EditDataPool(VM).then(() => {
+              EditDataPool(VM).then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
                 getAllDatapoolsAdmin()
-              })
+                onClose()
+              }))
             }}
             loading = {isLoadingEditDataPool}
             >

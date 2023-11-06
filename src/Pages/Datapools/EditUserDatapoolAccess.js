@@ -13,7 +13,7 @@ export function EditUserDatapoolAccess({open, onClose, DP}){
     const {errorEditDataPoolAccess, isLoadingEditDataPoolAccess, EditDataPoolAccess, getAllDatapoolsAdmin} = useDatapools()
     const [api, contextHolder] = message.useMessage()
 
-    const {users, loadingUsers, getUserError, getUsers} = useUsers()
+    const {users, getUsers} = useUsers()
 
     const [usersWithAccess, setUsersWithAccess] = useState([])
     const [selectedUsers, setSelectedUsers] = useState([])
