@@ -37,6 +37,7 @@ import { QuestionInformationList } from "./Pages/QuestionInformation/List";
 import { DefaultImagesList } from "./Pages/DefaultImages/List";
 import { BackgroundImagesList } from "./Pages/BackgroundImages/List";
 import { NotificationsList } from "./Pages/Notifications";
+import { UsersList } from "./Pages/Users";
 
 export function SelectRoutes({}){
     const {roles, isStudent,} = useAuth()
@@ -62,6 +63,8 @@ export function SelectRoutes({}){
                 <Route path="/" exact element={<Dashboard />}/>
                 <Route path="/level_of_difficulty" exact element={<LevelOfDifficulty />}/>
                 <Route path="/datapools" exact element={<Datapools />}/>
+                <Route path="/users_list" element={<UsersList/>}/>
+
                 <Route path="*" exact element={<NotFoundPage />}/>
             </Routes>
         )
@@ -121,6 +124,7 @@ export function SelectRoutes({}){
                 <Route path="/background_images_list" element={<BackgroundImagesList/>}/>
 
                 <Route path="/user_comments" element={<NotificationsList/>}/>
+
                 
                 
                 <Route path="*" exact element={<NotFoundPage />}/>
