@@ -105,6 +105,7 @@ const UserDrawer = () => {
                 <Tooltip
                   color='white'
                   title={<p>Click to go to question</p>}
+                  placement='left'
                   key={ni}
                 >
                   <div 
@@ -201,6 +202,7 @@ const UserDrawer = () => {
               <Tooltip
                 color='white'
                 title={<p>Click to go to question</p>}
+                placement='left'
                 key={ni}
                 onClick={() => {
                   goToQuestionViewEditSamePage(navigate, ({Id, Type}))

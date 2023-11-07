@@ -12,6 +12,7 @@ import { UploadImage } from "../../../../Components/UploadImage";
 import { SelectSeries } from "./SelectSeries";
 import { SelectBackgroundImage } from "../../../../Components/SelectBackgroundImage";
 import { useMaps } from "../../../../contexts/MapsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AddMap(){
 
@@ -449,19 +450,8 @@ s
         }
 
         addMap(data)
-        .then(
-            (r) => {
-                const {Id} = r
-                
-                if(Id){
-                    api.destroy()
-                    api.success('Map added successfully', 1)
-                }
-                else{
-                    api.destroy()
-                    api.error(r)
-                }
-        })
+        .then(r => handleResponse(r, api, 'Added successfully', 1))
+        
     }
 
     const renderFinalPage = () => {

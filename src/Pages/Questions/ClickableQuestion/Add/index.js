@@ -7,11 +7,11 @@ import { useState } from "react";
 import { UploadImage } from "../../../../Components/UploadImage";
 
 import './index.css'
-import { SetElementAnswer } from "./SetElementAnswer";
 import { CLICKABLE_CHART, CLICKABLE_IMAGE } from "../Shared/Constants";
 import { UploadPDF } from "../../../../Components/UploadPDF";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { handleResponse } from "../../../../services/Auxillary";
+import { SetElementAnswer } from "../Shared/SetElementAnswer";
 
 export function AddClickableQuestion(){
 
@@ -415,7 +415,7 @@ export function AddClickableQuestion(){
                     AnswerId : ci.answer.Id,
         }))
             
-        let data = new FormData()
+        const data = new FormData()
         data.append('Code', questionInfo.Code)
         data.append('SubtopicId', questionInfo.selectedSubtopic.Id)
         data.append('LODId', questionInfo.selectedLOD.Id)
