@@ -119,7 +119,10 @@ export function getKeyboardQuestionWrongAnswersRequest(b){
     return GET_REQUEST_API('KeyboardQuestion/GetKeyboardQuestionWrongAnswers_PORTAL', b)
 }
 
-
+//Clickable question edit functions
+export function addClickableQuestionRequest(b){
+    return ADD_REQUEST_FILE_API('SimpleClickable/AddQuestionSingleStep', b, true)
+}
 
 
 

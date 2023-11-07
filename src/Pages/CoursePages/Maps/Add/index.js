@@ -76,11 +76,11 @@ export function AddMap(){
         return null
     }
 
-    const isMetadataValid = validateMetadata()
-    const isSelectImageValid = validateAddImage()
-    const isAddElementsValid = validateAddElements()
+    const metadataValidation = validateMetadata()
+    const selectImageValidation = validateAddImage()
+    const addElementsValidation = validateAddElements()
 
-    const canAdd = !isMetadataValid && !isSelectImageValid && !isAddElementsValid
+    const canAdd = !metadataValidation && !selectImageValidation && !addElementsValidation
 
     const renderMetaData = () => {
         return(
@@ -203,6 +203,7 @@ s
                                 let newPart = ({
                                     title:'',
                                     x: pageX - left + offset,
+                                    offsetX:offset,
                                     y: pageY - top,
                                     width: 1,
                                     height: 1
@@ -434,7 +435,7 @@ s
             Title: e.title,
             ExternalVideoLink: e.externalLink,
             QuestionSeriesId: e.series ? e.series.Id : undefined ,
-            X: Math.floor(e.x),
+            X: Math.floor(e.x - e.offsetX),
             Y:  Math.floor(e.y),
             Width:  Math.floor(e.width),
             Length:  Math.floor(e.height),
@@ -502,15 +503,15 @@ s
                 items={[
                         {
                             title: 
-                            <Space>
+                            <Space className={metadataValidation ? "highlighted" : ""}>
                                 <p>Meta data{' '}</p>
 
-                                {(!isMetadataValid ? 
+                                {(!metadataValidation ? 
                                 <CheckCircleFilled style={{color:'green'}}/> 
                                 : 
                                 <Tooltip 
                                     color="white"
-                                    title={<p>{isMetadataValid}</p>}
+                                    title={<p>{metadataValidation}</p>}
                                     placement="top"
                                 >
                                     <CloseCircleTwoTone twoToneColor={'red'}/>
@@ -521,15 +522,15 @@ s
                         },
                         {
                             title:
-                            <Space>
+                            <Space className={!metadataValidation && selectImageValidation ? "highlighted" : ""}>
                                 <p>Add image</p>
 
-                                {(!isSelectImageValid ? 
+                                {(!selectImageValidation ? 
                                 <CheckCircleFilled style={{color:'green'}}/> 
                                 : 
                                 <Tooltip 
                                     color="white"
-                                    title={<p>{isSelectImageValid}</p>}
+                                    title={<p>{selectImageValidation}</p>}
                                     placement="top"
                                 >
                                     <CloseCircleTwoTone twoToneColor={'red'}/>
@@ -540,14 +541,14 @@ s
                         },
                         {
                             title:
-                            <Space>
+                            <Space className={!metadataValidation && !selectImageValidation && addElementsValidation ? "highlighted" : ""} >
                                 <p>Add elements</p>
-                                {(!isAddElementsValid ? 
+                                {(!addElementsValidation ? 
                                 <CheckCircleFilled style={{color:'green'}}/> 
                                 : 
                                 <Tooltip 
                                     color="white"
-                                    title={<p>{isAddElementsValid}</p>}
+                                    title={<p>{addElementsValidation}</p>}
                                     placement="top"
                                 >
                                     <CloseCircleTwoTone twoToneColor={'red'}/>

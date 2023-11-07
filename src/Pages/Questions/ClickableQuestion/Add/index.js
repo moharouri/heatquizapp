@@ -7,10 +7,15 @@ import { useState } from "react";
 import { UploadImage } from "../../../../Components/UploadImage";
 
 import './index.css'
-import { SetElementAnswer } from "../Shared/SetElementAnswer";
-import { CLICKABLE_IMAGE } from "../Shared/Constants";
+import { SetElementAnswer } from "./SetElementAnswer";
+import { CLICKABLE_CHART, CLICKABLE_IMAGE } from "../Shared/Constants";
+import { UploadPDF } from "../../../../Components/UploadPDF";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AddClickableQuestion(){
+
+    const {isLoadingAddClickableQuestion, addClickableQuestion} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -28,6 +33,7 @@ export function AddClickableQuestion(){
     const [newImageURL, setNewImageURL] = useState(null)
 
     const imageRef = React.createRef()
+    const [leftOffset, setLeftOffset] = useState(0)
 
     const [newImageWidth, setNewImageWidth] = useState(0)
     const [newImageHeight, setNewImageHeight] = useState(0)
@@ -42,6 +48,9 @@ export function AddClickableQuestion(){
     const [selectedPart, setSelectedPart] = useState(null)
 
     const [newParts, setNewParts] = useState([])
+
+    const [newPDF, setNewPDF] = useState(null)
+    const [newPDFURL, setNewPDFURL] = useState(null)
 
     const [hoverElement, setHoverElement] = useState(null) 
 
@@ -87,6 +96,7 @@ export function AddClickableQuestion(){
                             src={newImageURL}
 
                             ref={imageRef}
+
                             onClick={(e) => {
                                 if(!(isAddingElement || isMovingElement)) return;
 
@@ -98,15 +108,17 @@ export function AddClickableQuestion(){
                                 const parentNode = imgRef.parentNode.parentNode
                                 const styles = window.getComputedStyle(parentNode)
                                 const offset = Number(styles.getPropertyValue('padding-right').replace('px', ''))
-                                
-                                const {top, left} = imgRef.getBoundingClientRect()
 
+                                setLeftOffset(offset)
+
+                                const {top, left} = imgRef.getBoundingClientRect()
                                 
                                 if(!isAddingElementSecond && !isMovingElement){
 
                                     let newPart = ({
                                         x: pageX - left + offset,
                                         y: pageY - top,
+                                        offsetX: offset,
                                         width: 1,
                                         height: 1,
                                         type:CLICKABLE_IMAGE,
@@ -369,6 +381,99 @@ export function AddClickableQuestion(){
         )
     }
 
+    const addQuestionClick = () => {
+
+        if(!canAdd){
+            api.destroy()
+            api.warning("Please fill all required data")
+            return
+        }
+       
+        const imageWidth = 0.35*window.innerWidth
+        const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)       
+        
+        //Click images
+        let ClickImages = newParts.filter(a => a.type === CLICKABLE_IMAGE)
+            .map(ci => ({
+                        X : Number.parseInt(+ci.x + leftOffset),
+                        Y : Number.parseInt(+ci.y),
+
+                        Width : Math.trunc(ci.width),
+                        Height : Math.trunc(ci.height),
+                        AnswerId : ci.answer.Id,
+            }))
+
+
+        //Clickable Chart 
+        let ClickCharts = newParts.filter(a => a.type === CLICKABLE_CHART)
+        .map(ci => ({
+                    X : Number.parseInt(+ci.x),
+                    Y : Number.parseInt(+ci.y),
+
+                    Width : Math.trunc(ci.width),
+                    Height : Math.trunc(ci.height),
+                    AnswerId : ci.answer.Id,
+        }))
+            
+        let data = new FormData()
+        data.append('Code', questionInfo.Code)
+        data.append('SubtopicId', questionInfo.selectedSubtopic.Id)
+        data.append('LODId', questionInfo.selectedLOD.Id)
+        data.append('ClickParts', JSON.stringify({
+            ClickImages:ClickImages,
+            ClickCharts: ClickCharts
+        }))
+        
+        data.append('Public', false)
+        data.append('Attributes', "")
+
+        data.append('Picture', newImage)
+        data.append('PictureWidth', Number.parseInt(imageWidth))
+        data.append('PictureHeight', Number.parseInt(imageHeight))
+
+        data.append('PDF', newPDF)
+        
+        addClickableQuestion(data).then(r => handleResponse(r, api, 'Added successfully', 1))
+    }
+
+    const renderFinalPage = () => {
+
+        return(
+            <Space direction="vertical">
+                {!canAdd && <p className="default-red">Please fill all required data</p>}
+                <br/>
+                {canAdd && 
+                <Space size={'large'} align="start">
+                    <div>
+                        <p> Question solution (optional)</p>
+                        <UploadPDF 
+                            pdfURL={newPDFURL}
+
+                            className="add-question-upload-pdf"
+                            pdfClassName="add-question-upload-pdf-internal"
+
+                            onSetPDF={(url, pdf) => {
+                                setNewPDFURL(url)
+                                setNewPDF(pdf)
+                            }}
+                        />
+                    </div>
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    <Button
+                        type="primary"
+                        size="small" 
+                        onClick={addQuestionClick}
+                        loading={isLoadingAddClickableQuestion}
+                    >
+                        Add question
+                    </Button>
+                </Space>}
+            </Space>
+        )
+    }
+
     const selectContent = () => {
         const map = {
             0: () => 
@@ -378,7 +483,7 @@ export function AddClickableQuestion(){
             />,
             1: () => renderAddImage(),
             2: () => renderQuestionContent(),
-            3: () => <div/>,
+            3: () => renderFinalPage(),
         }
 
         return map[currentTab]()
@@ -407,6 +512,8 @@ export function AddClickableQuestion(){
     const questionContentValidation = validateQuestionContent()
 
     const canAdd = !questionInfo.validation && !selectImageValidation && !questionContentValidation
+
+    console.log(leftOffset)
 
     return(
         <PagesWrapper>
