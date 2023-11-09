@@ -18,6 +18,7 @@ import { MultipleChoiceQuestionEditView } from "../MultipleChoiceQuestion/ViewEd
 import { KeyboardQuestionEditView } from "../KeyboardQuestion/EditView";
 import { ClickableQuestionEditView } from "../ClickableQuestion/ViewEdit";
 import { ErrorComponent } from "../../../Components/ErrorComponent";
+import { QuestionMeanTimeStatistics } from "../../../Components/QuestionMeanTimeStatistics";
 
 export function QuestionEditView(){
     const {
@@ -198,25 +199,16 @@ export function QuestionEditView(){
                         valueStyle={{fontSize:'medium', color:'gray'}}
                     />
                  </Tooltip>
-                <Tooltip 
-                    color="white"
-                    title={
-                        <Space
-                            direction="vertical"
-                        >
-                            <p>Median play time {' '} {MedianPlayTime} {' s'}</p>
-                            <p>Median <span className="question-edit-view-info-card-green">{' correct '}</span>play time {' '} {MedianPlayTimeCorrect} {' s'}</p>
-                            <p>Median <span className="question-edit-view-info-card-red">{' incorrect '}</span>play time {' '} {MedianPlayTimeWrong} {' s'}</p>
-                        </Space>
-                    }
-                                                        
+                <QuestionMeanTimeStatistics
+                    question={question}
+                    style={{width:1000, height:800}}
                 >
                     <Statistic 
                         title='Median play time'
                         value={MedianPlayTime + ' s'}
                         valueStyle={{fontSize:'medium', color:'gray'}}
                     />
-                 </Tooltip>
+                </QuestionMeanTimeStatistics>
                 
 
                 <Statistic 

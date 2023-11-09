@@ -8,6 +8,10 @@ export function searchQuestionsByIdsRequest(b){
     return GET_REQUEST_BODY_API('SimpleClickable/GetQuestionsByIds_ADVANCED_PORTAL', b, true)
 }
 
+export function getQuestionMedianTimeRequest(Id){
+    return GET_REQUEST_API('Statistics/GetQuestionStatisticDetailed', Id)
+}
+
 
 export function getClickableQuestionPlayRequest(Id){
     return GET_REQUEST_API('SimpleClickable/GetQuestion_APP', Id)

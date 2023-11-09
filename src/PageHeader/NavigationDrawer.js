@@ -103,19 +103,30 @@ const NavigationDrawer = () => {
         icon: <SoundTwoTone style={{...iconStyle}}/>
     },    
     {
-        label:'Topics',
-        key:'/topics',
-        icon: <FlagTwoTone  style={{...iconStyle}}/>
-    },    
-    {
-        label:'Click trees',
-        key:'/click_trees',
-        icon: <AppstoreTwoTone   style={{...iconStyle}}/>
-    },    
-    {
-        label:'Interpreted trees',
-        key:'/interpreted_trees',
-        icon: <ControlTwoTone     style={{...iconStyle}}/>
+        label:'Questions',
+        children:[
+        {
+            label:'Questions list',
+            key:'/questions_list',
+            icon:<DatabaseTwoTone style={{...iconStyle}}/>
+        },
+        {
+            label:'Clickable question',
+            key:'/add_c_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Keyboard question',
+            key:'/add_k_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Multiple choice question',
+            key:'/add_mc_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        }
+        ],
+        type:'group'
     },    
     {
         label:'Keyboards',
@@ -147,33 +158,7 @@ const NavigationDrawer = () => {
         },
         ],
         type:'group'
-    },    
-    {
-        label:'Questions',
-        children:[
-        {
-            label:'Questions list',
-            key:'/questions_list',
-            icon:<DatabaseTwoTone style={{...iconStyle}}/>
-        },
-        {
-            label:'Clickable question',
-            key:'/add_c_q',
-            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
-        },
-        {
-            label:'Keyboard question',
-            key:'/add_k_q',
-            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
-        },
-        {
-            label:'Multiple choice question',
-            key:'/add_mc_q',
-            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
-        }
-        ],
-        type:'group'
-    },    
+    },
     {
         label:'Series',
         children:[
@@ -194,7 +179,7 @@ const NavigationDrawer = () => {
         label:'Auxilliary',
         children:[
             {
-                label:'Map click images',
+                label:'Map pop-up icons',
                 key:'/map_click_images_list',
                 icon:<DatabaseTwoTone style={{...iconStyle}}/>
             },
@@ -213,6 +198,21 @@ const NavigationDrawer = () => {
                 key:'/background_images_list',
                 icon:<DatabaseTwoTone style={{...iconStyle}}/>
             },
+            {
+                label:'Click trees',
+                key:'/click_trees',
+                icon: <AppstoreTwoTone   style={{...iconStyle}}/>
+            },    
+            {
+                label:'Interpreted trees',
+                key:'/interpreted_trees',
+                icon: <ControlTwoTone     style={{...iconStyle}}/>
+            },  
+            {
+                label:'Topics',
+                key:'/topics',
+                icon: <FlagTwoTone  style={{...iconStyle}}/>
+            }
         ],
         type:'group'
     }

@@ -1,7 +1,7 @@
 import React, { useContext} from "react"
 
 import { useAsyncFn } from "../hooks/useAsync"
-import { addQuestionsToSeriesRequest, addSeriesRequest, addSeriesStatisticRequest, assignQuestionsToPoolRequest, decreasePoolsNumberSeriesRequest, deselectQuestionFromSeriesRequest, editQuestionsInfoRequest, getSeriesAddersRequest, getSeriesRequest, getSeriesStatisticsRequest, getSeriesViewEditRequest, increasePoolsNumberSeriesRequest, rearrangeSeriesRequest, searchSeriesByIdsRequest, searchSeriesRequest } from "../services/Series"
+import { addQuestionsToSeriesRequest, addSeriesRequest, addSeriesStatisticRequest, assignQuestionsToPoolRequest, decreasePoolsNumberSeriesRequest, deselectQuestionFromSeriesRequest, editQuestionsInfoRequest, getSeriesAddersRequest, getSeriesMedianTimeSpectrumRequest, getSeriesRequest, getSeriesStatisticsRequest, getSeriesViewEditRequest, increasePoolsNumberSeriesRequest, rearrangeSeriesRequest, searchSeriesByIdsRequest, searchSeriesRequest } from "../services/Series"
 
 const Context = React.createContext()
 
@@ -13,6 +13,7 @@ export function SeriesProvider ({children}){
     //Fetch from API
     const {value: Series, error: errorGetSeries, loading:isLoadingSeries, execute: getSeries} = useAsyncFn((code) => getSeriesRequest(code)) 
     const {value: SeriesViewEdit, error: errorGetSeriesViewEdit, loading:isLoadingSeriesViewEdit, execute: getSeriesViewEdit} = useAsyncFn((code) => getSeriesViewEditRequest(code)) 
+    const {value: seriesMedianTimeSpectrum, error: errorGetSeriesMedianTimeSpectrum, loading:isLoadingGetSeriesMedianTimeSpectrum, execute: getSeriesMedianTimeSpectrum} = useAsyncFn((Id) => getSeriesMedianTimeSpectrumRequest(Id)) 
 
 
     const {value: SeriesStatistics, error:errorGetSeriesStatistics, loading:isLoadingSeriesStatistics, execute: getSeriesStatistics} = useAsyncFn((code) => getSeriesStatisticsRequest(code))
@@ -109,7 +110,12 @@ export function SeriesProvider ({children}){
             rearrangeSeriesResult,
             errorRearrangeSeries,
             isLoadingRearrangeSeries,
-            rearrangeSeries
+            rearrangeSeries,
+
+            seriesMedianTimeSpectrum,
+            isLoadingGetSeriesMedianTimeSpectrum,
+            errorGetSeriesMedianTimeSpectrum,
+            getSeriesMedianTimeSpectrum
         }}>
             {children}
         </Context.Provider>
