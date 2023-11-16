@@ -4,7 +4,7 @@ import { Divider, List, Skeleton } from "antd";
 import { useUsers } from "../../contexts/UsersContext";
 import { ErrorComponent } from "../../Components/ErrorComponent";
 
-export function UsersList({}){
+export function UsersList(){
 
     const {loadingUsers, users, getUserError, getUsers,} = useUsers()
 
