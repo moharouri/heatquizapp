@@ -25,7 +25,7 @@ import { DisplayClickableQuestionAnswers } from "./DisplayClickableQuestionAnswe
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
-
+    
     const { 
         isLoadingSeries, Series, getSeries, errorGetSeries,
         isLoadingSeriesStatistics, SeriesStatistics, getSeriesStatistics,

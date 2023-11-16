@@ -109,7 +109,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                 <div className="hq-opposite-arrangement">
                     <p>Player timeline:  {' ' + player}</p>
 
-                    {seriesRefs.length && 
+                    {seriesRefs.length ? 
                     <Space size={'middle'}>
                         <p>Series {' '}</p>
                         <Pagination
@@ -120,7 +120,7 @@ export function PlayerTimeline({open, onClose, selectedPlayer}){
                             onChange={onSeriesChange}
                             pageSize={1}
                         />
-                    </Space>}
+                    </Space> : <div/>}
                 </div>}
                 width={'50%'}
                 onClose={onClose}
