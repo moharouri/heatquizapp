@@ -4,26 +4,19 @@ import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useState } from "react";
 import { useEffect } from "react";
 import { useDatapools } from "../../contexts/DatapoolsContext";
+import { handleResponse } from "../../services/Auxillary";
 
 export function AddDatapool({open, onClose}){
 
     if(!open) return <div/>;
 
-    const { errorAddDataPool, isLoadingAddDataPool, AddDataPoolResult, AddDataPool, getAllDatapoolsAdmin} = useDatapools()
+    const {isLoadingAddDataPool, AddDataPool, getAllDatapoolsAdmin} = useDatapools()
     const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
       setName('')
       setNickName('')
     }, [open])
-
-    useEffect(() => {
-      if(errorAddDataPool)
-      {
-        api.destroy()
-        api.error(errorAddDataPool)
-      }
-    }, [errorAddDataPool])
 
     const [name, setName] = useState('')
     const [nickName, setNickName] = useState('')
@@ -34,16 +27,13 @@ export function AddDatapool({open, onClose}){
         width={'50%'}
         onClose={onClose}
         open={open}
-        bodyStyle={{
-          paddingBottom: 80,
-        }}
         closeIcon={<ArrowLeftOutlined />}
         maskClosable={false}
         >
           {contextHolder}
           <Form>
             <Form.Item>
-              <small>Name</small>
+              <small className="default-gray">Name</small>
               <Input 
                 placeholder="New datapool's name"
                 value={name}
@@ -52,7 +42,7 @@ export function AddDatapool({open, onClose}){
           
             </Form.Item>
             <Form.Item>
-              <small>Nickname</small>
+              <small className="default-gray">Nickname</small>
               <Input 
                 placeholder="New datapool's nickname"
                 value={nickName}
@@ -79,9 +69,10 @@ export function AddDatapool({open, onClose}){
                 NickName: nickName
               })
 
-              AddDataPool(VM).then(() => {
+              AddDataPool(VM).then(r => handleResponse(r, api, 'Added successfully', 1, () => {
                 getAllDatapoolsAdmin()
-              })
+                onClose()
+              }))
             }}
             loading = {isLoadingAddDataPool}
             >

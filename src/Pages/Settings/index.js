@@ -2,7 +2,7 @@ import React from "react";
 import { PagesWrapper } from "../../PagesWrapper";
 import { useEffect } from "react";
 import { useDatapools } from "../../contexts/DatapoolsContext";
-import {Col, Divider, Dropdown, Row, Skeleton, Space, message } from "antd";
+import {Col, Divider, Dropdown, Row, Space, Spin, message } from "antd";
 import { ErrorComponent } from "../../Components/ErrorComponent";
 
 import './index.css'
@@ -51,7 +51,7 @@ export function Settings(){
         const error = (errorGetUserNotificationSubscriptions || errorGetDatapoolsAdmin)
 
         return(
-            <Col xs={9}>
+            <Col xs={24}>
                 <Space>
                     <div>
                         <small className="default-gray">Notifications subscription</small>
@@ -59,7 +59,7 @@ export function Settings(){
                         <br/>
                         <br/>
 
-                        {(isLoadingDatapoolsAdmin || isLoadingGetUserNotificationSubscriptions) && <Skeleton />}
+                        {(isLoadingDatapoolsAdmin || isLoadingGetUserNotificationSubscriptions) && <Spin />}
 
                         {errorGetDatapoolsAdmin && !isLoadingDatapoolsAdmin && 
                             <ErrorComponent 

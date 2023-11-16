@@ -38,9 +38,12 @@ import { DefaultImagesList } from "./Pages/DefaultImages/List";
 import { BackgroundImagesList } from "./Pages/BackgroundImages/List";
 import { NotificationsList } from "./Pages/Notifications";
 import { UsersList } from "./Pages/Users";
+import { AddClickableQuestion } from "./Pages/Questions/ClickableQuestion/Add";
 
-export function SelectRoutes({}){
+export function SelectRoutes(){
     const {roles, isStudent,} = useAuth()
+
+    console.log(roles)
 
     const isAdmin = roles.includes('admin')
     const isNormalUser = roles.includes('course_editor')
@@ -69,8 +72,8 @@ export function SelectRoutes({}){
             </Routes>
         )
     }
-    //else if (isNormalUser)
-    //{
+    else if (isNormalUser)
+    {
         return(
             <Routes>
                 <Route path="/Login" exact element={<Login />}/>
@@ -105,6 +108,7 @@ export function SelectRoutes({}){
                 
                 <Route path="/add_mc_q" element={<AddMutlipleChoiceQuestion />}/>
                 <Route path="/add_k_q" element={<AddKeyboardQuestion />}/>
+                <Route path="/add_c_q" element={<AddClickableQuestion />}/>
 
                 <Route path="/keyboards_list" element={<KeyboardsList/>}/>
                 <Route path="/add_keyboard" element={<AddKeyboard/>}/>
@@ -130,7 +134,7 @@ export function SelectRoutes({}){
                 <Route path="*" exact element={<NotFoundPage />}/>
             </Routes>
         )
-    //}
+    }
 
     return(
         <Routes>

@@ -12,6 +12,7 @@ import { UploadImage } from "../../../../Components/UploadImage";
 import { SelectSeries } from "./SelectSeries";
 import { SelectBackgroundImage } from "../../../../Components/SelectBackgroundImage";
 import { useMaps } from "../../../../contexts/MapsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 export function AddMap(){
 
@@ -76,11 +77,11 @@ export function AddMap(){
         return null
     }
 
-    const isMetadataValid = validateMetadata()
-    const isSelectImageValid = validateAddImage()
-    const isAddElementsValid = validateAddElements()
+    const metadataValidation = validateMetadata()
+    const selectImageValidation = validateAddImage()
+    const addElementsValidation = validateAddElements()
 
-    const canAdd = !isMetadataValid && !isSelectImageValid && !isAddElementsValid
+    const canAdd = !metadataValidation && !selectImageValidation && !addElementsValidation
 
     const renderMetaData = () => {
         return(
@@ -172,12 +173,8 @@ export function AddMap(){
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
 
         return(
-            <Row 
-            gutter={24}
-            size={'large'}>
-                <Col
-                   
-                >
+            <Row gutter={24}>
+                <Col>
                     <div>
 
                     <img 
@@ -207,6 +204,7 @@ s
                                 let newPart = ({
                                     title:'',
                                     x: pageX - left + offset,
+                                    offsetX:offset,
                                     y: pageY - top,
                                     width: 1,
                                     height: 1
@@ -438,7 +436,7 @@ s
             Title: e.title,
             ExternalVideoLink: e.externalLink,
             QuestionSeriesId: e.series ? e.series.Id : undefined ,
-            X: Math.floor(e.x),
+            X: Math.floor(e.x - e.offsetX),
             Y:  Math.floor(e.y),
             Width:  Math.floor(e.width),
             Length:  Math.floor(e.height),
@@ -452,19 +450,8 @@ s
         }
 
         addMap(data)
-        .then(
-            (r) => {
-                const {Id} = r
-                
-                if(Id){
-                    api.destroy()
-                    api.success('Map added successfully', 1)
-                }
-                else{
-                    api.destroy()
-                    api.error(r)
-                }
-        })
+        .then(r => handleResponse(r, api, 'Added successfully', 1))
+        
     }
 
     const renderFinalPage = () => {
@@ -506,15 +493,15 @@ s
                 items={[
                         {
                             title: 
-                            <Space>
+                            <Space className={metadataValidation ? "highlighted" : ""}>
                                 <p>Meta data{' '}</p>
 
-                                {(!isMetadataValid ? 
+                                {(!metadataValidation ? 
                                 <CheckCircleFilled style={{color:'green'}}/> 
                                 : 
                                 <Tooltip 
                                     color="white"
-                                    title={<p>{isMetadataValid}</p>}
+                                    title={<p>{metadataValidation}</p>}
                                     placement="top"
                                 >
                                     <CloseCircleTwoTone twoToneColor={'red'}/>
@@ -525,15 +512,15 @@ s
                         },
                         {
                             title:
-                            <Space>
+                            <Space className={!metadataValidation && selectImageValidation ? "highlighted" : ""}>
                                 <p>Add image</p>
 
-                                {(!isSelectImageValid ? 
+                                {(!selectImageValidation ? 
                                 <CheckCircleFilled style={{color:'green'}}/> 
                                 : 
                                 <Tooltip 
                                     color="white"
-                                    title={<p>{isSelectImageValid}</p>}
+                                    title={<p>{selectImageValidation}</p>}
                                     placement="top"
                                 >
                                     <CloseCircleTwoTone twoToneColor={'red'}/>
@@ -544,14 +531,14 @@ s
                         },
                         {
                             title:
-                            <Space>
+                            <Space className={!metadataValidation && !selectImageValidation && addElementsValidation ? "highlighted" : ""} >
                                 <p>Add elements</p>
-                                {(!isAddElementsValid ? 
+                                {(!addElementsValidation ? 
                                 <CheckCircleFilled style={{color:'green'}}/> 
                                 : 
                                 <Tooltip 
                                     color="white"
-                                    title={<p>{isAddElementsValid}</p>}
+                                    title={<p>{addElementsValidation}</p>}
                                     placement="top"
                                 >
                                     <CloseCircleTwoTone twoToneColor={'red'}/>

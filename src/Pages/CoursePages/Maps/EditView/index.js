@@ -22,6 +22,7 @@ import { AddBadgeSystemEntity } from "./AddBadgeSystemEntity";
 import { AssignBadgesToElement } from "./AssignBadgesToElement";
 import { AttachMapToElement } from "./AttachMapToElement";
 import { AssignClickImagesListGroup } from "./AssignClickImagesListGroup";
+import { ReassignMap } from "./ReassignMap";
 
 export function MapEditView(){
 
@@ -67,6 +68,7 @@ export function MapEditView(){
 
     const [showEditMapModal, setShowEditMapModal] = useState(false)
     const [showAddBadgeSystemModal, setShowAddBadgeSystemModal] = useState(false)
+    const [showReassignMapModal, setShowReassignMapModal] = useState(false)
 
     const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
     const [selectedSeries, setSelectedSeries] = useState({Code:''})
@@ -153,7 +155,9 @@ export function MapEditView(){
                                     key:'reassign_map',
                                     label:'Assign map to another course',
                                     icon: <NodeExpandOutlined /> ,
-                                    onClick: () => {}
+                                    onClick: () => {
+                                        setShowReassignMapModal(true)
+                                    }
                                 },
                                 {
                                     key:'play_map',
@@ -166,7 +170,13 @@ export function MapEditView(){
                                     label:'Add badge system',
                                     icon: <PlusOutlined style={{color:'green'}}/> ,
                                     onClick: () => setShowAddBadgeSystemModal(true)
-                                },],
+                                },
+                                {
+                                    key:'add_element',
+                                    label:'Add new element',
+                                    icon: <PlusOutlined style={{color:'green'}}/> ,
+                                    onClick: () => {}
+                                }],
                                 title:"Actions"
                             }}
                         >
@@ -1559,6 +1569,14 @@ export function MapEditView(){
                 element={selectedElement}
                 reloadMap={() => loadData()}
                 
+            />
+
+            <ReassignMap 
+                open={showReassignMapModal}
+                onClose={() => setShowReassignMapModal(false)}
+
+                map={mapExtended}
+                reloadMap={() => loadData()}
             />
 
             {editTitleModal()}

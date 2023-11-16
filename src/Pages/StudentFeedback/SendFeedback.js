@@ -11,7 +11,7 @@ import { useStudentFeedback } from "../../contexts/StudentFeedbackContext";
 export function SendFeedback({open, onClose, question}){
     const {currentPlayerKey} = useAuth()
 
-    const { loadingAddFeedback, addFeedbackResult, addFeedbackError, addFeedback} = useStudentFeedback()
+    const { loadingAddFeedback, addFeedbackError, addFeedback} = useStudentFeedback()
 
     const [newText, setNewText] = useState('')
     const [feedhackWasSent, setFeedhackWasSent] = useState(false)
@@ -66,6 +66,7 @@ export function SendFeedback({open, onClose, question}){
                     onChange={(v) => setNewText(v.target.value)}
                     maxLength={500}
                     showCount = {true}
+                    cols={10}
                     className="question-feedback-add-comment-text-input"
                 />
                 <br/>

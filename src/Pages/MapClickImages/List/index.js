@@ -46,7 +46,7 @@ export function MapClickImagesList(){
         },
         {
             key: 'edit_list_image',
-            label: 'Edit Image ',
+            label: 'Edit image ',
             icon: <PictureOutlined />,
             onClick: () => {
                 setSelectedList(l)
@@ -172,7 +172,7 @@ export function MapClickImagesList(){
             {contextHolder}
             <Divider orientation="left">
                 <Space>
-                    <p>Map click images</p>
+                    <p>Map pop-up icons</p>
 
                     <Button 
                         icon={<PlusOutlined style={{color:'green'}} />}

@@ -387,7 +387,7 @@ export function Reports(){
     }
 
     function renderGraphicalStatistics(){
-        const {DailyQuestionStatsEveryDay, HourlyQuestionStatsAllDays} = graphicalStats
+        const {DailyQuestionStatsEveryDay} = graphicalStats
 
         return(
             <ReportGraphicalStatistics
@@ -873,7 +873,13 @@ export function Reports(){
             {contextHolder}
             {searchLine()}
             <Divider />
-            {(loadingGraphicalStats || loadingNumericStats) && <Skeleton />}
+
+            {(loadingGraphicalStats || loadingNumericStats) && 
+            <div>
+                <p className="default-title">... Loading data ...</p>
+                <Skeleton/>
+            </div>}
+
             {!(loadingGraphicalStats || loadingNumericStats) && numericStats && showNumericStats && renderNumericStatistics()}
 
             {!(loadingGraphicalStats || loadingNumericStats) && graphicalStats && !showNumericStats && renderGraphicalStatistics()}

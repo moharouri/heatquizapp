@@ -105,7 +105,7 @@ export function SeriesList(){
                                                         title={<img 
                                                             src={me.Map.LargeMapURL}
                                                             alt={me.Title}
-                                                            className="map-image-small"
+                                                            className="hq-img hq-clickable"
                                                             onClick={() => naviagate('/playcoursemap/'+me.Map.Id)}
                                                         />}
                                                         

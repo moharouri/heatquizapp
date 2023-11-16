@@ -9,6 +9,10 @@ export function getSeriesViewEditRequest(Code){
     return GET_REQUEST_API('QuestionSeries/GetSeries_EXTENDED', Code)
 }
 
+export function getSeriesMedianTimeSpectrumRequest(Id){
+    return GET_REQUEST_API('Statistics/GetSeriesStatisticDetailed', Id)
+}
+
 export function getSeriesStatisticsRequest(Id){
     return GET_REQUEST_API('QuestionSeries/GetSeriesElementStatistics_EXTENDED', Id)
 }

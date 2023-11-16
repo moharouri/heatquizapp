@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
-import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, getRecentlyVistedMapsRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
+import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, getRecentlyVistedMapsRequest, reassignMapToCourseRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
 
 const Context = React.createContext()
 
@@ -53,6 +53,8 @@ export function MapsProvider ({children}){
     const {loading: loadingEditBadgeSystemEntity, value: editBadgeSystemEntityResult, error: editBadgeSystemEntityError, execute: editBadgeSystemEntity} = useAsyncFn((b) => editBadgeSystemEntityRequest(b))
     const {loading: loadingAddBadgeSystemEntity, value: addBadgeSystemEntityResult, error: addBadgeSystemEntityError, execute: addBadgeSystemEntity} = useAsyncFn((b) => addBadgeSystemEntityRequest(b))
     const {loading: loadingAssignBadgeSystemToElement, value: assignBadgeSystemToElementResult, error: assignBadgeSystemToElementError, execute: assignBadgeSystemToElement} = useAsyncFn((b) => assignBadgeSystemToElementRequest(b))
+    
+    const {loading: loadingReassignMapToCourse, value: reassignMapToCourseResult, error: reassignMapToCourseError, execute: reassignMapToCourse} = useAsyncFn((b) => reassignMapToCourseRequest(b))
 
 
     return(
@@ -200,7 +202,12 @@ export function MapsProvider ({children}){
             loadingRecentlyVistedMaps,
             recentlyVistedMaps,
             getRecentlyVistedMapsError,
-            getRecentlyVistedMaps
+            getRecentlyVistedMaps,
+
+            loadingReassignMapToCourse,
+            reassignMapToCourseResult,
+            reassignMapToCourseError,
+            reassignMapToCourse
         }}>
             {children}
         </Context.Provider>

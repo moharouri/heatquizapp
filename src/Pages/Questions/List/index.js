@@ -12,6 +12,7 @@ import { ViewQuestionRelations } from "../ViewQuestionRelations/ViewQuestionRela
 import { CopyQuestion } from "../CopyQuestion/CopyQuestion";
 import { useNavigate } from "react-router-dom";
 import { ErrorComponent } from "../../../Components/ErrorComponent";
+import { QuestionMeanTimeStatistics } from "../../../Components/QuestionMeanTimeStatistics";
 
 export function QuestionList(){
 
@@ -160,11 +161,18 @@ export function QuestionList(){
                                     </>}
 
                                     <br/>
-
-                                    <small className="default-gray">Median play time</small>
-                                    <Space size={'large'}>
-                                        <p>{q.MedianPlayTime} <small className="default-gray"> seconds </small></p>
-                                    </Space>
+                                    <QuestionMeanTimeStatistics
+                                        question={q}
+                                        style={{width:1000, height:800}}
+                                    >
+                                        <Space direction="vertical">
+                                            <small className="default-gray">Median play time</small>
+                                            <Space size={'large'}>
+                                                <p>{q.MedianPlayTime} <small className="default-gray"> seconds </small></p>
+                                            </Space>
+                                        </Space>
+                                    </QuestionMeanTimeStatistics>
+                                    
                                 </div>
                             </div>
                             

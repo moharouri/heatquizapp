@@ -13,6 +13,12 @@ import { FixURL, goToMapPlay } from "../../../../services/Auxillary";
 import './Play.css'
 import { getMapKey_LS, getMapPlayStatisticsRequest_LS, recordMapVisit_LS, updateMapKey_LS, updateMapPlayStatisticsRequest_LS } from "../../../../services/Maps";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { ErrorComponent } from "../../../../Components/ErrorComponent";
+
+var PDF_BTN = require('./Images/Button_PDF.png')
+var VIDEO_BTN = require('./Images/Button_Video.png')
+var LINK_BTN = require('./Images/Button_Link.png')
+var SERIES_BTN = require('./Images/Button_QuestionSeries.png')
 
 export function MapPlay(){
     const {
@@ -48,6 +54,9 @@ export function MapPlay(){
         
         //Get map play statistics on this device
         const result = getMapPlayStatisticsRequest_LS(id) 
+
+        console.log("result", result)
+        
         setPlayStats(result)
 
         setPlaySeries(false)
@@ -152,6 +161,12 @@ export function MapPlay(){
         const {QuestionSeries, PDFURL, ExternalVideoLink, VideoURL, RequiredElement, Threshold, MapAttachment} = e
 
         if(RequiredElement){
+            console.log(RequiredElement)
+            console.log(playStats)
+            console.log(playStats.ElementsProgress)
+            console.log(playStats.ElementsProgress[existingElementIndex])
+            console.log(progress, Threshold)
+
             let existingElementIndex = playStats.ElementsProgress.map((a, ai) => a.Id === e.Id ? (ai) : null)[0]
 
             const progress = playStats.ElementsProgress[existingElementIndex]
@@ -164,7 +179,9 @@ export function MapPlay(){
             }
         
             const finalProgress = evaluateElementProgress(QuestionSeries, progress)
-            
+            console.log(QuestionSeries, progress)
+            console.log(finalProgress)
+
             if(finalProgress < Threshold){
                 renderRequiredElement(e)
                 return
@@ -219,61 +236,46 @@ export function MapPlay(){
              >
                 {QuestionSeries && 
                 <Col>
-                    {(!seriesImage ? 
-                    <Button onClick={() => playSeriesActivate(QuestionSeries, e)}>Series </Button> 
-                    : 
                     <img 
                         alt="series"
                         className="map-element-modal-img"
-                        src={seriesImage}
+                        src={seriesImage || SERIES_BTN}
                         onClick={() => playSeriesActivate(QuestionSeries, e)}
-                    />)}
+                    />
                 </Col>}
 
                 {PDFURL && 
                 <Col>
-                    {(!pdfImage ? 
-                    <Button onClick={() => {
-                        addPDFStat(e)
-                        window.open(PDFURL)
-                    }}>PDF</Button>
-                    :
                     <img 
                         alt="pdf"
                         className="map-element-modal-img"
-                        src={pdfImage}
+                        src={pdfImage || PDF_BTN}
                         onClick={() => {
                             addPDFStat(e)
                             window.open(PDFURL)
                         }}
-                    />)}
+                    />
                 </Col>}
                 
                 {ExternalVideoLink && 
                     <Col>
-                        {(!linkImage ?
-                        <Button  onClick={() => window.open(ExternalVideoLink)}>Link</Button>
-                        :
                         <img 
                             alt="link"
                             className="map-element-modal-img"
-                            src={linkImage}
+                            src={linkImage || LINK_BTN}
                             onClick={() => window.open(ExternalVideoLink)}
-                        />)}
+                        />
                     </Col>
                 }
                 
                 {VideoURL && 
                     <Col>
-                        {(!videoImage ? 
-                        <Button  onClick={() => window.open(VideoURL)}>VideoURL</Button> 
-                        : 
-                        <img 
+                       <img 
                             alt="video"
                             className="map-element-modal-img"
-                            src={videoImage}
+                            src={videoImage || VIDEO_BTN}
                             onClick={() => window.open(VideoURL)}
-                        />)}
+                        />
                     </Col>}
 
             {MapAttachment && 
@@ -299,18 +301,25 @@ export function MapPlay(){
     }
 
     const getBadgeForElement = (badges, element) => {
+        console.log(badges, element, playStats)
+
         if(!playStats) return null;
 
         const {QuestionSeries} = element
-        let existingElementIndex = playStats.ElementsProgress.map((a, ai) => a.Id === element.Id ? (ai) : null)[0]
+        let existingElementIndex = playStats.ElementsProgress.map((a, ai) => a.Id === element.Id ? (ai) : null).filter(a => a)[0]
+        console.log(existingElementIndex)
 
         if([null, undefined].includes(existingElementIndex)) return null;
 
         const progress = playStats.ElementsProgress[existingElementIndex]
+        console.log(playStats.ElementsProgress[existingElementIndex])
+        console.log(progress)
 
         const finalProgress = evaluateElementProgress(QuestionSeries, progress)
+        console.log(finalProgress)
 
         const findBadge = badges.filter(a => a.Progress <= finalProgress).sort((a, b) => b.Progress - a.Progress)[0]
+        console.log(findBadge)
 
         return findBadge
     }
@@ -334,7 +343,7 @@ export function MapPlay(){
         const {BackgroundImage, Badges, QuestionSeries} = e
         const {LargeMapWidth, ShowBorder} = map
 
-        let toBeDrawBadge = Badges.length  && QuestionSeries ? getBadgeForElement(Badges, e) : null
+        let toBeDrawBadge = Badges.length && !(e.Badge_X && e.Badge_Y) && QuestionSeries ? getBadgeForElement(Badges, e) : null
 
         const positionStyle = getElementPositionStyle(imageBaseWidth, LargeMapWidth, e)
 
@@ -363,6 +372,13 @@ export function MapPlay(){
 
                 onClick={() => onClickElement(e)}
             >
+                {toBeDrawBadge &&
+                <img 
+                    alt="badge"
+                    className="hq-img"
+                    style={positionStyle}
+                    src={toBeDrawBadge.URL}
+                />}
                 
             </span>
         )
@@ -507,12 +523,21 @@ const setLocalKey = () => {
             >
                 {contextHolder}
                 {notificationContextHolder}
+
                 {loadingMap && <Skeleton />}
+
                 {map && !playSeries && !loadingMap && 
                 <div>
                     {renderMap()}
                     {renderActionList()}
                 </div>}
+
+                {getMapError && !loadingMap && 
+                    <ErrorComponent 
+                        error={getMapError}
+                        onReload={() => initialize()}
+                    />
+                }
                     
                 {playSeries && 
                     <SeriesPlay 

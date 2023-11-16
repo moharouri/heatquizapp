@@ -63,8 +63,11 @@ export function Datapools(){
                         return(
                             <Col 
                             key={Id}
-                            
-                            xs={6}>
+                            lg={{span:6}}
+                            md={{span:8}}
+                            sm={{span:12}}
+                            xs={{span:24}}
+                            >
                                 <div
                                     className="datapools-edit-view-element"
                                 >
@@ -113,7 +116,7 @@ export function Datapools(){
         <PagesWrapper>
             <Divider orientation="left">
                 <Space>
-                    Datapools
+                    <p>Datapools</p>
                     <Button
                         size="small"
                         onClick={() => setShowAddDPModal(true)}

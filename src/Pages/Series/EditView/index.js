@@ -19,6 +19,7 @@ import { AddQuestionsToSeries } from "./AddQuestionsToSeries";
 import { AssignQuestionsToPool } from "./AssignQuestionsToPool";
 import { ReorderQuestionsInSeries } from "./ReorderQuestionsInSeries";
 import { ErrorComponent } from "../../../Components/ErrorComponent";
+import { SeriesMeanTimeStatistics } from "../../../Components/SeriesMeanTimeStatistics";
 
 export function SeriesEditViewPage(){
     const {code} = useParams()
@@ -96,11 +97,17 @@ export function SeriesEditViewPage(){
                     suffix = {<span className="default-small default-gray">{' '}{onMobilePerc}</span>}
                     valueStyle={{fontSize:'medium', color:'gray'}}
                 />
-                <Statistic 
-                    title='Median play time'
-                    value={MedianPlayTime}
-                    valueStyle={{fontSize:'medium', color:'gray'}}
-                />
+                <SeriesMeanTimeStatistics
+                    series={Series}
+
+                    style={{width:1000, height:600}}
+                >
+                    <Statistic 
+                        title='Median play time'
+                        value={MedianPlayTime}
+                        valueStyle={{fontSize:'medium', color:'gray'}}
+                    />
+                </SeriesMeanTimeStatistics>
             </Space>
         )
     }

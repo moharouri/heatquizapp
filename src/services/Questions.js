@@ -8,6 +8,10 @@ export function searchQuestionsByIdsRequest(b){
     return GET_REQUEST_BODY_API('SimpleClickable/GetQuestionsByIds_ADVANCED_PORTAL', b, true)
 }
 
+export function getQuestionMedianTimeRequest(Id){
+    return GET_REQUEST_API('Statistics/GetQuestionStatisticDetailed', Id)
+}
+
 
 export function getClickableQuestionPlayRequest(Id){
     return GET_REQUEST_API('SimpleClickable/GetQuestion_APP', Id)
@@ -119,6 +123,26 @@ export function getKeyboardQuestionWrongAnswersRequest(b){
     return GET_REQUEST_API('KeyboardQuestion/GetKeyboardQuestionWrongAnswers_PORTAL', b)
 }
 
+//Clickable question edit functions
+export function addClickableQuestionRequest(b){
+    return ADD_REQUEST_FILE_API('SimpleClickable/AddQuestionSingleStep', b, true)
+}
+
+export function editClickableQuestionAnswerRequest(b){
+    return EDIT_REQUEST_BODY_API('SimpleClickable/UpdateClickableImageAnswer', b, true)
+}
+
+export function deleteClickableQuestionPartRequest(b){
+    return EDIT_REQUEST_BODY_API('SimpleClickable/RemoveClickable', b)
+}
+
+export function addClickableQuestionPartsRequest(b){
+    return ADD_REQUEST_FILE_API('SimpleClickable/AddNewQuestionParts', b)
+}
+
+export function editClickableQuestionImageRequest(b){
+    return EDIT_REQUEST_FILE_API('SimpleClickable/AddEditQuestionBackgroundImage', b)
+}
 
 
 

@@ -1,28 +1,40 @@
-import {Col, Drawer, List, Row, Select, Skeleton, message } from "antd";
+import {Button, Col, Drawer, List, Row, Select, Skeleton, Space, message } from "antd";
 import React, { useState } from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 
-import { CLICKABLE_CHART, CLICKABLE_IMAGE } from "./Constants";
+import { CLICKABLE_CHART, CLICKABLE_IMAGE } from "../Shared/Constants";
 import { useInterpretedTrees } from "../../../../contexts/InterpretedTreesContext";
 import { useClickTrees } from "../../../../contexts/ClickTreesContext";
 import { useEffect } from "react";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function SetElementAnswer({open, onClose, elementIndex, onSelect}){
+export function EditElementAnswer({open, onClose, element, type, reloadQuestion}){
 
     if(!open) return <div/>;
 
     const {interpretedTrees, errorGetInterpretedTrees, isLoadingInterpretedTrees, getAllInterpretedTrees} = useInterpretedTrees()
     const {clickTrees, errorGetClickTrees, isLoadingClickTrees, getAllClickTrees,} = useClickTrees()
 
+    const {isLoadingEditClickableQuestionAnswer, editClickableQuestionAnswer} = useQuestions()
+
     const [selectedType, setSelectedType] = useState(CLICKABLE_IMAGE)
     const [selectedTree, setSelectedTree] = useState(null)
     const [selectedNode, setSelectedNode] = useState(null)
+    const [selectedNodeSecond, setSelectedNodeSecond] = useState(null)
     const [showSubLeafs, setShowSubLeafs] = useState(false)
 
     const [api, contextHolder] = message.useMessage()
 
     useEffect(() =>{
+        setSelectedType(type)
+
+        setSelectedTree(null)
+        setSelectedNode(null)
+        setSelectedNodeSecond(null)
+        setShowSubLeafs(false)
+
         getAllClickTrees()
         getAllInterpretedTrees()
     }, [])
@@ -70,20 +82,19 @@ export function SetElementAnswer({open, onClose, elementIndex, onSelect}){
                         renderItem={(img) => {
                             const {Id, URL, Name, Leafs} = img
 
+                            const isSelected = selectedNode && selectedNode.Id === img.Id
+
                             return(
                                 <div 
                                     key={Id}
-                                    className={"hq-full-width hq-clickable hoverable"}
+                                    className={"hq-full-width hq-clickable hoverable" + (isSelected ? " highlighted" : "")}
                                     onClick={() => {
                                         setSelectedNode(img)
 
                                         if(Leafs.length) {
                                             setShowSubLeafs(true)
                                         }
-                                        else{
-                                            onSelect(CLICKABLE_IMAGE, img)
-                                            onClose()
-                                        }
+                                        
                                     }}
                                 >
                                     <img 
@@ -104,14 +115,14 @@ export function SetElementAnswer({open, onClose, elementIndex, onSelect}){
 
                         renderItem={(img) => {
                             const {Id, URL, Name} = img
+                            const isSelected = selectedNodeSecond && selectedNodeSecond.Id === img.Id
 
                             return(
                                 <div 
                                     key={Id}
-                                    className={"hq-full-width hq-clickable hoverable"}
+                                    className={"hq-full-width hq-clickable hoverable" + (isSelected ? " highlighted" : "")}
                                     onClick={() => {
-                                        onSelect(CLICKABLE_IMAGE, img)
-                                        onClose()
+                                        setSelectedNodeSecond(img)
                                     }}
                                 >
                                     <img 
@@ -171,14 +182,15 @@ export function SetElementAnswer({open, onClose, elementIndex, onSelect}){
 
                         renderItem={(img) => {
                             const {Id, URL, Name} = img
+                            const isSelected = selectedNode && selectedNode.Id === img.Id
 
                             return(
                                 <div 
                                     key={Id}
-                                    className={"hq-full-width hq-clickable hoverable"}
+                                    className={"hq-full-width hq-clickable hoverable" + (isSelected ? " highlighted" : "")}
                                     onClick={() => {
-                                        onSelect(CLICKABLE_CHART, img)
-                                        onClose()
+                                        setSelectedNode(img)
+                                        
                                     }}
                                 >
                                     <img 
@@ -199,7 +211,33 @@ export function SetElementAnswer({open, onClose, elementIndex, onSelect}){
 
     return(
         <Drawer
-        title={"Select answer for element #" + elementIndex}
+        title={
+        <Space size={'large'}>
+            <p>Select answer for element</p>
+
+            <Button
+                size="small"
+                type="primary"
+
+                loading={isLoadingEditClickableQuestionAnswer}
+
+                onClick={() => {
+                    const VM = ({
+                        ...element,
+                        IsImage: (type === CLICKABLE_IMAGE),
+                        Answer: null,
+                        AnswerId: (selectedNodeSecond || selectedNode).Id
+                    })
+
+                    editClickableQuestionAnswer(VM).then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
+                        reloadQuestion()
+                        onClose()
+                    }))
+                }}
+            >
+                Update
+            </Button>
+        </Space>}
         width={'50%'}
         onClose={onClose}
         open={open}
@@ -210,30 +248,12 @@ export function SetElementAnswer({open, onClose, elementIndex, onSelect}){
             {contextHolder}
         
             <Row gutter={[4,4]}>
-                <Col xs={12}>
-                    <Select
-                        className="hq-full-width"
-                        onChange={(v, option) => {
-                            setSelectedType(v)
-                            setSelectedTree(null)
-                            setSelectedNode(null)
-                            setShowSubLeafs(false)
-                        }}
-                        defaultValue={'please select'}
-                        value={selectedType}
-                        options={([CLICKABLE_IMAGE, CLICKABLE_CHART]).map((d) => ({
-                            value: d,
-                            label: d
-                        }))}
-
-                        suffixIcon={<span>Answer type</span>}
-                    />
-                </Col>
-                <Col xs={12}>
+                <Col xs={24}>
                     {renderSelectClickTreeAnswer()}
+                </Col>
+                <Col xs={24}>
                     {renderSelectIntrpretedTreeAnswer()}
                 </Col>
-                
             </Row>
         </Drawer>
     )

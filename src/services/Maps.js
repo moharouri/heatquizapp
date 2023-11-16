@@ -121,6 +121,10 @@ export function assignBadgeSystemToElementRequest(b){
     return ADD_REQUEST_FILE_API('CourseMap/CopyBadgeGroupEntities/', b)
 }
 
+export function reassignMapToCourseRequest(b){
+    return EDIT_REQUEST_FILE_API('CourseMap/ReassignMap/', b)
+}
+
 export function removeBadgeSystemRequest(b){
     return EDIT_REQUEST_FILE_API('CourseMap/RemoveBadgeGroup/', b)
 }

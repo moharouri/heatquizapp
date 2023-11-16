@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Col, Divider, List, Row, Skeleton, Space, message } from "antd";
+import { Button, Col, Divider, List, Row, Skeleton, message } from "antd";
 import { FixURL } from "../../../../services/Auxillary";
 
 import { useAuth } from "../../../../contexts/AuthContext";
@@ -344,11 +344,17 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
             flexDirection:'column',
             cursor:'pointer',
             position: 'absolute',
+            border: "1px solid rgb(245, 245, 245)"
            
         })
 
         return(
-            <div>
+            <div
+            style = {{
+                height:imageHeight,
+                width:imageWidth,
+            }} 
+            >
                 <img
                 style = {{
                     ...backgroundImageStyle,
@@ -365,7 +371,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                     const itemPositionStyle = getItemPositionStyle(imageWidth, BackgroundImageWidth, p)
 
                     return (
-                        <span 
+                        <div 
                         key={p.Id}
                         style = {{
                             ...backgroundImageStyle,
@@ -394,7 +400,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                             <CloseCircleFilled
                                 style={{color:'red', opacity:'70%'}}
                             />)}
-                        </span>
+                        </div>
                     )
                 })}
 
@@ -404,7 +410,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                     const itemPositionStyle = getItemPositionStyle(imageWidth, BackgroundImageWidth, p)
 
                     return (
-                        <span 
+                        <div 
                         key={p.Id}
                         style = {{
                             ...backgroundImageStyle,
@@ -433,7 +439,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                             <CloseCircleFilled
                                 style={{color:'red', opacity:'70%'}}
                             />)}
-                        </span>
+                        </div>
                     )
                 })}
             </div>

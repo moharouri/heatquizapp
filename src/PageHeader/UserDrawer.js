@@ -77,8 +77,6 @@ const UserDrawer = () => {
   const renderNotificationsList = () => {
     if(isStudent) return;
 
-    if(!unseenComments.CountInactive) return;
-
     const notifications = unseenComments.Comments
     const feedback = unseenComments.StudentFeedback
 
@@ -86,7 +84,6 @@ const UserDrawer = () => {
       <Drawer
           title="Notifications"
           placement="right"
-          closable={false}
           onClose={() => setShowUnseenComments(false)}
           open={showUnseenComments}
         >
@@ -108,6 +105,7 @@ const UserDrawer = () => {
                 <Tooltip
                   color='white'
                   title={<p>Click to go to question</p>}
+                  placement='left'
                   key={ni}
                 >
                   <div 
@@ -204,6 +202,7 @@ const UserDrawer = () => {
               <Tooltip
                 color='white'
                 title={<p>Click to go to question</p>}
+                placement='left'
                 key={ni}
                 onClick={() => {
                   goToQuestionViewEditSamePage(navigate, ({Id, Type}))
@@ -304,7 +303,7 @@ const UserDrawer = () => {
             type="light"
             onClick = {() =>{
               registerFeedbackSeen()
-              setShowUnseenComments(unseenComments.CountInactive)
+              setShowUnseenComments(true)
             }}
             icon = {
                 <Badge

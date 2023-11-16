@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
 import { addCourseRequest, editCourseRequest, getAllCourses, getCourse, getMyCourses } from "../services/Courses"
 import { useDatapools } from "./DatapoolsContext"
+import { useAuth } from "./AuthContext"
 
 const Context = React.createContext()
 
@@ -10,7 +11,8 @@ export function useCourses(){
 }
 
 export function CoursesProvider ({children}){
-    
+    const {isStudent} = useAuth()
+
     //Fetch courses from API
     const {loading: loadingCourses, value: courses, error: getCoursesError, execute: getCourses} = useAsyncFn(() => getAllCourses())
     const {loading: loadingMyCourses, value: myCourses, error: getMyCoursesError, execute: getOwnedCourses} = useAsyncFn(() => getMyCourses())
@@ -23,7 +25,9 @@ export function CoursesProvider ({children}){
     
 
     useEffect(() => {
-        getCourses()
+        if(!isStudent){
+            getCourses()
+        }
     }, [selectedDatapool])
 
     return(

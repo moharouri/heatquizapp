@@ -3,7 +3,7 @@ import { useSeries } from "../../contexts/SeriesContext";
 import { Button, Col, Divider, Dropdown, FloatButton, Input, List, Progress, QRCode, Row, Skeleton, Space, Spin, Tooltip, message, notification } from "antd";
 import { red, green } from '@ant-design/colors';
 import { getRandomSeriesElements } from "./Functions";
-import { FixURL, convertSecondsToHHMMSS, goToQuestionViewEdit, goToSeriesViewEdit } from "../../services/Auxillary";
+import { convertSecondsToHHMMSS, goToQuestionViewEdit, goToSeriesViewEdit } from "../../services/Auxillary";
 
 import { CLICKABLE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
 import { ClickableQuestionPlay } from "../../Pages/Questions/ClickableQuestion/Play";
@@ -14,7 +14,6 @@ import { ForwardOutlined, QuestionCircleOutlined, FilePdfOutlined, CheckCircleFi
 
 import './SeriesPlay.css'
 import { LatexRenderer } from "../LatexRenderer";
-import { getItemPositionStyle } from "../../Pages/Questions/ClickableQuestion/Functions";
 import { QuestionPlayPocket } from "../../Pages/Questions/QuestionPlayPocket/QuestionPlayPocket";
 import { useStudentFeedback } from "../../contexts/StudentFeedbackContext";
 import { SendFeedback } from "../../Pages/StudentFeedback/SendFeedback";
@@ -22,6 +21,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../ViewSolutionComponent";
 import { ErrorComponent } from "../ErrorComponent";
 import { ImageModal } from "../ImageModal";
+import { DisplayClickableQuestionAnswers } from "./DisplayClickableQuestionAnswers";
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
@@ -512,102 +512,27 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
     const renderClickableQuestionFinalPage = (index) => {
         const element = playedElements[index]
 
-        const {Question} = element
-        const {Code, BackgroundImageURL, BackgroundImageHeight, BackgroundImageWidth, ClickImages, ClickCharts} = Question
-
-        const imageWidth = window.innerWidth*0.20
-        const imageHeight = (BackgroundImageHeight/BackgroundImageWidth) * imageWidth
-
-        const backgroundImageStyle = ({
-            backgroundPosition:'center',
-            backgroundRepeat:'no-repeat',
-            backgroundSize:'contain',
-        })
-
-        const itemStyle = ({
-            alignItems:'center',
-            justifyContent:'center',
-            display:'flex',
-            position: 'absolute',
-           
-        })
+        const {Question, Answers} = element
 
         return(
-            <Space 
-                size={'large'}
-            >
-                <div>
-                    <img
-                        style = {{
-                            ...backgroundImageStyle,
-                            height:imageHeight,
-                            width:imageWidth,
-                        }} 
-
-                        src = {BackgroundImageURL}
-                        alt={Code}
+            <Row className="hq-full-width" gutter={[2,2]}>
+                <Col>
+                    <small className="default-gray">Your answer(s)</small>
+                    <DisplayClickableQuestionAnswers 
+                        Question={Question}
+                        Answers = {Answers}
                     />
-
-                    {ClickImages.map((p) => {
-                        const {Answer} = p
-
-                        const itemPositionStyle = getItemPositionStyle(imageWidth, BackgroundImageWidth, p, 0)
-
-                        return (
-                            <span 
-                            key={p.Id}
-                            style = {{
-                                ...backgroundImageStyle,
-                                ...itemStyle,
-                            
-                                ...itemPositionStyle,
-
-                                [p.Background_ImageId ? "backgroundImage" : ""]:
-                                p.Background_ImageId ? "url(" + FixURL(p.Background_Image.URL) + ")" : "",
-                            }}
-                                                    >
-                                
-                                <img 
-                                    style={itemPositionStyle}
-                                    src={Answer.URL}
-                                    alt="answer"
-                                />
-                            </span>
-                        )
-                    })}
-
-                    {ClickCharts.map((p) => {
-                        const {Answer} = p 
-
-                        const itemPositionStyle = getItemPositionStyle(imageWidth, BackgroundImageWidth, p)
-
-                        return (
-                            <span 
-                            className="clickable-question-play-clickable-item"
-                            key={p.Id}
-                            style = {{
-                                ...backgroundImageStyle,
-                                ...itemStyle,
-                                
-                                ...itemPositionStyle,
-    
-                                [p.Background_ImageId ? "backgroundImage" : ""]:
-                                p.Background_ImageId ? "url(" + FixURL(p.Background_Image.URL) + ")" : "",
-                            }}
-    
-                            >
-                                
-                                <img 
-                                    style={itemPositionStyle}
-                                    src={Answer.URL}
-                                    alt="answer"
-                                />
-                            </span>
-                        )
-                    })}
-                </div>
-            </Space>
+                </Col>
+                <Col xs={1} />
+                <Col>
+                    <small className="default-gray"><span className="default-green">Correct</span> answer(s)</small>
+                    <DisplayClickableQuestionAnswers 
+                        Question={Question}
+                    />
+                </Col>
+            </Row>
         )
+
     }
 
     const elementActionList = (index) => [
@@ -785,7 +710,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                                     <Space size={'large'}>
                                         <Space
                                             size={'large'}
-                                            className="series-play-final-page-item-statistics-section"
+                                            align="start"
                                         >
                                             <div
                                             className="series-play-final-page-item-statistics-score-time"
@@ -811,11 +736,10 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                                                         </small>
                                                         </i></p>
                                                     
-                                                </Space>                                           
+                                                </Space>   
+                                                                                         
                                             </div>
-                                            <div
-                                            
-                                            >
+                                            <div>
                                                 <small
                                                     className="default-gray"
                                                 >
@@ -855,6 +779,17 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                                                         
                                                     </Space> 
                                                 </div>}
+                                            </div>
+                                            <div>
+                                                <Button
+                                                    icon={<NotificationOutlined style={{color:'blueviolet'}} />}
+                                                    size="small"
+                                                    onClick={() => {                                                
+                                                        setShowSendFeedbackModal(true)
+                                                        setSelectedQuestion(Question)
+                                                    }}>
+                                                    Send feedback
+                                                </Button>
                                             </div>
 
                                         </Space>
