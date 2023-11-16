@@ -8,7 +8,7 @@ import Input from "antd/es/input/Input";
 import {PlusOutlined,} from '@ant-design/icons';
 import { AddUser } from "./AddUser";
 
-export function UsersList({}){
+export function UsersList(){
 
     const {loadingUsers, users, getUserError, getUsers,} = useUsers()
 

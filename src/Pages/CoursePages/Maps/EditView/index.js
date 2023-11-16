@@ -21,6 +21,7 @@ import { AddBadgeSystem } from "./AddBadgeSystem";
 import { AddBadgeSystemEntity } from "./AddBadgeSystemEntity";
 import { AssignBadgesToElement } from "./AssignBadgesToElement";
 import { AttachMapToElement } from "./AttachMapToElement";
+import { AssignClickImagesListGroup } from "./AssignClickImagesListGroup";
 import { ReassignMap } from "./ReassignMap";
 
 export function MapEditView(){
@@ -81,6 +82,8 @@ export function MapEditView(){
     const [showAssignBackgroundImage, setShowAssignBackgroundImage] = useState(false)
     const [showAssignClickImagesList, setShowAssignClickImagesList] = useState(false)
     const [showAssignMapAttachment, setShowAssignMapAttachment] = useState(false)
+
+    const [showAssignClickImagesListGroup, setShowAssignClickImagesListGroup] = useState(false)
 
     const [selectedElement, setSelectedElement] = useState(null)
 
@@ -1527,6 +1530,11 @@ export function MapEditView(){
 
                     
                 }}
+            />
+
+            <AssignClickImagesListGroup 
+                open={showAssignClickImagesListGroup}
+                onClose={() => setShowAssignClickImagesListGroup(false)}
             />
 
             <EditBadgeImage 
