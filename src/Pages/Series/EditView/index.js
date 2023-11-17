@@ -20,6 +20,7 @@ import { AssignQuestionsToPool } from "./AssignQuestionsToPool";
 import { ReorderQuestionsInSeries } from "./ReorderQuestionsInSeries";
 import { ErrorComponent } from "../../../Components/ErrorComponent";
 import { SeriesMeanTimeStatistics } from "../../../Components/SeriesMeanTimeStatistics";
+import { QuestionMeanTimeStatistics } from "../../../Components/QuestionMeanTimeStatistics";
 
 export function SeriesEditViewPage(){
     const {code} = useParams()
@@ -264,14 +265,16 @@ export function SeriesEditViewPage(){
                                 </Space>
                                 <Space>
                                     <ClockCircleOutlined />
-                                    <Tooltip
-                                        title={<p>Median play time (seconds)</p>}
-                                        color="white"
+
+                                    <QuestionMeanTimeStatistics
+                                        question={Question}
+                                        style={{width:1000, height:800}}
                                     >
                                         <p>{medianPlayTime}
                                             <i><small>{' '}seconds </small></i>
                                         </p>
-                                    </Tooltip>
+                                    </QuestionMeanTimeStatistics>
+                                
                                 </Space>
                             </Space>
 
