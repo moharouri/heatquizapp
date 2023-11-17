@@ -28,7 +28,7 @@ export function QuestionMeanTimeStatistics({question, children, style}){
     const [maxTimeCorrect, setMaxTimeCorrect] = useState(0)
 
     const [dynamicRendering, setDynamicRendering] = useState(false)
-    const [dynamicLineX, setDynamicLineX] = useState(false)
+    const [dynamicLineX, setDynamicLineX] = useState(style.width)
 
     const [ctx, setCtx] = useState(null)
 
