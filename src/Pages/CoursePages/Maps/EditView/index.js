@@ -176,6 +176,12 @@ export function MapEditView(){
                                     label:'Add new element',
                                     icon: <PlusOutlined style={{color:'green'}}/> ,
                                     onClick: () => {}
+                                },
+                                {
+                                    key:'assign_click_list_elements',
+                                    label:'Assign map pop-up icons to elements',
+                                    icon: <AimOutlined/> ,
+                                    onClick: () => setShowAssignClickImagesListGroup(true)
                                 }],
                                 title:"Actions"
                             }}
@@ -490,10 +496,10 @@ export function MapEditView(){
                         })
                     }
 
-                    const isSeriesChanged = (loadingRemoveSeriesFromMapElement || loadingAssignSeriesToMapElement) && selectedElement.Id === e.Id
-                    const isPDFChanged = (loadingRemovePDFToMapElement) && selectedElement.Id === e.Id
-                    const isClickListChanged = (loadingAssignClickListToMapElement || loadingDeassignClickListToMapElement) && selectedElement.Id === e.Id
-                    const isAttachmentChanged = (loadingDeattachMapToElement) && selectedElement.Id === e.Id
+                    const isSeriesChanged = selectedElement && (loadingRemoveSeriesFromMapElement || loadingAssignSeriesToMapElement) && selectedElement.Id === e.Id
+                    const isPDFChanged = selectedElement && (loadingRemovePDFToMapElement) && selectedElement.Id === e.Id
+                    const isClickListChanged = selectedElement && (loadingAssignClickListToMapElement || loadingDeassignClickListToMapElement) && selectedElement.Id === e.Id
+                    const isAttachmentChanged = selectedElement && (loadingDeattachMapToElement) && selectedElement.Id === e.Id
                     
 
                     return(
@@ -1064,7 +1070,7 @@ export function MapEditView(){
                                     
                                         : <small className="default-gray"> no badges added </small>}
                                     </Collapse.Panel>
-                                    <Collapse.Panel header={<small className="default-gray">Click images list</small>} key="2">
+                                    <Collapse.Panel header={<small className="default-gray">Pop-up icons list</small>} key="2">
                                         {CourseMapElementImages ? 
                                         (isClickListChanged ? 
                                         <Spin/>:
@@ -1535,6 +1541,8 @@ export function MapEditView(){
             <AssignClickImagesListGroup 
                 open={showAssignClickImagesListGroup}
                 onClose={() => setShowAssignClickImagesListGroup(false)}
+                map = {mapExtended}
+                reloadMap={() => loadData()}
             />
 
             <EditBadgeImage 

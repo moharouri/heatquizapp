@@ -244,3 +244,7 @@
     height: 20vh;
     width: 100%;
 }
+
+.hq-question-action-line{
+    min-width: 300px;
+}

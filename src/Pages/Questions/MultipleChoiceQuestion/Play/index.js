@@ -10,6 +10,7 @@ import { NextButton } from "../../../../Components/NextButton";
 import { ImageModal } from "../../../../Components/ImageModal";
 
 export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
+    console.log(mapKey)
 
     const {multipleChoiceQuestionPlay, errorGetMultipleChoiceQuestionPlay, isLoadingMultipleChoiceQuestionPlay, getMultipleChoiceQuestionPlay, postQuestionStatistic} = useQuestions()
     const {currentPlayerKey} = useAuth()
@@ -137,7 +138,7 @@ export function MultipleChoiceQuestion({Id, deadLoad, onUpdateSeriesPlayElements
                     </Button>}
 
                     {showScore &&
-                    <Row gutter={[4,4]}>
+                    <Row gutter={[4,4]} className="hq-question-action-line">
                         <Col>
                         <p>
                             Your answer is {' '} 

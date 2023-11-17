@@ -81,13 +81,13 @@ export function UsersList(){
                 columns={columns}
                 dataSource={users ? 
                     users.filter((u) => {   
-                    if(u.Username === 'admin') return;
+                    if(u.Username === 'admin') return false;
 
-                    if(!searchCode.trim()) return true
+                    if(!searchCode.trim()) return true;
     
-                    if(u.Username.includes(searchCode.trim()) || u.Email.includes(searchCode.trim())) return true
+                    if(u.Username.includes(searchCode.trim()) || u.Email.includes(searchCode.trim())) return true;
     
-                    return false
+                    return false;
     
                 }) : []}
                 rowKey={(record) => record.username}

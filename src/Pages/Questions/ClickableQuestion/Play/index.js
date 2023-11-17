@@ -270,7 +270,7 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                 {showScore && <p>Score: {' '} {finalScore}</p>}
                 
                 {showScore &&
-                <Row gutter={[4,4]}>
+                <Row gutter={[4,4]} className="hq-question-action-line">
                     <Col>
                         {showSolution && !showCorrectSolution &&
                         <Button
