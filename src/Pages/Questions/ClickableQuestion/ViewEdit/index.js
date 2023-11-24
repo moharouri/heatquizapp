@@ -685,7 +685,7 @@ export function ClickableQuestionEditView({reloadQuestion}){
                         </Tooltip>
                         <Tooltip
                             color="white"
-                            title={<p>Update explanation</p>}
+                            title={<p>Update/View explanation</p>}
                             placement="left"
                         >
                             <Button
