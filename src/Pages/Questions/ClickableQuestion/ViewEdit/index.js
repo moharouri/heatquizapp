@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Button, Col, Input, List, Popconfirm, Row, Space, Tooltip, message } from "antd";
-import {PlusOutlined, PictureOutlined} from '@ant-design/icons';
+import {PlusOutlined, PictureOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 
 import './index.css'
 import { FixURL, handleResponse } from "../../../../services/Auxillary";
@@ -9,6 +9,7 @@ import { EditElementAnswer } from "./EditElementAnswer";
 import { CLICKABLE_CHART, CLICKABLE_IMAGE } from "../Shared/Constants";
 import { SetElementAnswer } from "../Shared/SetElementAnswer";
 import { EditClickableQuestionImage } from "./EditClickableQuestionImage";
+import { EditQuestionExplanation } from "./EditQuestionExplanation";
 
 export function ClickableQuestionEditView({reloadQuestion}){
 
@@ -22,6 +23,7 @@ export function ClickableQuestionEditView({reloadQuestion}){
     const imageRef2 = React.createRef()
 
     const [showEditImage, setShowEditImage] = useState(false)
+    const [showEditExplanation, setShowEditExplanation] = useState(false)
 
     const [offset, setOffset] = useState(0)
 
@@ -681,6 +683,17 @@ export function ClickableQuestionEditView({reloadQuestion}){
                                  <PictureOutlined />
                             </Button>
                         </Tooltip>
+                        <Tooltip
+                            color="white"
+                            title={<p>Update explanation</p>}
+                            placement="left"
+                        >
+                            <Button
+                                onClick={() => setShowEditExplanation(true)}
+                            >
+                                 <QuestionCircleOutlined />
+                            </Button>
+                        </Tooltip>
                     </Space> 
                 </Col>
             </Row>
@@ -712,6 +725,15 @@ export function ClickableQuestionEditView({reloadQuestion}){
             <EditClickableQuestionImage 
                 open={showEditImage}
                 onClose={() => setShowEditImage(false)}
+
+                question = {question.Question}
+
+                reloadQuestion={() => reloadQuestion()}
+            />
+
+            <EditQuestionExplanation 
+                open={showEditExplanation}
+                onClose={() => setShowEditExplanation(false)}
 
                 question = {question.Question}
 
