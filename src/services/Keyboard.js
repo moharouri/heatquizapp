@@ -1,9 +1,5 @@
 import { ADD_REQUEST_BODY_API, EDIT_REQUEST_BODY_API, EDIT_REQUEST_FILE_API, GET_REQUEST_API, GET_REQUEST_BODY_API } from "./APIRequests";
 
-export function getKeyboardRequest(Id){
-    return GET_REQUEST_API('Keyboard/GetKeyboard_PORTAL_VIEW_EDIT', Id)
-}
-
 export function getAllKeyListsRequest(){
     return GET_REQUEST_API('KeysList/GetAllKeyLists', null, true)
 }
@@ -26,6 +22,10 @@ export function reassignKeysToListRequest(b){
 
 export function editKeyListCodeRequest(b){
     return EDIT_REQUEST_FILE_API('KeysList/UpdateCode', b, true)
+}
+
+export function getKeyboardRequest(Id){
+    return GET_REQUEST_API('Keyboard/GetKeyboard_PORTAL_VIEW_EDIT', Id)
 }
 
 export function searchKeyboardsRequest(b){
