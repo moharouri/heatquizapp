@@ -1,0 +1,34 @@
+.eb-question-control-volume{
+    border: 1px solid gainsboro;
+    margin-bottom: 1vh;
+}
+
+.eb-question-erm-direction-container{
+   flex-direction: row;
+   display: flex;
+}
+
+.eb-question-term-direction-inactive{
+    color: gainsboro;
+    border: 1px solid gainsboro;
+}
+
+.eb-question-term-direction-green{
+    color: green;
+    border: 1px solid green;
+}
+
+.eb-question-term-direction-red{
+    color: red;
+    border: 1px solid red;
+}
+
+.eb-question-term-direction-neutral{
+    color: #428bca;
+    border: 1px solid #428bca;
+}
+
+.eb-question-term-word{
+    padding-left: 4px;
+    padding-right: 4px;
+}

@@ -1,0 +1,5 @@
+export const NORTH_DIRECTION = 'North'
+export const SOUTH_DIRECTION = 'South'
+export const WEST_DIRECTION = 'West'
+export const EAST_DIRECTION = 'East'
+export const CENTER_DIRECTION = 'Center'

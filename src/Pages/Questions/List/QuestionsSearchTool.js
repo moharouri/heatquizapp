@@ -5,7 +5,7 @@ import { useTopics } from "../../../contexts/TopicsContext";
 import { useLevelsOfDifficulty } from "../../../contexts/LevelOfDifficultyContext";
 
 import './List.css'
-import { CLICKABLE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, QUESTION_SEARCH_CRITERIAS, QUESTION_SEARCH_CRITERIA_MEDIAN_TIME, QUESTION_SEARCH_CRITERIA_PLAY_STATS, QUESTION_SEARCH_CRITERIA_QUESTION_TYPES, QUESTION_TYPES_SEARCH_NAMES } from "./constants";
+import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, QUESTION_SEARCH_CRITERIAS, QUESTION_SEARCH_CRITERIA_MEDIAN_TIME, QUESTION_SEARCH_CRITERIA_PLAY_STATS, QUESTION_SEARCH_CRITERIA_QUESTION_TYPES, QUESTION_TYPES_SEARCH_NAMES } from "./constants";
 import { useQuestions } from "../../../contexts/QuestionsContext";
 import { GetPagesArray } from "../../../services/Auxillary";
 
@@ -68,10 +68,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             <div className="question-search-criteria">
                 <Select 
                     onChange={(v, option) => {
-                        console.log(v)
-
                         const findTypes = QUESTION_TYPES_SEARCH_NAMES.filter(a =>v.includes(a.value))
-                        console.log(findTypes)
 
                         setSelectedQuestionTypes(findTypes)
                     }}
@@ -226,7 +223,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             ShowClickableQuestions: selectedQuestionTypes.map(a => a.value).includes(CLICKABLE_QUESTION_PARAMETER),
             ShowKeyboardQuestions: selectedQuestionTypes.map(a => a.value).includes(KEYBOARD_QUESTION_PARAMETER),
             ShowMultipleChoiceQuestions: selectedQuestionTypes.map(a => a.value).includes(MULTIPLE_CHOICE_QUESTION_PARAMETER),
-            ShowEBQuestions: false,
+            ShowEBQuestions: selectedQuestionTypes.map(a => a.value).includes(ENERGY_BALANCE_QUESTION_PARAMETER),
             ShowFreebodyDiagramQuestions: false,
             ShowDiagramQuestions: false,
             
@@ -267,7 +264,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             ShowClickableQuestions: true,
             ShowKeyboardQuestions: true,
             ShowMultipleChoiceQuestions: true,
-            ShowEBQuestions: false,
+            ShowEBQuestions: true,
             ShowFreebodyDiagramQuestions: false,
             ShowDiagramQuestions: false,
             

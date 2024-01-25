@@ -12,7 +12,6 @@ import { NextButton } from "../../../../Components/NextButton";
 import { ImageModal } from "../../../../Components/ImageModal";
 
 export function KeyboardQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, showSolution, nextAction, mapKey}){
-    console.log(mapKey)
     const {keyboardQuestionPlay, errorGetKeyboardQuestionPlay, isLoadingKeyboardQuestionPlay, getKeyboardQuestionPlay, postQuestionStatistic} = useQuestions()
 
     const [answerList, setAnswerList] = useState({

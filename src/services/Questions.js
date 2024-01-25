@@ -25,6 +25,11 @@ export function getKeyboardQuestionPlayRequest(Id){
     return GET_REQUEST_API('KeyboardQuestion/GetQuestion_PORTAL', Id)
 }
 
+
+export function getEnergyBalanceQuestionPlayRequest(Id){
+    return GET_REQUEST_API('EnergyBalanceQuestionUpdated/GetQuestion_PORTAL', Id)
+}
+
 export function addQuestionStatisticRequest(b){
     return ADD_REQUEST_BODY_API('SimpleClickable/PostStatistic', b)
 }
