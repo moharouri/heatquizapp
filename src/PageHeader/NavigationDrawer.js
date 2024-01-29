@@ -124,6 +124,11 @@ const NavigationDrawer = () => {
             label:'Multiple choice question',
             key:'/add_mc_q',
             icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Energy balance question',
+            key:'/add_eb_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
         ],
         type:'group'

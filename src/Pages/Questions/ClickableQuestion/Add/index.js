@@ -513,8 +513,6 @@ export function AddClickableQuestion(){
 
     const canAdd = !questionInfo.validation && !selectImageValidation && !questionContentValidation
 
-    console.log(leftOffset)
-
     return(
         <PagesWrapper>
             {contextHolder}

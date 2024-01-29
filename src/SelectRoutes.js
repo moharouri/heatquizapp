@@ -39,6 +39,7 @@ import { BackgroundImagesList } from "./Pages/BackgroundImages/List";
 import { NotificationsList } from "./Pages/Notifications";
 import { UsersList } from "./Pages/Users";
 import { AddClickableQuestion } from "./Pages/Questions/ClickableQuestion/Add";
+import { AddEnergyBalanceQuestion } from "./Pages/Questions/EnergyBalanceQuestion/Add/AddEnergyBalanceQuestion";
 
 export function SelectRoutes(){
     const {roles, isStudent,} = useAuth()
@@ -109,6 +110,7 @@ export function SelectRoutes(){
                 <Route path="/add_mc_q" element={<AddMutlipleChoiceQuestion />}/>
                 <Route path="/add_k_q" element={<AddKeyboardQuestion />}/>
                 <Route path="/add_c_q" element={<AddClickableQuestion />}/>
+                <Route path="/add_eb_q" element={<AddEnergyBalanceQuestion />}/>
 
                 <Route path="/keyboards_list" element={<KeyboardsList/>}/>
                 <Route path="/add_keyboard" element={<AddKeyboard/>}/>
