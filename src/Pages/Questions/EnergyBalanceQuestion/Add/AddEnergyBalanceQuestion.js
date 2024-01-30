@@ -1,10 +1,12 @@
 import React from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
-import { Button, Col, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
 import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
+import TextArea from "antd/es/input/TextArea";
+import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
 export function AddEnergyBalanceQuestion(){
 
@@ -35,6 +37,8 @@ export function AddEnergyBalanceQuestion(){
     const [newParts, setNewParts] = useState([])
     const [hoverElement, setHoverElement] = useState(null) 
 
+    const [questionBody, setQuestionBody] = useState("")
+
     const [newPDF, setNewPDF] = useState(null)
     const [newPDFURL, setNewPDFURL] = useState(null)
 
@@ -59,6 +63,49 @@ export function AddEnergyBalanceQuestion(){
         )
     }
 
+    const renderAddQuestionBody = () => {
+        return(
+            <div className="hq-full-width">
+                <p className="default-gray">Question body</p>
+
+                <TextArea 
+                    value={questionBody}
+                    onChange={(v) => setQuestionBody(v.target.value)}
+                    className="hq-full-width"
+
+                />
+
+                <br/>
+                <LatexRenderer 
+                    latex={questionBody}
+                />
+            </div>
+        )
+    }
+
+    const renderControlVolumeList = () => {
+
+        return(
+            <div className="hq-full-width">
+                <List 
+                    dataSource={newParts}
+
+                    renderItem={(p, pi) => {
+
+                        return(
+                            <div className="hq-full-width">
+                                <Space>
+                                    <p className="default-gray">{pi+1}</p>
+                                </Space>
+                                <Divider />
+                            </div>
+                        )
+                    }}
+                />
+            </div>
+        )
+    }
+
     const renderQuestionContent = () => {
         if(!newImage) {
             return (
@@ -75,12 +122,12 @@ export function AddEnergyBalanceQuestion(){
         const tabs = [{
             key:'1',
             label:'Question text/info',
-            children: <div/>
+            children: <div>{renderAddQuestionBody()} </div>
         },
         {
             key:'2',
             label:'Control volumes',
-            children: <div/>
+            children: <div>{renderControlVolumeList()}</div>
         },
         {
             key:'3',
