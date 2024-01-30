@@ -1,7 +1,7 @@
 import React from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
-import { Button, Col, Row, Space, Steps, Tooltip } from "antd";
+import { Button, Col, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
 import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
@@ -38,6 +38,8 @@ export function AddEnergyBalanceQuestion(){
     const [newPDF, setNewPDF] = useState(null)
     const [newPDFURL, setNewPDFURL] = useState(null)
 
+    const [api, contextHolder] = message.useMessage()
+
     const renderAddImage = () => {
         return(
             <div>
@@ -68,6 +70,28 @@ export function AddEnergyBalanceQuestion(){
 
         const imageWidth = 0.35*window.innerWidth
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
+
+
+        const tabs = [{
+            key:'1',
+            label:'Question text/info',
+            children: <div/>
+        },
+        {
+            key:'2',
+            label:'Control volumes',
+            children: <div/>
+        },
+        {
+            key:'3',
+            label:'EB terms',
+            children: <div/>
+        },
+        {
+            key:'4',
+            label:'Boundary conditions',
+            children: <div/>
+        }]
 
         return(
             <div className="hq-full-width">
@@ -194,12 +218,37 @@ export function AddEnergyBalanceQuestion(){
                                 size = "small"
                                 type = "primary"
                                 onClick = {() => {
+                                    if(isMovingElement){
+                                        api.destroy()
+                                        api.warning("Please finish moving element #" + (movedElement + 1))
+                                        return
+                                    }
 
+                                    if(isAddingElementSecond){
+                                        api.destroy()
+                                        api.warning("Please finish adding")
+                                        return
+                                    }                                   
+
+                                    if(isAddingElement){
+                                        setIsAddingElement(false)
+
+                                        return
+                                    }
+
+                                    setIsAddingElement(true)
                                 }}
                             >   
                                 Add  control volume
                             </Button>
                         </Space>
+                        <br/>
+                        <br/>
+                        <Tabs
+                            defaultActiveKey="1"
+                            items={tabs}
+                            onChange={(t) => {}}
+                        />
                     </Col>
                 </Row>
             </div>)
@@ -238,8 +287,8 @@ export function AddEnergyBalanceQuestion(){
 
     return(
         <PagesWrapper>
-
-             <Steps
+            {contextHolder}
+            <Steps
                 onChange={onChange}
                 current={currentTab}
                 items={[
