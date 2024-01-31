@@ -1,12 +1,15 @@
 import React from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
-import { Button, Col, Divider, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+
+import './index.css'
+import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "../Play/Constants";
 
 export function AddEnergyBalanceQuestion(){
 
@@ -37,7 +40,11 @@ export function AddEnergyBalanceQuestion(){
     const [newParts, setNewParts] = useState([])
     const [hoverElement, setHoverElement] = useState(null) 
 
+    const [currentSubtab, setCurrentSubtab] = useState(1)
+
     const [questionBody, setQuestionBody] = useState("")
+
+    const [ebTerms, setEbTerms] = useState([])
 
     const [newPDF, setNewPDF] = useState(null)
     const [newPDFURL, setNewPDFURL] = useState(null)
@@ -91,14 +98,206 @@ export function AddEnergyBalanceQuestion(){
                     dataSource={newParts}
 
                     renderItem={(p, pi) => {
-
+                        const {correct} = p
                         return(
-                            <div className="hq-full-width">
-                                <Space>
-                                    <p className="default-gray">{pi+1}</p>
+                            <div
+                            key={pi}
+                            className="hq-full-width">
+                                <Space className="hq-full-width">
+                                    <div className="hq-full-width hq-opposite-arrangement">
+                                        <Space>
+                                            <p className="default-gray">{pi+1}</p>
+                                        
+                                            <div className="add-eb-question-correct-field">
+                                                <p
+                                                onClick={() => {
+                                                    let _newParts = [...newParts]
+
+                                                    _newParts = _newParts.map((a) => ({...a, correct: false}))
+
+                                                    _newParts[pi].correct = true
+
+                                                    setNewParts(_newParts)
+                                                }}
+                                                className={"hq-clickable " + (correct ? "default-green" : "default-gray")}>
+                                                    {correct ? "Correct" : "Incorrect"}
+                                                </p>
+                                            </div>
+                                        </Space>
+                                        <Space>
+                                            <Button
+                                                size="small"
+                                                type="primary"
+                                            >
+                                                Move
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                type="primary"
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Space>
+                                    </div>
+                                   
                                 </Space>
                                 <Divider />
                             </div>
+                        )
+                    }}
+                />
+            </div>
+        )
+    }
+
+    const setDirectionForEBTerms = (ti, direction) => {
+
+        let _terms = [...ebTerms]
+
+        _terms[ti][direction] = !_terms[ti][direction]
+
+        _terms[ti].IsDummy = false
+
+        setEbTerms(_terms)
+    }
+    
+    const setDirectionIsDummyForEBTerms = (ti) => {
+
+        let _terms = [...ebTerms]
+
+        for(let d of [NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION]){
+            _terms[ti][d] = false
+
+        }
+
+        _terms[ti].IsDummy = true
+
+        setEbTerms(_terms)
+    }
+
+    const renderEnergyBalanceTerms = () => {
+
+        return(
+            <div className="hq-full-width">
+                <List 
+                    dataSource={ebTerms}
+                    
+                    renderItem={(t, ti) => {
+                        const {Code, Latex, LatexText, North, South, East, West, Center, IsDummy} = t 
+                        return(
+                            <Space
+                                key={ti}
+
+                                direction="vertical"
+
+                                className="hq-full-width"
+                            >
+                                <Space>
+                                    <p className="default-gray">{ti+1}</p>
+
+                                    <Input 
+                                        type="text"
+                                        value={Code}
+                                        className="hq-full-width"
+                                        placeholder="Term code (must be unique)"
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...ebTerms]
+
+                                            _terms[ti].Code = value
+
+                                            setEbTerms(_terms)
+                                        }}
+                                    />
+                                </Space>
+                                <Space>
+                                    <p className="default-white">{ti+1}</p>
+                                    <Input 
+                                        type="text"
+                                        value={Latex}
+                                        className="hq-full-width"
+                                        placeholder="Latex code (must be unique)"
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...ebTerms]
+
+                                            _terms[ti].Latex = value
+
+                                            setEbTerms(_terms)
+                                        }}
+                                    />
+
+                                    <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                </Space>
+                                <br/>
+                                <p className="default-gray">Latex text (optional)</p>
+                                <TextArea 
+                                    value={LatexText}
+                                    onChange={(v) => {
+                                        const value = v.target.value
+
+                                        let _terms = [...ebTerms]
+
+                                        _terms[ti].LatexText = value
+
+                                        setEbTerms(_terms)
+                                    }}
+                                />
+                                <LatexRenderer latex={LatexText || ""}/>
+
+                                <p className="default-gray">Possible directions</p>
+                                <Space>
+                                    <p 
+                                        className={North ? "add-eb-question-direction-field-selected" : "add-eb-question-direction-field"}
+                                        onClick={() => setDirectionForEBTerms(ti, NORTH_DIRECTION)}
+                                    >
+                                        North
+                                    </p>
+                                    <p 
+                                        className={South ? "add-eb-question-direction-field-selected" : "add-eb-question-direction-field"}
+                                        onClick={() => setDirectionForEBTerms(ti, SOUTH_DIRECTION)}
+                                    >
+                                        South
+                                    </p>
+                                    <p
+                                        className={West ? "add-eb-question-direction-field-selected" : "add-eb-question-direction-field"}
+                                        onClick={() => setDirectionForEBTerms(ti, WEST_DIRECTION)}
+                                    >
+                                        West
+                                    </p>
+                                    <p
+                                        className={East ? "add-eb-question-direction-field-selected" : "add-eb-question-direction-field"}
+                                        onClick={() => setDirectionForEBTerms(ti, EAST_DIRECTION)}
+                                    >
+                                        East
+                                    </p>
+                                    <p 
+                                        className={Center ? "add-eb-question-direction-field-selected" : "add-eb-question-direction-field"}
+                                        onClick={() => setDirectionForEBTerms(ti, CENTER_DIRECTION)}
+                                    >
+                                        Center
+                                    </p>
+                                    <p 
+                                        onClick={() => setDirectionIsDummyForEBTerms(ti)}
+                                        className={IsDummy ? "add-eb-question-direction-field-selected" : "add-eb-question-direction-field"}>
+                                        IsDummy
+                                    </p>                                                                
+                                </Space>
+                                <br/>
+                                <Space>
+                                    <p className="default-gray">Questions</p>
+                                    <PlusOutlined 
+                                        style={{color:'green', cursor:'pointer'}} 
+                                        onClick={() => {
+
+                                        }}
+                                    />
+
+                                </Space>
+                                <Divider />
+                            </Space>
                         )
                     }}
                 />
@@ -120,22 +319,22 @@ export function AddEnergyBalanceQuestion(){
 
 
         const tabs = [{
-            key:'1',
+            key:1,
             label:'Question text/info',
             children: <div>{renderAddQuestionBody()} </div>
         },
         {
-            key:'2',
+            key:2,
             label:'Control volumes',
             children: <div>{renderControlVolumeList()}</div>
         },
         {
-            key:'3',
+            key:3,
             label:'EB terms',
-            children: <div/>
+            children: <div>{renderEnergyBalanceTerms()}</div>
         },
         {
-            key:'4',
+            key:4,
             label:'Boundary conditions',
             children: <div/>
         }]
@@ -175,7 +374,8 @@ export function AddEnergyBalanceQuestion(){
                                         y: pageY - top,
                                         offsetX: offset,
                                         width: 1,
-                                        height: 1
+                                        height: 1,
+                                        correct: !newParts.length
                                     })
 
 
@@ -284,17 +484,51 @@ export function AddEnergyBalanceQuestion(){
                                     }
 
                                     setIsAddingElement(true)
+                                    setCurrentSubtab(2)
                                 }}
                             >   
                                 Add  control volume
+                            </Button>
+                            
+                            <Button
+                                size="small"
+                                type="primary"
+                                onClick={() => {
+                                    const newTerm = ({
+                                        Code:'',
+                                        Latex:'',
+                                        LatexText:'',
+
+                                        North: false,
+                                        South: false,
+                                        East: false,
+                                        West: false,
+                                        Center: false,
+                                        IsDummy: false,
+
+                                        Questions:[]
+
+                                    })
+
+                                    let _terms = [...ebTerms]
+
+                                    _terms.push(newTerm)
+
+                                    setEbTerms(_terms)
+                                    setCurrentSubtab(3)
+
+                                }}
+                            >
+                                Add energy balance term
                             </Button>
                         </Space>
                         <br/>
                         <br/>
                         <Tabs
-                            defaultActiveKey="1"
+                            defaultActiveKey={1}
                             items={tabs}
-                            onChange={(t) => {}}
+                            onChange={(t) => setCurrentSubtab(t)}
+                            activeKey={currentSubtab}
                         />
                     </Col>
                 </Row>
