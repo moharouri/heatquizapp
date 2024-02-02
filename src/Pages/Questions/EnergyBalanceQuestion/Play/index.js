@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import {List, Skeleton, Space, Steps, Tabs, Tooltip } from "antd";
+import {Col, List, Row, Skeleton, Space, Steps, Tabs, Tooltip } from "antd";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { FixURL } from "../../../../services/Auxillary";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
@@ -8,6 +8,7 @@ import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WES
 import Xarrow from "react-xarrows";
 
 import './Play.css'
+import { Keyboard } from "../../../../Components/Keyboard";
 
 export function EnergyBalanceQuestionPlay({Id}){
 
@@ -27,6 +28,8 @@ export function EnergyBalanceQuestionPlay({Id}){
     })
     
     const [selectedTerm, setSelectedTerm] = useState(null)
+
+    const [selectedTermDefine, setSelectedTermDefine] = useState(null)
 
     useEffect(() => {
         getEnergyBalanceQuestionPlay(Id)
@@ -127,10 +130,10 @@ export function EnergyBalanceQuestionPlay({Id}){
         }
 
         if(originalTerm){
-            container[direction].push({...originalTerm})
+            container[direction].push({...originalTerm, Questions: t.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}}))})
         }
         else{
-            container[direction].push({...t, Inflow: true, IsSource: true})
+            container[direction].push({...t, Inflow: true, IsSource: true, Questions: t.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}}))})
 
         }
 
@@ -159,13 +162,28 @@ export function EnergyBalanceQuestionPlay({Id}){
     }
 
     const flipTermSign = (t, direction, currentSign) => {
+
         let container = {...termsContainer}
 
         let _containerD =  [...container[direction]]
 
         _containerD = _containerD.filter(a => a.Id != t.Id)
 
-        _containerD.push({...t, Inflow: !currentSign, IsSource: !currentSign})
+        let originalTerm = null
+
+        for(let d of [NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION]){
+            originalTerm = termsContainer[d].filter(a => a.Id === t.Id)[0]
+
+            if(originalTerm) break;
+        }
+
+        if(originalTerm){
+            _containerD.push({...t, Inflow: !currentSign, IsSource: !currentSign, Questions: originalTerm.Questions})
+
+        }
+        else{
+            _containerD.push({...t, Inflow: !currentSign, IsSource: !currentSign})
+        }
 
         container[direction] = _containerD
 
@@ -352,10 +370,10 @@ export function EnergyBalanceQuestionPlay({Id}){
         }
 
         if(originalTerm){
-            container[direction].push({...originalTerm})
+            container[direction].push({...originalTerm, Questions: selectedTerm.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}}))})
         }
         else{
-            container[direction].push({...selectedTerm, Inflow: true, IsSource: true})
+            container[direction].push({...selectedTerm, Inflow: true, IsSource: true, Questions: selectedTerm.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}}))})
 
         }
 
@@ -556,15 +574,150 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
+    const getAddedTerms = () => {
+        let addedTerms = []
+
+        for(let d of [NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION]){
+            addedTerms = [...addedTerms, ...termsContainer[d]]
+        }
+
+        return addedTerms
+    }
+
+    const addAnswerToTermQuestion = (l) => {
+        console.log(l)
+
+        let originalTerm = null
+        let originalDirection = null
+
+        let originalIndex = null
+
+        for(let d of [NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION]){
+            originalTerm = termsContainer[d].map((a, ai) => ({...a, index: ai})).filter(a => a.Id === selectedTermDefine.Id)[0]
+
+            if(originalTerm){
+                originalDirection = d
+                originalIndex = originalTerm.index
+                break;
+            }
+        }
+        
+        if(!originalTerm) return;
+
+        let _terms = ({...termsContainer})
+
+        _terms[originalDirection][originalIndex].Questions = [{..._terms[originalDirection][originalIndex].Questions[0], AddedAnswer: l}]
+
+        setTermsContainer(_terms)
+
+    }
+
+    const renderDefineSpecificTerm = () => {
+        console.log(termsContainer)
+
+        const {Latex, LatexText, Questions} = selectedTermDefine
+
+        if(Questions.length > 1){
+            return(<div>test</div>)
+        }
+
+        else{
+
+            const question = Questions[0]
+
+            const {Keyboard: keyboard, LatexCode} = question
+
+            const list = question.AddedAnswer
+            const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+            return(
+                <div>
+                    <Space size={"large"} align="start">
+                        <Space direction="vertical" align="start">
+                            <p className="default-gray">Define</p>
+
+                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                            <LatexRenderer latex={"$$" + LatexCode + "$$"}/>
+                        </Space>
+
+                        {LatexText &&
+                        <Space direction="vertical" align="start">
+                            <p className="default-gray">Help</p>
+                            <p className="default-gray">{LatexText}</p>
+                        </Space>}
+                    </Space>
+
+                    <br/>
+                    <div className="h">
+                        {reducedLatex && 
+                        <LatexRenderer 
+                            latex={"$$"+reducedLatex+"$$"}
+                        />}
+                    </div>
+                    <Keyboard 
+                        Id={keyboard.Id}
+
+                        List={list}
+
+                        onEnterKey={(l) => addAnswerToTermQuestion(l)}
+                    />
+                </div>
+            )
+        }
+    }
+
+    const renderDefineSelectedTerms = () => {
+        const addedTerms = getAddedTerms()
+
+        return(
+            <Space size={'large'} align="start">
+                {renderImageWithControlVolume()}
+
+                <Space direction="vertical" align="start">
+                    <Row className="hq-full-width">
+                        {addedTerms.map((t) => {
+                            const {Id, Latex} = t
+
+                            const isSelectedDefine = selectedTermDefine && selectedTermDefine.Id === Id
+
+                            return(
+                                <Col
+                                    key={Id}
+                                    className={"keyboard-key-item " + (isSelectedDefine ? "eb-question-term-selected-define" : "")}
+
+                                    onClick={() => {
+                                        if(isSelectedDefine){
+                                            setSelectedTermDefine(null)
+                                            return
+                                        }
+
+                                        setSelectedTermDefine(t)
+                                    }}
+                                >
+                                    <LatexRenderer latex={"$$" + Latex + "$$"} />
+                                </Col>
+                            )
+                        })}
+                    </Row>
+
+                    {selectedTermDefine && renderDefineSpecificTerm()}
+                </Space>
+            </Space>
+        )
+    }
+
     const renderContent = () => {
         const map = {
             0: () => renderSelectControlVolume(),
             1: () => renderEnergyBalanceTerms(),
+            2: () => renderDefineSelectedTerms()
 
         }
 
         return map[currentTab]()
     }
+
+    
 
     const onChange = (t) => setCurrentTab(t)
 
@@ -577,6 +730,10 @@ export function EnergyBalanceQuestionPlay({Id}){
         {
             key:'EBQ',
             title: <p className={currentTab === 1 ? "default-title highlighted" : "default-gray"}>Energy balance equation</p>
+        },
+        {
+            key:'Definitions',
+            title: <p className={currentTab === 2 ? "default-title highlighted" : "default-gray"}>Definitions</p>
         }]
 
         return(

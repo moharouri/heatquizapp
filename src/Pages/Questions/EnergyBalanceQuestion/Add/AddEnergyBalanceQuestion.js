@@ -3,7 +3,7 @@ import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
 import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined, CloseCircleFilled, DragOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
@@ -103,46 +103,85 @@ export function AddEnergyBalanceQuestion(){
                             <div
                             key={pi}
                             className="hq-full-width">
-                                <Space className="hq-full-width">
-                                    <div className="hq-full-width hq-opposite-arrangement">
-                                        <Space>
-                                            <p className="default-gray">{pi+1}</p>
+                                <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove control volume</p>}
+                                        color="white"
+                                    >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                if(isMovingElement){
+                                                    api.destroy()
+                                                    api.warning("Please finish moving element #" + (movedElement + 1))
+                                                    return
+                                                }
+            
+                                                if(isAddingElementSecond){
+                                                    api.destroy()
+                                                    api.warning("Please finish adding")
+                                                    return
+                                                } 
+
+                                                let _newParts = [...newParts]
+
+                                                _newParts = _newParts.filter((a, ai) => ai !== pi)
+
+                                                if(_newParts.length === 1){
+                                                    _newParts[0].correct = true
+                                                }
+
+                                                setNewParts(_newParts)
+
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p className="default-gray">{pi+1}</p>
                                         
-                                            <div className="add-eb-question-correct-field">
-                                                <p
-                                                onClick={() => {
-                                                    let _newParts = [...newParts]
+                                    <div className="add-eb-question-correct-field">
+                                    <p
+                                        onClick={() => {
+                                            let _newParts = [...newParts]
 
-                                                    _newParts = _newParts.map((a) => ({...a, correct: false}))
+                                            _newParts = _newParts.map((a) => ({...a, correct: false}))
 
-                                                    _newParts[pi].correct = true
+                                            _newParts[pi].correct = true
 
-                                                    setNewParts(_newParts)
-                                                }}
-                                                className={"hq-clickable " + (correct ? "default-green" : "default-gray")}>
-                                                    {correct ? "Correct" : "Incorrect"}
-                                                </p>
-                                            </div>
-                                        </Space>
-                                        <Space>
-                                            <Button
-                                                size="small"
-                                                type="primary"
-                                            >
-                                                Move
-                                            </Button>
-                                            <Button
-                                                size="small"
-                                                type="primary"
-                                            >
-                                                Delete
-                                            </Button>
-                                        </Space>
-                                    </div>
-                                   
-                                </Space>
-                                <Divider />
-                            </div>
+                                            setNewParts(_newParts)
+                                        }}
+                                        className={"hq-clickable " + (correct ? "default-green" : "default-gray")}>
+                                            {correct ? "Correct" : "Incorrect"}
+                                    </p>
+                                </div>
+                                
+                                <Tooltip
+                                    color="white"
+                                    title={<p>Click to move</p>}
+                                >
+                                    <DragOutlined style={{color:'blue', cursor:'pointer'}} onClick={() => {
+                                        if(isAddingElementSecond){
+                                            api.destroy()
+                                            api.warning("Please finish adding")
+                                            return
+                                        }
+
+                                        if(isMovingElement){
+                                            setIsMovingElement(false)
+                                            setMovedElement(null)
+                                            return
+                                        }
+
+                                        setIsMovingElement(true)
+                                        setMovedElement(pi)
+                                    }}/>
+                                </Tooltip>
+                                
+                            </Space>
+                        <Divider />
+                    </div>
                         )
                     }}
                 />
@@ -193,6 +232,27 @@ export function AddEnergyBalanceQuestion(){
                                 className="hq-full-width"
                             >
                                 <Space>
+                                &nbsp;
+                                <Tooltip 
+                                    title={<p>Click to remove term</p>}
+                                    color="white"
+                                >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                
+
+                                                let _terms = [...ebTerms]
+
+                                                _terms = _terms.filter((a, ai) => ai !== ti)
+
+                                                setEbTerms(_terms)
+
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
                                     <p className="default-gray">{ti+1}</p>
 
                                     <Input 
@@ -212,6 +272,13 @@ export function AddEnergyBalanceQuestion(){
                                     />
                                 </Space>
                                 <Space>
+                                &nbsp;
+                                <div className="add-eb-question-hide-element">
+                                    <Tooltip>
+                                    <CloseCircleFilled />
+                                    </Tooltip>
+                                </div>
+                                &nbsp;
                                     <p className="default-white">{ti+1}</p>
                                     <Input 
                                         type="text"

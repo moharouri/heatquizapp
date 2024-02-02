@@ -32,3 +32,7 @@
     padding-left: 4px;
     padding-right: 4px;
 }
+
+.eb-question-term-selected-define{
+    background-color: aliceblue;
+}
