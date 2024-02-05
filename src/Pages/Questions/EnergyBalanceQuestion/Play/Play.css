@@ -36,3 +36,11 @@
 .eb-question-term-selected-define{
     background-color: aliceblue;
 }
+
+.eb-question-term-selected-answered{
+    background-color: #ebffe6;
+}
+
+.eb-question-term-answer-zone{
+    border-bottom: 1px solid lightblue;
+}

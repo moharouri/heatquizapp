@@ -9,6 +9,7 @@ import Xarrow from "react-xarrows";
 
 import './Play.css'
 import { Keyboard } from "../../../../Components/Keyboard";
+import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 
 export function EnergyBalanceQuestionPlay({Id}){
 
@@ -31,16 +32,28 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     const [selectedTermDefine, setSelectedTermDefine] = useState(null)
 
+    const [BCAnswers, setBCAnswers] = useState([])
+
+    const [selectedBCDefine, setSelectedBCDefine] = useState(null)
+
     useEffect(() => {
         getEnergyBalanceQuestionPlay(Id)
     }, [Id])
+
+    useEffect(() => {
+       if(energyBalanceQuestionPlay){
+        const {BoundaryConditions} = energyBalanceQuestionPlay
+
+        setBCAnswers(BoundaryConditions.map((bc) => ({...bc, AddedAnswer:{List:[], echoNumber:0}})))
+       }
+    }, [energyBalanceQuestionPlay])
 
 
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
         return({            
             width: (element.Width)  * (specificedWidth/imageWidth),
             height: (element.Height)* (specificedHeight/imageHeight),
-            left: (element.X) * (specificedWidth/imageWidth), // + Offset,
+            left: (element.X) * (specificedWidth/imageWidth)  - 10,
             top: (element.Y) * (specificedHeight/imageHeight),
         })
     }
@@ -215,8 +228,8 @@ export function EnergyBalanceQuestionPlay({Id}){
             selectedColor = '#DC4C64'
         }
 
-        const notSelectedStyle = {backgroundColor:'#f1f4f8', cursor:'pointer'} //border:'1px solid green', 
-        const selectedStyle = {backgroundColor:selectedColor, cursor:'pointer'} //border:'1px solid green', 
+        const notSelectedStyle = {backgroundColor:'#f1f4f8', cursor:'pointer', border:'1px solid gray',} // 
+        const selectedStyle = {backgroundColor:selectedColor, cursor:'pointer', border:'1px solid green',} //border:'1px solid green', 
 
         return(
             <Space direction="vertical">
@@ -468,6 +481,272 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
+    const renderNorthArrows = (cvDimesions) => {
+        const northTerms = termsContainer[NORTH_DIRECTION]
+
+        const {width, height, left, top} = cvDimesions
+
+        const arrowLength = 0.025*window.innerWidth
+        const latexSpace = 0.25 * arrowLength
+        return(
+            <div>
+                {/* Base */}
+                {northTerms.map((t, ti) => {
+                    const {Id} = t
+
+                    const tleft = left + ((ti+1)/(1+ northTerms.length)) * width
+
+                    const style = {top:top - height, left: tleft, width:1, height:1, position:'relative'}
+
+                    return(
+                        <div 
+                        key={Id}
+                        style={style}
+                        id={Id + "BASE"}>
+
+                        </div>
+                    )
+                })}
+
+                {/* Tip */}
+                {northTerms.map((t, ti) => {
+                    const {Id, Latex} = t
+
+                    const tleft = left + ((ti+1)/(1+ northTerms.length)) * width
+                    const style = {top: top - height -arrowLength - latexSpace, left: tleft, width:1, height:1, position:'relative'}
+                    return(
+                        <div 
+                        style={style}
+                        key={Id}
+                        id={Id + "TIP"}>
+                        </div>
+                    )
+                })}
+
+                {/* Arrow */}
+                {northTerms.map((t, ti) => {
+                    const {Id, Inflow} = t
+
+                    const start = Id + (Inflow ? "TIP" : "BASE")
+                    const end = Id + (!Inflow ? "TIP" : "BASE")
+                    
+                    return(
+                    <Xarrow
+                        start={start} 
+                        end={end} 
+                        strokeWidth={2}
+                        headSize={4}
+                        startAnchor="auto"
+                        endAnchor="auto"
+                        color={Inflow ?"green":"red"}
+                        path={"straight"}
+                    />
+                   )
+                })}
+            </div>
+        )
+    }
+
+    const renderSouthArrows = (cvDimesions) => {
+        const southTerms = termsContainer[SOUTH_DIRECTION]
+
+        const {width, height, left, top} = cvDimesions
+
+        const arrowLength = 0.025*window.innerWidth
+
+        return(
+            <div>
+                {/* Base */}
+                {southTerms.map((t, ti) => {
+                    const {Id} = t
+
+                    const tleft = left + ((ti+1)/(1+ southTerms.length)) * width
+
+                    const style = {top:top, left: tleft, width:1, height:1, position:'relative'}
+
+                    return(
+                        <div 
+                        key={Id}
+                        style={style}
+                        id={Id + "BASE"}>
+
+                        </div>
+                    )
+                })}
+
+                {/* Tip */}
+                {southTerms.map((t, ti) => {
+                    const {Id, Latex} = t
+
+                    const tleft = left + ((ti+1)/(1+ southTerms.length)) * width
+                    const style = {top:top   + arrowLength , left: tleft, width:1, height:1, position:'relative'}
+                    return(
+                        <div
+                        key={Id}
+                        style={style}
+                        id={Id + "TIP"}>
+                        </div>
+                    )
+                })}
+
+                {/* Arrow */}
+                {southTerms.map((t, ti) => {
+                    const {Id, Inflow} = t
+
+                    const start = Id + (Inflow ? "TIP" : "BASE")
+                    const end = Id + (!Inflow ? "TIP" : "BASE")
+                    
+                    return(
+                    <Xarrow
+                        start={start} 
+                        end={end} 
+                        strokeWidth={2}
+                        headSize={4}
+                        startAnchor="auto"
+                        endAnchor="auto"
+                        color={Inflow ?"green":"red"}
+                        path={"straight"}
+                    />
+                   )
+                })}
+            </div>
+        )
+    }
+
+    const renderEastArrows = (cvDimesions) => {
+        const eastTerms = termsContainer[EAST_DIRECTION]
+
+        const {width, height, left, top} = cvDimesions
+
+        const arrowLength = 0.025*window.innerWidth
+
+        return(
+            <div>
+                {/* Base */}
+                {eastTerms.map((t, ti) => {
+                    const {Id} = t
+
+                    const tTop = top - ((ti+1)/(1+ eastTerms.length)) * height
+
+                    const style = {top:tTop, left: left, width:1, height:1, position:'relative'}
+
+                    return(
+                        <div 
+                        key={Id}
+                        style={style}
+                        id={Id + "BASE"}>
+
+                        </div>
+                    )
+                })}
+
+                {/* Tip */}
+                {eastTerms.map((t, ti) => {
+                    const {Id, Latex} = t
+
+                    const tTop = top - ((ti+1)/(1+ eastTerms.length)) * height
+
+                    const style = {top:tTop , left: left - arrowLength, width:1, height:1, position:'relative'}
+                    return(
+                        <div
+                        key={Id}
+                        style={style}
+                        id={Id + "TIP"}>
+                        </div>
+                    )
+                })}
+
+                {/* Arrow */}
+                {eastTerms.map((t, ti) => {
+                    const {Id, Inflow} = t
+
+                    const start = Id + (Inflow ? "TIP" : "BASE")
+                    const end = Id + (!Inflow ? "TIP" : "BASE")
+                    
+                    return(
+                    <Xarrow
+                        start={start} 
+                        end={end} 
+                        strokeWidth={2}
+                        headSize={4}
+                        startAnchor="auto"
+                        endAnchor="auto"
+                        color={Inflow ?"green":"red"}
+                        path={"straight"}
+                    />
+                   )
+                })}
+            </div>
+        )
+    }
+
+    const renderWestArrows = (cvDimesions) => {
+        const westTerms = termsContainer[WEST_DIRECTION]
+
+        const {width, height, left, top} = cvDimesions
+
+        const arrowLength = 0.025*window.innerWidth
+
+        return(
+            <div>
+                {/* Base */}
+                {westTerms.map((t, ti) => {
+                    const {Id} = t
+
+                    const tTop = top - ((ti+1)/(1+ westTerms.length)) * height
+
+                    const style = {top:tTop, left: left + width, width:1, height:1, position:'relative'}
+
+                    return(
+                        <div 
+                        key={Id}
+                        style={style}
+                        id={Id + "BASE"}>
+
+                        </div>
+                    )
+                })}
+
+                {/* Tip */}
+                {westTerms.map((t, ti) => {
+                    const {Id, Latex} = t
+
+                    const tTop = top - ((ti+1)/(1+ westTerms.length)) * height
+
+                    const style = {top:tTop , left: left + width + arrowLength, width:1, height:1, position:'relative'}
+                    return(
+                        <div
+                        key={Id}
+                        style={style}
+                        id={Id + "TIP"}>
+                        </div>
+                    )
+                })}
+
+                {/* Arrow */}
+                {westTerms.map((t, ti) => {
+                    const {Id, Inflow} = t
+
+                    const start = Id + (Inflow ? "TIP" : "BASE")
+                    const end = Id + (!Inflow ? "TIP" : "BASE")
+                    
+                    return(
+                    <Xarrow
+                        start={start} 
+                        end={end} 
+                        strokeWidth={2}
+                        headSize={4}
+                        startAnchor="auto"
+                        endAnchor="auto"
+                        color={Inflow ?"green":"red"}
+                        path={"straight"}
+                    />
+                   )
+                })}
+            </div>
+        )
+    }
+
     const renderImageWithControlVolume = () => {
         const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL} = energyBalanceQuestionPlay
      
@@ -491,10 +770,15 @@ export function EnergyBalanceQuestionPlay({Id}){
                 >
 
                     {selectedCV && 
-                        <div style={{...cvDimesions, position:'relative', border:'2px solid gainsboro' }}>
+                        <div style={{...cvDimesions, position:'relative' }}>
                                 {renderMainInteractionBox(cvDimesions)}
                         </div>    
                     }
+
+                    {renderNorthArrows(cvDimesions)}
+                    {renderSouthArrows(cvDimesions)}
+                    {renderEastArrows(cvDimesions)}
+                    {renderWestArrows(cvDimesions)}
 
                  </div>
                  {renderEnergyBalanceEquation()}
@@ -585,8 +869,6 @@ export function EnergyBalanceQuestionPlay({Id}){
     }
 
     const addAnswerToTermQuestion = (l) => {
-        console.log(l)
-
         let originalTerm = null
         let originalDirection = null
 
@@ -628,13 +910,16 @@ export function EnergyBalanceQuestionPlay({Id}){
             const {Keyboard: keyboard, LatexCode} = question
 
             const list = question.AddedAnswer
+
+            const answerValidity = validateKeyboardAnswer(list)
+
             const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
             return(
                 <div>
                     <Space size={"large"} align="start">
                         <Space direction="vertical" align="start">
-                            <p className="default-gray">Define</p>
+                            <p className="default-gray">Define:</p>
 
                             <LatexRenderer latex={"$$" + Latex + "$$"}/>
                             <LatexRenderer latex={"$$" + LatexCode + "$$"}/>
@@ -648,12 +933,15 @@ export function EnergyBalanceQuestionPlay({Id}){
                     </Space>
 
                     <br/>
-                    <div className="h">
+                    <div className="eb-question-term-answer-zone">
                         {reducedLatex && 
                         <LatexRenderer 
                             latex={"$$"+reducedLatex+"$$"}
                         />}
                     </div>
+                    <small className="default-red">{answerValidity || ""}</small>
+                    <br/>
+                    <br/>
                     <Keyboard 
                         Id={keyboard.Id}
 
@@ -680,10 +968,24 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                             const isSelectedDefine = selectedTermDefine && selectedTermDefine.Id === Id
 
+                            const answerValidity = validateKeyboardAnswer(t.Questions[0].AddedAnswer)
+
+                            const answerIsValid = (answerValidity === null)
+
+                            let keyColor = ""
+
+                            if(answerIsValid){
+                                keyColor = "eb-question-term-selected-answered"
+                            }
+
+                            if(isSelectedDefine){
+                                keyColor = "eb-question-term-selected-define"
+                            }
+
                             return(
                                 <Col
                                     key={Id}
-                                    className={"keyboard-key-item " + (isSelectedDefine ? "eb-question-term-selected-define" : "")}
+                                    className={"keyboard-key-item " + (keyColor)}
 
                                     onClick={() => {
                                         if(isSelectedDefine){
@@ -706,12 +1008,126 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
+    const addAnswerToBC = (l) => {
+        let originalIndex = BCAnswers.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === selectedBCDefine.Id)[0]
+
+        if(!originalIndex) return
+
+        originalIndex = originalIndex.index
+
+        let _answers = [...BCAnswers]
+        _answers[originalIndex] = ({..._answers[originalIndex], AddedAnswer: l})
+
+        setBCAnswers(_answers)
+
+    }
+
+    const renderDefineSpecificBC = () => {
+        const {Latex, LatexText, KeyboardId, AddedAnswer} = selectedBCDefine
+        
+        const list = AddedAnswer
+
+        const answerValidity = validateKeyboardAnswer(list)
+
+        const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+            
+        return(
+                <div>
+                    <Space size={"large"} align="start">
+                        <Space direction="vertical" align="start">
+                            <p className="default-gray">Define:</p>
+
+                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                            <p className="default-gray">{LatexText}</p>
+                        </Space>
+
+                    </Space>
+
+                    <br/>
+                    <div className="eb-question-term-answer-zone">
+                        {reducedLatex && 
+                        <LatexRenderer 
+                            latex={"$$"+reducedLatex+"$$"}
+                        />}
+                    </div>
+                    <small className="default-red">{answerValidity || ""}</small>
+                    <br/>
+                    <br/>
+                    <Keyboard 
+                        Id={KeyboardId}
+
+                        List={list}
+
+                        onEnterKey={(l) => addAnswerToBC(l)}
+                    />
+                </div>)
+    }
+
+    const renderBoundaryConditions = () => {
+
+        return(
+            <Space size={'large'} align="start">
+                {renderImageWithControlVolume()}
+                <Space direction="vertical" align="start">
+                    <Row className="hq-full-width">
+                        {BCAnswers.map((t) => {
+                            const {Id, Latex, AddedAnswer} = t
+
+                            const isSelectedDefine = selectedBCDefine && selectedBCDefine.Id === Id
+
+                            const answerValidity = validateKeyboardAnswer(AddedAnswer)
+
+                            const answerIsValid = (answerValidity === null)
+
+                            let keyColor = ""
+
+                            if(answerIsValid){
+                                keyColor = "eb-question-term-selected-answered"
+                            }
+
+                            if(isSelectedDefine){
+                                keyColor = "eb-question-term-selected-define"
+                            }
+
+                            return(
+                                <Col
+                                    key={Id}
+                                    className={"keyboard-key-item " + (keyColor)}
+
+                                    onClick={() => {
+                                        if(isSelectedDefine){
+                                            setSelectedBCDefine(null)
+                                            return
+                                        }
+
+                                        setSelectedBCDefine(t)
+                                    }}
+                                >
+                                    <LatexRenderer latex={"$$" + Latex + "$$"} />
+                                </Col>
+                            )
+                        })}
+                    </Row>
+
+                    {selectedBCDefine && renderDefineSpecificBC()}
+                </Space>
+            </Space>
+        )
+    }
+
     const renderContent = () => {
+        const {BoundaryConditions} = energyBalanceQuestionPlay
+
         const map = {
             0: () => renderSelectControlVolume(),
             1: () => renderEnergyBalanceTerms(),
-            2: () => renderDefineSelectedTerms()
+            2: () => renderDefineSelectedTerms(),
 
+        }
+
+        if(BoundaryConditions.length){
+            map[3] = (() => renderBoundaryConditions())
         }
 
         return map[currentTab]()
@@ -719,9 +1135,26 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     
 
-    const onChange = (t) => setCurrentTab(t)
+    const onChange = (t) => {
+        if(currentTab === 0 && !selectedCV){
+            return
+        }
+
+        if(currentTab === 1 && t !== 0){
+            const addedTerms = getAddedTerms()
+
+            if(!addedTerms.length) return;
+        }
+
+        if(t === 3 && !selectedCV){
+            return
+        }
+
+        setCurrentTab(t)
+    }
 
     const renderQuestion = () => {
+        const {BoundaryConditions} = energyBalanceQuestionPlay
 
         const items = [{
             key:'CV',
@@ -735,6 +1168,16 @@ export function EnergyBalanceQuestionPlay({Id}){
             key:'Definitions',
             title: <p className={currentTab === 2 ? "default-title highlighted" : "default-gray"}>Definitions</p>
         }]
+
+        
+        if(BoundaryConditions.length){
+            items.push(
+                {
+                    key:'Boundary conditions',
+                    title: <p className={currentTab === 4 ? "default-title highlighted" : "default-gray"}>Boundary conditions</p>
+                })
+        }
+
 
         return(
             <div>

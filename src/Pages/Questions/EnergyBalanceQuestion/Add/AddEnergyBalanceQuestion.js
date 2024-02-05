@@ -45,6 +45,9 @@ export function AddEnergyBalanceQuestion(){
     const [questionBody, setQuestionBody] = useState("")
 
     const [ebTerms, setEbTerms] = useState([])
+    const [bcTerms, setBCTerms] = useState([])
+
+    const [showAddQAnswers, setShowAddQAnswers] = useState(false)
 
     const [newPDF, setNewPDF] = useState(null)
     const [newPDFURL, setNewPDFURL] = useState(null)
@@ -222,7 +225,7 @@ export function AddEnergyBalanceQuestion(){
                     dataSource={ebTerms}
                     
                     renderItem={(t, ti) => {
-                        const {Code, Latex, LatexText, North, South, East, West, Center, IsDummy} = t 
+                        const {Code, Latex, LatexText, North, South, East, West, Center, IsDummy, Questions} = t 
                         return(
                             <Space
                                 key={ti}
@@ -358,11 +361,75 @@ export function AddEnergyBalanceQuestion(){
                                     <PlusOutlined 
                                         style={{color:'green', cursor:'pointer'}} 
                                         onClick={() => {
+                                            let _terms = [...ebTerms]
 
+                                            _terms[ti].Questions.push({
+                                                Latex:'',
+                                                Keyboard: null,
+                                                Answers: []
+                                            })
+
+                                            setEbTerms(_terms)
                                         }}
                                     />
 
                                 </Space>
+                                {Questions.map((q, qi) => {
+                                    const {Keyboard, Latex} = q
+
+                                    return(
+                                        <div key={qi}>
+                                            <Space>
+                                                &nbsp;
+                                                <Tooltip 
+                                                    title={<p>Click to remove question</p>}
+                                                    color="white"
+                                                >
+                                                        <CloseCircleFilled 
+                                                            style={{cursor:'pointer', color:'red'}}
+
+                                                            onClick={() => {
+                                                                
+                                                                let _terms = [...ebTerms]
+
+                                                                _terms[ti].Questions = _terms[ti].Questions.filter((a, ai) => qi !== ai)
+
+                                                                setEbTerms(_terms)
+
+                                                            }}
+                                                        />
+                                                    </Tooltip>
+                                                    &nbsp;
+                                                    <p className="default-gray">{qi+1}</p>
+                                                    <Input 
+                                                        type="text"
+                                                        value={Latex}
+                                                        className="hq-full-width"
+                                                        placeholder="Latex code (must be unique)"
+                                                        onChange={(v) => {
+                                                            const value = v.target.value
+
+                                                            let _terms = [...ebTerms]
+
+                                                            _terms[ti].Questions[qi].Latex = value
+
+                                                            setEbTerms(_terms)
+                                                        }}
+                                                    />
+
+                                                    <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                                                    
+                                                </Space>
+
+                                                    
+                                                <p className="hq-clickable hoverable-plus"
+                                                        onClick={() => {
+                                                            
+                                                        }}
+                                                    >Add answers</p>
+                                        </div>
+                                    )
+                                })}
                                 <Divider />
                             </Space>
                         )
@@ -587,6 +654,32 @@ export function AddEnergyBalanceQuestion(){
                                 }}
                             >
                                 Add energy balance term
+                            </Button>
+
+                            <Button
+                                size="small"
+                                type="primary"
+                                onClick={() => {
+                                    const newTerm = ({
+                                        Code:'',
+                                        Latex:'',
+                                        LatexText:'',
+
+                                        Keyboard: null,
+                                        Answers:[] 
+
+                                    })
+
+                                    let _terms = [...ebTerms]
+
+                                    _terms.push(newTerm)
+
+                                    setEbTerms(_terms)
+                                    setCurrentSubtab(3)
+
+                                }}
+                            >
+                                Add Boundary condition
                             </Button>
                         </Space>
                         <br/>
