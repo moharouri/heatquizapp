@@ -140,6 +140,7 @@ export function SelectRoutes(){
 
     return(
         <Routes>
+            <Route path="/Login" exact element={<Login />}/>
             <Route path="*" exact element={<NotFoundPage />}/>
         </Routes>
     )
