@@ -3,13 +3,14 @@ import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
 import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined, CloseCircleFilled, DragOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined, CloseCircleFilled, DragOutlined, InsertRowAboveOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
 import './index.css'
 import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "../Play/Constants";
+import { SelectKeyboard } from "../../KeyboardQuestion/Add/SelectKeyboard";
 
 export function AddEnergyBalanceQuestion(){
 
@@ -45,7 +46,15 @@ export function AddEnergyBalanceQuestion(){
     const [questionBody, setQuestionBody] = useState("")
 
     const [ebTerms, setEbTerms] = useState([])
+
+    const [BCKeyboard, setBCKeyboard] = useState(null)
+    const [showSelectKeyboardBC, setShowSelectKeyboardBC] = useState(false)
     const [bcTerms, setBCTerms] = useState([])
+
+
+    const [ICKeyboard, setICKeyboard] = useState(null)
+    const [showSelectKeyboardIC, setShowSelectKeyboardIC] = useState(false)
+    const [icTerms, setICTerms] = useState([])
 
     const [showAddQAnswers, setShowAddQAnswers] = useState(false)
 
@@ -439,6 +448,117 @@ export function AddEnergyBalanceQuestion(){
         )
     }
 
+
+    const renderBoundaryConditions = () => {
+        return(
+            <div>
+                <p>Keyboard</p>
+                            
+                <div 
+                    className="please-select-area" 
+                    onClick={() => setShowSelectKeyboardBC(true)}
+                >
+                    {!BCKeyboard ? 
+                        <Space>
+                            <InsertRowAboveOutlined />
+                            <small>Click to select a keyboard</small>
+                        </Space> : 
+                        <Space>
+                            <InsertRowAboveOutlined />
+                            <p> {BCKeyboard.Name} </p>
+                        </Space>}
+                </div> 
+                        
+                <br/>
+                {BCKeyboard && <Space>
+                    <p className="default-gray">Terms</p>
+                    <PlusOutlined 
+                        style={{color:'green', cursor:'pointer'}} 
+                        onClick={() => {
+                            const newTerm = ({
+                                List:[],
+                                echoNumber:0 
+                            })
+
+                            let _terms = [...bcTerms]
+
+                            _terms.push(newTerm)
+
+                            setBCTerms(_terms)
+                        }}
+                    />
+                </Space>}
+                {BCKeyboard &&
+                <List 
+                    dataSource={bcTerms}
+
+                    renderItem={(bc, bci) => {
+                        const {List} = bc 
+
+                        return(
+                            <p>{bci+1}</p>
+                        )
+                    }}
+                />}
+            </div>
+        )
+    }
+
+    const renderInitialConditions = () => {
+        return(
+            <div>
+                <p>Keyboard</p>
+                            
+                <div 
+                    className="please-select-area" 
+                    onClick={() => setShowSelectKeyboardIC(true)}
+                >
+                    {!ICKeyboard ? 
+                        <Space>
+                            <InsertRowAboveOutlined />
+                            <small>Click to select a keyboard</small>
+                        </Space> : 
+                        <Space>
+                            <InsertRowAboveOutlined />
+                            <p> {ICKeyboard.Name} </p>
+                        </Space>}
+                </div> 
+                        
+                <br/>
+                {ICKeyboard && <Space>
+                    <p className="default-gray">Terms</p>
+                    <PlusOutlined 
+                        style={{color:'green', cursor:'pointer'}} 
+                        onClick={() => {
+                            const newTerm = ({
+                                List:[],
+                                echoNumber:0 
+                            })
+
+                            let _terms = [...icTerms]
+
+                            _terms.push(newTerm)
+
+                            setICTerms(_terms)
+                        }}
+                    />
+                </Space>}
+                {ICKeyboard &&
+                <List 
+                    dataSource={icTerms}
+
+                    renderItem={(bc, bci) => {
+                        const {List} = bc 
+
+                        return(
+                            <p>{bci+1}</p>
+                        )
+                    }}
+                />}
+            </div>
+        )
+    }
+
     const renderQuestionContent = () => {
         if(!newImage) {
             return (
@@ -470,7 +590,12 @@ export function AddEnergyBalanceQuestion(){
         {
             key:4,
             label:'Boundary conditions',
-            children: <div/>
+            children: <div>{renderBoundaryConditions()}</div>
+        },
+        {
+            key:5,
+            label:'Initial conditions',
+            children: <div>{renderInitialConditions()}</div>
         }]
 
         return(
@@ -656,31 +781,7 @@ export function AddEnergyBalanceQuestion(){
                                 Add energy balance term
                             </Button>
 
-                            <Button
-                                size="small"
-                                type="primary"
-                                onClick={() => {
-                                    const newTerm = ({
-                                        Code:'',
-                                        Latex:'',
-                                        LatexText:'',
-
-                                        Keyboard: null,
-                                        Answers:[] 
-
-                                    })
-
-                                    let _terms = [...ebTerms]
-
-                                    _terms.push(newTerm)
-
-                                    setEbTerms(_terms)
-                                    setCurrentSubtab(3)
-
-                                }}
-                            >
-                                Add Boundary condition
-                            </Button>
+                           
                         </Space>
                         <br/>
                         <br/>
@@ -793,6 +894,28 @@ export function AddEnergyBalanceQuestion(){
 
             <br/>
             {selectContent()}
+
+            <SelectKeyboard 
+                open={showSelectKeyboardBC || showSelectKeyboardIC}
+                onClose={() => {
+                    setShowSelectKeyboardBC(false)
+                    setShowSelectKeyboardIC(false)
+                }}
+                onSelect={(k) => {
+                    setShowSelectKeyboardBC(false)
+                    setShowSelectKeyboardIC(false)
+
+                    if(showSelectKeyboardBC){
+                        setBCKeyboard(k)
+                        setBCTerms([])
+                    }
+
+                    else if(showSelectKeyboardIC){
+                        setICKeyboard(k)
+                        setICTerms([])
+                    }
+                }}
+            />
 
         </PagesWrapper>
     )
