@@ -11,6 +11,7 @@ import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import './index.css'
 import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "../Play/Constants";
 import { SelectKeyboard } from "../../KeyboardQuestion/Add/SelectKeyboard";
+import { AddAnswersToList } from "../Shared/AddAnswersToList";
 
 export function AddEnergyBalanceQuestion(){
 
@@ -49,11 +50,13 @@ export function AddEnergyBalanceQuestion(){
 
     const [BCKeyboard, setBCKeyboard] = useState(null)
     const [showSelectKeyboardBC, setShowSelectKeyboardBC] = useState(false)
+    const [showAddBCTerms, setAddBCTerms] = useState(false)
     const [bcTerms, setBCTerms] = useState([])
 
 
     const [ICKeyboard, setICKeyboard] = useState(null)
     const [showSelectKeyboardIC, setShowSelectKeyboardIC] = useState(false)
+    const [showAddICTerms, setAddICTerms] = useState(false)
     const [icTerms, setICTerms] = useState([])
 
     const [showAddQAnswers, setShowAddQAnswers] = useState(false)
@@ -475,16 +478,8 @@ export function AddEnergyBalanceQuestion(){
                     <PlusOutlined 
                         style={{color:'green', cursor:'pointer'}} 
                         onClick={() => {
-                            const newTerm = ({
-                                List:[],
-                                echoNumber:0 
-                            })
-
-                            let _terms = [...bcTerms]
-
-                            _terms.push(newTerm)
-
-                            setBCTerms(_terms)
+                            setAddBCTerms(true)
+                            setAddICTerms(false)
                         }}
                     />
                 </Space>}
@@ -914,6 +909,31 @@ export function AddEnergyBalanceQuestion(){
                         setICKeyboard(k)
                         setICTerms([])
                     }
+                }}
+            />
+
+            <AddAnswersToList 
+                open={showAddBCTerms || showAddICTerms}
+                selectedKeyboard={showAddBCTerms ? BCKeyboard : ICKeyboard}
+                existingList={showAddBCTerms ? bcTerms : icTerms}
+                onClose={() => {
+                    setAddBCTerms(false)
+                    setAddICTerms(false)
+                }}
+
+                onUpdateList={(l) => {
+                    if(showAddBCTerms){
+                       let _terms = [...bcTerms, ...l]
+                        
+                       setBCTerms(_terms)
+                    }
+
+                    else if(showAddICTerms){
+                        let _terms = [...icTerms, ...l]
+                        
+                       setICTerms(_terms)
+                    }
+
                 }}
             />
 
