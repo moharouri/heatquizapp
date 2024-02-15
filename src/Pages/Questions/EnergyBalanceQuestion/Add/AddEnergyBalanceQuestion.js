@@ -3,7 +3,7 @@ import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
 import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined, CloseCircleFilled, DragOutlined, InsertRowAboveOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined,  ExclamationCircleOutlined , CloseCircleFilled, DragOutlined, InsertRowAboveOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
@@ -12,6 +12,7 @@ import './index.css'
 import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "../Play/Constants";
 import { SelectKeyboard } from "../../KeyboardQuestion/Add/SelectKeyboard";
 import { AddAnswersToList } from "../Shared/AddAnswersToList";
+import { AssignAnswersToQuestion } from "./AssignAnswersToQuestion";
 
 export function AddEnergyBalanceQuestion(){
 
@@ -60,6 +61,7 @@ export function AddEnergyBalanceQuestion(){
     const [icTerms, setICTerms] = useState([])
 
     const [showAddQAnswers, setShowAddQAnswers] = useState(false)
+    const [selectedQuestion, setSelectedQuestion] = useState(null)
 
     const [newPDF, setNewPDF] = useState(null)
     const [newPDFURL, setNewPDFURL] = useState(null)
@@ -436,9 +438,9 @@ export function AddEnergyBalanceQuestion(){
                                                     
                                                 <p className="hq-clickable hoverable-plus"
                                                         onClick={() => {
-                                                            
+                                                            setShowAddQAnswers(true)
                                                         }}
-                                                    >Add answers</p>
+                                                    >Set answers</p>
                                         </div>
                                     )
                                 })}
@@ -604,6 +606,50 @@ export function AddEnergyBalanceQuestion(){
         )
     }
 
+    const validateContent_QuestionInfo = () => {
+        if(!questionBody.trim()) return "Add question body"
+
+        return null
+    }
+
+    const validateContent_ControlVolume = () => {
+        if(!newParts.length) return "Please add at least one control volume"
+
+        return null
+    }
+
+    const validateContent_EBTerms = () => {
+        if(!ebTerms.length) return "Please add terms"
+
+        if(ebTerms.filter(a => !a.Code.trim()).length) return "Atleast one terms has no code"
+        if(ebTerms.filter(a => !a.Latex.trim()).length) return "Atleast one terms has no LaTeX code"
+
+        if(ebTerms.filter(a => !a.Questions.length).length) return "Atleast one terms has no questions"
+        if(ebTerms.filter(a => a.Questions.filter(q => !q.Latex.trim()).length).length) return "Atleast one terms has no a question with no LaTeX code"
+        if(ebTerms.filter(a => a.Questions.filter(q => !q.Keyboard).length).length) return "Atleast one terms has no a question with no Keyboard"
+        if(ebTerms.filter(a => a.Questions.filter(q => !q.Answers.length).length).length) return "Atleast one terms has no a question with no answers"
+
+        //Check repeated answers
+
+        return null
+    }
+
+    const validateContent_BCTerms = () => {
+        if(bcTerms.length){
+            //Check repeated answers
+        }
+
+        return null
+    }
+
+    const validateContent_ICTerms = () => {
+        if(ebTerms.length){
+            //Check repeated answers
+        }
+
+        return null
+    }
+
     const renderQuestionContent = () => {
         if(!newImage) {
             return (
@@ -617,29 +663,93 @@ export function AddEnergyBalanceQuestion(){
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
 
 
+        const validateInfo = validateContent_QuestionInfo()
+        const validateCVs = validateContent_ControlVolume()
+
+        const validateEBs = validateContent_EBTerms()
+
+        const validateBCs = validateContent_BCTerms()
+        const validateICs = validateContent_ICTerms()
+
         const tabs = [{
             key:1,
-            label:'Question text/info',
+            label:
+            <Space> 
+                <p>Question text/info</p> 
+            
+                {validateInfo &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateInfo}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
+
             children: <div>{renderAddQuestionBody()} </div>
         },
         {
             key:2,
-            label:'Control volumes',
+            label:
+            <Space> 
+                <p>Control volumes</p> 
+            
+                {validateCVs &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateCVs}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
             children: <div>{renderControlVolumeList()}</div>
         },
         {
             key:3,
-            label:'EB terms',
+            label:
+            <Space> 
+                <p>EB terms</p> 
+            
+                {validateEBs &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateEBs}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
             children: <div>{renderEnergyBalanceTerms()}</div>
         },
         {
             key:4,
-            label:'Boundary conditions',
+            label:
+            <Space> 
+                <p>Boundary conditions</p> 
+            
+                {validateBCs &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateBCs}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
             children: <div>{renderBoundaryConditions()}</div>
         },
         {
             key:5,
-            label:'Initial conditions',
+            label:
+            <Space> 
+                <p>Initial conditions</p> 
+            
+                {validateICs &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateICs}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
             children: <div>{renderInitialConditions()}</div>
         }]
 
@@ -985,6 +1095,18 @@ export function AddEnergyBalanceQuestion(){
                     }
 
                 }}
+            />
+
+            <AssignAnswersToQuestion 
+                open={showAddQAnswers}
+                onClose={() => {
+                    setSelectedQuestion(null)
+                    setShowAddQAnswers(false)
+                }}
+
+                addedAnswers={(selectedQuestion || {}).Answers}
+
+                onUpdateAnswers={(l) => {}} 
             />
 
         </PagesWrapper>
