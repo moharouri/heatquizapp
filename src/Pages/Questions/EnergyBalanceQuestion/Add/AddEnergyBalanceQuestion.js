@@ -489,9 +489,37 @@ export function AddEnergyBalanceQuestion(){
 
                     renderItem={(bc, bci) => {
                         const {List} = bc 
+                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
                         return(
-                            <p>{bci+1}</p>
+                            <div
+                                key={bci}
+                                className="hq-full-width"
+                            >
+                                <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove condition</p>}
+                                        color="white"
+                                    >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                let _terms = [...bcTerms]
+
+                                                _terms = _terms.filter((t, ti) => bci !== ti)
+                                                setBCTerms(_terms)
+
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p>{bci+1}</p>
+                                    &nbsp;
+                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                </Space>
+                            </div>
                         )
                     }}
                 />}
@@ -525,19 +553,12 @@ export function AddEnergyBalanceQuestion(){
                     <PlusOutlined 
                         style={{color:'green', cursor:'pointer'}} 
                         onClick={() => {
-                            const newTerm = ({
-                                List:[],
-                                echoNumber:0 
-                            })
-
-                            let _terms = [...icTerms]
-
-                            _terms.push(newTerm)
-
-                            setICTerms(_terms)
+                            setAddBCTerms(false)
+                            setAddICTerms(true)
                         }}
                     />
                 </Space>}
+                <br/>
                 {ICKeyboard &&
                 <List 
                     dataSource={icTerms}
@@ -545,8 +566,37 @@ export function AddEnergyBalanceQuestion(){
                     renderItem={(bc, bci) => {
                         const {List} = bc 
 
+                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
                         return(
-                            <p>{bci+1}</p>
+                            <div
+                                key={bci}
+                                className="hq-full-width"
+                            >
+                                <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove condition</p>}
+                                        color="white"
+                                    >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                let _terms = [...icTerms]
+
+                                                _terms = _terms.filter((t, ti) => bci !== ti)
+                                                setICTerms(_terms)
+
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p>{bci+1}</p>
+                                    &nbsp;
+                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                </Space>
+                            </div>
                         )
                     }}
                 />}
