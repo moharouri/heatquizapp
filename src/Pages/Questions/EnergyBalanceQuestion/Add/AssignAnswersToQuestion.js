@@ -6,7 +6,7 @@ import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { Keyboard } from "../../../../Components/Keyboard";
 import { SelectKeyboardList } from "../../../Keyboards/Shared/SelectKeyboardList";
 
-export function AssignAnswersToQuestion({open, onClose, addedAnswers, onUpdateAnswers}){
+export function AssignAnswersToQuestion({open, onClose, usedKeyboard, addedAnswers, onUpdateKeyboard, onUpdateAnswers}){
 
     if(!open) return <div/>;
 
@@ -22,6 +22,7 @@ export function AssignAnswersToQuestion({open, onClose, addedAnswers, onUpdateAn
 
     useEffect(() => {
         setNewList(addedAnswers)
+        setSelectedKeyboard(usedKeyboard)
     }, [open, addedAnswers])
 
     const renderSelectedKeyboard = () => {
@@ -32,11 +33,18 @@ export function AssignAnswersToQuestion({open, onClose, addedAnswers, onUpdateAn
                 <SelectKeyboardList 
                     onSelect={(k) => {
                         setSelectedKeyboard(k)
+                        onUpdateKeyboard(k)
 
-                        setNewList([])
+                        setNewList([{
+                            List:[],
+                            echoNumber:0
+                        }])
                         setSelectedIndex(0)
 
-                        onUpdateAnswers([])
+                        onUpdateAnswers([{
+                            List:[],
+                            echoNumber:0
+                        }])
 
                         setCurrentTab(2)
 
@@ -71,7 +79,7 @@ export function AssignAnswersToQuestion({open, onClose, addedAnswers, onUpdateAn
 
                         const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
-                        const checkTerm = validateKeyboardAnswer(a, true)
+                        const checkTerm = validateKeyboardAnswer(a)
 
                         const termSelected = (ai === selectedIndex)
 
@@ -134,14 +142,23 @@ export function AssignAnswersToQuestion({open, onClose, addedAnswers, onUpdateAn
         <Drawer
         title={
             <Space size={'large'}>
-                <p>Add answers</p>
+                <p>Set answers</p>
 
                 <Button
                     size="small"
                     type="primary"
 
                     onClick={() => {
-                        
+                        const termsStatus = newList.map(l => validateKeyboardAnswer(l)).filter(a => a).length
+
+                        if(termsStatus){
+                            messageApi.destroy()
+                            messageApi.warning("All answers should be valid")
+                            return
+                        }
+
+                        onUpdateAnswers(newList)
+                        onClose()
                     }}
 
                 >
@@ -171,7 +188,22 @@ export function AssignAnswersToQuestion({open, onClose, addedAnswers, onUpdateAn
             }]}
 
             activeKey={currentTab}
-            onChange={(s) => setCurrentTab(s)}
+            onChange={(s) => {
+                if(s === 2 && !newList.length){
+                    let _terms = [...newList]
+
+                    _terms.push({
+                        List:[],
+                        echoNumber:0
+                    })
+
+                    setSelectedIndex(_terms.length - 1)
+
+                    setNewList(_terms)
+                }
+
+                setCurrentTab(s)
+            }}
         />
 
         

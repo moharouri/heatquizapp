@@ -3,7 +3,7 @@ import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
 import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined,  ExclamationCircleOutlined , CloseCircleFilled, DragOutlined, InsertRowAboveOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined,  ExclamationCircleOutlined , CloseCircleFilled, DragOutlined, InsertRowAboveOutlined, SmileTwoTone, FrownTwoTone} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
@@ -13,6 +13,7 @@ import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WES
 import { SelectKeyboard } from "../../KeyboardQuestion/Add/SelectKeyboard";
 import { AddAnswersToList } from "../Shared/AddAnswersToList";
 import { AssignAnswersToQuestion } from "./AssignAnswersToQuestion";
+import { UploadPDF } from "../../../../Components/UploadPDF";
 
 export function AddEnergyBalanceQuestion(){
 
@@ -61,6 +62,8 @@ export function AddEnergyBalanceQuestion(){
     const [icTerms, setICTerms] = useState([])
 
     const [showAddQAnswers, setShowAddQAnswers] = useState(false)
+    const [selectedBCTermIndex, setSelectedBCTermIndex] = useState(0)
+    const [selectedBCQuestionIndex, setSelectedBCQuestionIndex] = useState(0)
     const [selectedQuestion, setSelectedQuestion] = useState(null)
 
     const [newPDF, setNewPDF] = useState(null)
@@ -213,6 +216,12 @@ export function AddEnergyBalanceQuestion(){
         _terms[ti][direction] = !_terms[ti][direction]
 
         _terms[ti].IsDummy = false
+
+        const noDirectionSelected = ![NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION].map(a => _terms[ti][a]).filter(r => r).length
+
+        if(noDirectionSelected){
+            _terms[ti].North = true
+        }
 
         setEbTerms(_terms)
     }
@@ -389,7 +398,7 @@ export function AddEnergyBalanceQuestion(){
 
                                 </Space>
                                 {Questions.map((q, qi) => {
-                                    const {Keyboard, Latex} = q
+                                    const {Keyboard, Latex, Answers} = q
 
                                     return(
                                         <div key={qi}>
@@ -439,8 +448,55 @@ export function AddEnergyBalanceQuestion(){
                                                 <p className="hq-clickable hoverable-plus"
                                                         onClick={() => {
                                                             setShowAddQAnswers(true)
+                                                            setSelectedQuestion(q)
+                                                            setSelectedBCTermIndex(ti)
+                                                            setSelectedBCQuestionIndex(qi)
                                                         }}
                                                     >Set answers</p>
+
+                                            {Keyboard && 
+                                            <Space>
+                                                <InsertRowAboveOutlined />
+                                                <p> {Keyboard.Name} </p>
+                                            </Space>}
+
+                                            {Answers.map((ans, ans_i) => {
+                                                const {List} = ans 
+                                                const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+                        
+                                                return(
+                                                    <div
+                                                        key={ans_i}
+                                                        className="hq-full-width"
+                                                    >
+                                                        <Space>
+                                                            &nbsp;
+                                                            <Tooltip 
+                                                                title={<p>Click to remove answer</p>}
+                                                                color="white"
+                                                            >
+                                                                <CloseCircleFilled 
+                                                                    style={{cursor:'pointer', color:'red'}}
+                        
+                                                                    onClick={() => {
+                                                                        let _terms = [...ebTerms]
+                        
+                                                                        _terms[ti].Questions[qi].Answers = 
+                                                                        _terms[ti].Questions[qi].Answers.filter((a, ai) => ans_i !== ai)
+
+                                                                        setBCTerms(_terms)
+                                                                    }}
+                                                                />
+                                                            </Tooltip>
+                                                            &nbsp;
+                                                            <p>{ans_i+1}</p>
+                                                            &nbsp;
+                                                            <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                                        </Space>
+                                                    </div>
+                                                )
+                                            })}
+                                            
                                         </div>
                                     )
                                 })}
@@ -913,7 +969,7 @@ export function AddEnergyBalanceQuestion(){
                                         Latex:'',
                                         LatexText:'',
 
-                                        North: false,
+                                        North: true,
                                         South: false,
                                         East: false,
                                         West: false,
@@ -951,6 +1007,8 @@ export function AddEnergyBalanceQuestion(){
             </div>)
     }
 
+    
+
     const selectContent = () => {
         const map = {
             0: () => 
@@ -959,7 +1017,8 @@ export function AddEnergyBalanceQuestion(){
                 onSetInfo = {(i) => setQuestionInfo(i)}
             />,
             1: () => renderAddImage(),
-            2: () => renderQuestionContent()
+            2: () => renderQuestionContent(),
+            3: () => renderFinalPage()
         }
 
         return map[currentTab]()
@@ -973,12 +1032,65 @@ export function AddEnergyBalanceQuestion(){
     }
 
     const validateQuestionContent = () => {
-        
-        return null
+        const validateInfo = validateContent_QuestionInfo()
+        const validateCVs = validateContent_ControlVolume()
+
+        const validateEBs = validateContent_EBTerms()
+
+        const validateBCs = validateContent_BCTerms()
+        const validateICs = validateContent_ICTerms()
+
+        return (validateInfo || validateCVs || validateEBs || validateBCs || validateICs)
     }
 
     const selectImageValidation = validateAddImage()
     const questionContentValidation = validateQuestionContent()
+
+    const canAdd = !questionInfo.validation && !selectImageValidation && !questionContentValidation
+
+    const addQuestionClick = () => {
+
+    }
+
+    const renderFinalPage = () => {
+        return(
+            <Space direction="vertical">
+                {!canAdd && <p className="default-red">Please fill all required data</p>}
+                <br/>
+                {canAdd && 
+                    <Space size={'large'} align="start">
+                        <div>
+                            <p> Question solution (optional)</p>
+                            <UploadPDF 
+                                pdfURL={newPDFURL}
+
+                                className="add-question-upload-pdf"
+                                pdfClassName="add-question-upload-pdf-internal"
+
+                                onSetPDF={(url, pdf) => {
+                                    setNewPDFURL(url)
+                                    setNewPDF(pdf)
+                                }}
+                            />
+                        </div>
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        <Button
+                            type="primary"
+                            size="small" 
+                            onClick={addQuestionClick}
+                            loading={false}
+                        >
+                            Add question
+                        </Button>
+                    </Space>
+                }
+            </Space>
+        )
+    }
 
     const onChange = (newStep) => {setCurrentTab(newStep)}
 
@@ -1044,6 +1156,10 @@ export function AddEnergyBalanceQuestion(){
                            </Space>,
                             icon:<ProjectTwoTone />
                         },
+                        {
+                            title: 'Final',
+                            icon: canAdd ? <SmileTwoTone /> : <FrownTwoTone />
+                        },
                     ]}
             />
 
@@ -1104,9 +1220,24 @@ export function AddEnergyBalanceQuestion(){
                     setShowAddQAnswers(false)
                 }}
 
+                usedKeyboard = {(selectedQuestion || {}).Keyboard}
                 addedAnswers={(selectedQuestion || {}).Answers}
 
-                onUpdateAnswers={(l) => {}} 
+                onUpdateAnswers={(a) => {
+                    let _terms = [...ebTerms]
+
+                    _terms[selectedBCTermIndex].Questions[selectedBCQuestionIndex].Answers = a
+
+                    setEbTerms(_terms)
+                }} 
+
+                onUpdateKeyboard = {(k) => {
+                    let _terms = [...ebTerms]
+
+                    _terms[selectedBCTermIndex].Questions[selectedBCQuestionIndex].Keyboard = k
+
+                    setEbTerms(_terms)
+                }}
             />
 
         </PagesWrapper>
