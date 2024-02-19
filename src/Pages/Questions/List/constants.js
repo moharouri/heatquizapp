@@ -19,6 +19,7 @@ export const CLICKABLE_QUESTION_PARAMETER  = +1
 export const KEYBOARD_QUESTION_PARAMETER  = +2
 export const MULTIPLE_CHOICE_QUESTION_PARAMETER  = +3
 export const ENERGY_BALANCE_QUESTION_PARAMETER  = +5
+export const FBD_QUESTION_PARAMETER  = +6
 
 export const QUESTION_TYPES_SEARCH_NAMES = [
     {
@@ -36,5 +37,9 @@ export const QUESTION_TYPES_SEARCH_NAMES = [
     {
         value:ENERGY_BALANCE_QUESTION_PARAMETER,
         label:'Energy balance question'
+    },
+    {
+        value:FBD_QUESTION_PARAMETER,
+        label:'Freebody diagram question'
     }
 ]

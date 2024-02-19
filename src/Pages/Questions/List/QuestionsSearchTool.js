@@ -5,7 +5,7 @@ import { useTopics } from "../../../contexts/TopicsContext";
 import { useLevelsOfDifficulty } from "../../../contexts/LevelOfDifficultyContext";
 
 import './List.css'
-import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, QUESTION_SEARCH_CRITERIAS, QUESTION_SEARCH_CRITERIA_MEDIAN_TIME, QUESTION_SEARCH_CRITERIA_PLAY_STATS, QUESTION_SEARCH_CRITERIA_QUESTION_TYPES, QUESTION_TYPES_SEARCH_NAMES } from "./constants";
+import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, QUESTION_SEARCH_CRITERIAS, QUESTION_SEARCH_CRITERIA_MEDIAN_TIME, QUESTION_SEARCH_CRITERIA_PLAY_STATS, QUESTION_SEARCH_CRITERIA_QUESTION_TYPES, QUESTION_TYPES_SEARCH_NAMES } from "./constants";
 import { useQuestions } from "../../../contexts/QuestionsContext";
 import { GetPagesArray } from "../../../services/Auxillary";
 
@@ -224,7 +224,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             ShowKeyboardQuestions: selectedQuestionTypes.map(a => a.value).includes(KEYBOARD_QUESTION_PARAMETER),
             ShowMultipleChoiceQuestions: selectedQuestionTypes.map(a => a.value).includes(MULTIPLE_CHOICE_QUESTION_PARAMETER),
             ShowEBQuestions: selectedQuestionTypes.map(a => a.value).includes(ENERGY_BALANCE_QUESTION_PARAMETER),
-            ShowFreebodyDiagramQuestions: false,
+            ShowFreebodyDiagramQuestions:  selectedQuestionTypes.map(a => a.value).includes(FBD_QUESTION_PARAMETER),
             ShowDiagramQuestions: false,
             
             SearchBasedOnMedianTime: selectedSearchCriteria.value === QUESTION_SEARCH_CRITERIA_MEDIAN_TIME.value,
@@ -265,7 +265,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             ShowKeyboardQuestions: true,
             ShowMultipleChoiceQuestions: true,
             ShowEBQuestions: true,
-            ShowFreebodyDiagramQuestions: false,
+            ShowFreebodyDiagramQuestions: true,
             ShowDiagramQuestions: false,
             
             SearchBasedOnMedianTime: false,

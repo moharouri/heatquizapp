@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import {Col, List, Row, Skeleton, Space, Steps, Tabs, Tooltip } from "antd";
+import {Col, List, Row, Skeleton, Space, Steps, Tooltip } from "antd";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { FixURL } from "../../../../services/Auxillary";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
