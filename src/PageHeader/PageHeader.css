@@ -62,6 +62,7 @@
     max-height: 43px;
     object-fit: contain;
     float: left;
+    cursor: pointer;
 }
 
 .hq-app-logo-small{
@@ -69,6 +70,7 @@
     max-height: 30px;
     object-fit: contain;
     float: left;
+    cursor: pointer;
 }
 
 @media screen and (max-width:420px) {
