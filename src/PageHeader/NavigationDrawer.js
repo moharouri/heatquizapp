@@ -129,6 +129,11 @@ const NavigationDrawer = () => {
             label:'Energy balance question',
             key:'/add_eb_q',
             icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Freebody diagram question',
+            key:'/add_fbd_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
         ],
         type:'group'

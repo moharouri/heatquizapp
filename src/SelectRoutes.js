@@ -40,6 +40,7 @@ import { NotificationsList } from "./Pages/Notifications";
 import { UsersList } from "./Pages/Users";
 import { AddClickableQuestion } from "./Pages/Questions/ClickableQuestion/Add";
 import { AddEnergyBalanceQuestion } from "./Pages/Questions/EnergyBalanceQuestion/Add/AddEnergyBalanceQuestion";
+import { AddFBDQuestion } from "./Pages/Questions/FBDQuestion/Add";
 
 export function SelectRoutes(){
     const {roles, isStudent,} = useAuth()
@@ -111,6 +112,7 @@ export function SelectRoutes(){
                 <Route path="/add_k_q" element={<AddKeyboardQuestion />}/>
                 <Route path="/add_c_q" element={<AddClickableQuestion />}/>
                 <Route path="/add_eb_q" element={<AddEnergyBalanceQuestion />}/>
+                <Route path="/add_fbd_q" element={<AddFBDQuestion />}/>
 
                 <Route path="/keyboards_list" element={<KeyboardsList/>}/>
                 <Route path="/add_keyboard" element={<AddKeyboard/>}/>
