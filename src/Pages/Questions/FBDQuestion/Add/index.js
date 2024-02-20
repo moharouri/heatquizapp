@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
-import { Button, Col, Row, Space, Steps, Tooltip, message } from "antd";
+import { Button, Col, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 
 export function AddFBDQuestion(){
@@ -10,6 +10,7 @@ export function AddFBDQuestion(){
     const [api, contextHolder] = message.useMessage()
 
     const [currentTab, setCurrentTab] = useState(0)
+    const [currentSubtab, setCurrentSubtab] = useState(1)
 
     const [questionInfo, setQuestionInfo] = useState({
         Code:'',
@@ -69,6 +70,59 @@ export function AddFBDQuestion(){
         const imageWidth = 0.35*window.innerWidth
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
 
+        const validateInfo = false
+        const validateOBs = false
+        const validateVTs = false
+
+        const tabs = [{
+            key:1,
+            label:
+            <Space> 
+                <p>Question text/info</p> 
+            
+                {validateInfo &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateInfo}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
+
+            children: <div></div>
+        },
+        {
+            key:2,
+            label:
+            <Space> 
+                <p>Object bodies</p> 
+            
+                {validateOBs &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateOBs}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
+            children: <div></div>
+        },
+        {
+            key:3,
+            label:
+            <Space> 
+                <p>Vector terms</p> 
+            
+                {validateVTs &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateVTs}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
+            children: <div></div>
+        }]
 
         return(
             <div className="hq-full-width">
@@ -215,7 +269,7 @@ export function AddFBDQuestion(){
                                     }
 
                                     setIsAddingElement(true)
-                                    //setCurrentSubtab(2)
+                                    setCurrentSubtab(2)
                                 }}
                             >   
                                 Add  object body
@@ -234,6 +288,14 @@ export function AddFBDQuestion(){
 
                            
                         </Space>
+
+                        <br/>
+                        <br/>
+                        <Tabs
+                            items={tabs}
+                            onChange={(t) => setCurrentSubtab(t)}
+                            activeKey={currentSubtab}
+                        />
                 </Col>
             </Row>
             </div>
