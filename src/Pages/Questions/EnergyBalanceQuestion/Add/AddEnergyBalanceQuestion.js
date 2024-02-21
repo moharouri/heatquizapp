@@ -5,7 +5,6 @@ import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, me
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
 import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined,  ExclamationCircleOutlined , CloseCircleFilled, DragOutlined, InsertRowAboveOutlined, SmileTwoTone, FrownTwoTone} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
-import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
 import './index.css'
@@ -14,6 +13,7 @@ import { SelectKeyboard } from "../../KeyboardQuestion/Add/SelectKeyboard";
 import { AddAnswersToList } from "../Shared/AddAnswersToList";
 import { AssignAnswersToQuestion } from "./AssignAnswersToQuestion";
 import { UploadPDF } from "../../../../Components/UploadPDF";
+const { TextArea } = Input;
 
 export function AddEnergyBalanceQuestion(){
 

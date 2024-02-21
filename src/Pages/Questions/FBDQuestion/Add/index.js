@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
-import { Button, Col, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
+import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { FBD_VECTOR_LINEAR } from "../Shared/Constants";
+import './index.css'
+
+const { TextArea } = Input;
 
 export function AddFBDQuestion(){
 
@@ -38,6 +43,11 @@ export function AddFBDQuestion(){
    
     const [hoverElement, setHoverElement] = useState(null) 
 
+    const [questionBody, setQuestionBody] = useState("")
+    const [arrowLength, setArrowLength] = useState(100)
+
+    const [VTs, setVTs] = useState([])
+
     const renderAddImage = () => {
         return(
             <div>
@@ -57,6 +67,140 @@ export function AddFBDQuestion(){
         )
     }
 
+    const renderAddQuestionBody = () => {
+        return(
+            <div className="hq-full-width">
+                <p className="default-gray">Question body</p>
+
+                <TextArea 
+                    value={questionBody}
+                    onChange={(v) => setQuestionBody(v.target.value)}
+                />
+
+                <br/>
+                <LatexRenderer 
+                    latex={questionBody}
+                />
+                <br/>
+                <p className="default-gray">Arrow length</p>
+
+                <Input 
+                    value={arrowLength}
+                    type="number"
+                    onChange={(v) => setArrowLength(v.target.value)}
+
+                />
+
+            </div>
+        )
+    }
+
+    const renderVectorTerms = () => {
+        return(
+            <List 
+                dataSource={VTs}
+
+                renderItem={(vt, vti) => {
+                    const {Code, Latex, LatexText, Keyboard, Answers, Color, Type, ObjectBody} = vt 
+
+                    return(
+                        <Space
+                            className="hq-full-width"
+                            key={vti}
+                            direction="vertical"
+                            align="start"
+                        >
+                            <Space>
+                                &nbsp;
+                                <Tooltip 
+                                    title={<p>Click to remove term</p>}
+                                    color="white"
+                                >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                
+
+                                                let _terms = [...VTs]
+
+                                                _terms = _terms.filter((a, ai) => ai !== vti)
+
+                                                setVTs(_terms)
+
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p className="default-gray">{vti+1}</p>
+
+                                    <Input 
+                                        type="text"
+                                        value={Code}
+                                        className="hq-full-width"
+                                        placeholder="Term code (must be unique)"
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...VTs]
+
+                                            _terms[vti].Code = value
+
+                                            setVTs(_terms)
+                                        }}
+                                    />
+                                </Space>
+                                <Space>
+                                    &nbsp;
+                                    <div className="add-fbd-question-hide-element">
+                                        <Tooltip>
+                                        <CloseCircleFilled />
+                                        </Tooltip>
+                                    </div>
+                                    &nbsp;
+                                    <p className="default-white">{vti+1}</p>
+                                    <Input 
+                                        type="text"
+                                        value={Latex}
+                                        className="hq-full-width"
+                                        placeholder="Latex code (must be unique)"
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...VTs]
+
+                                            _terms[vti].Latex = value
+
+                                            setVTs(_terms)
+                                        }}
+                                    />
+
+                                    <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                </Space>
+
+                                <br/>
+                                <p className="default-gray">Latex text (optional)</p>
+                                <TextArea 
+                                    value={LatexText}
+                                    onChange={(v) => {
+                                        const value = v.target.value
+
+                                        let _terms = [...VTs]
+
+                                        _terms[vti].LatexText = value
+
+                                        setVTs(_terms)
+                                    }}
+
+                                    className="hq-full-width"
+                                />
+                                <LatexRenderer latex={LatexText || ""}/>
+                        </Space>
+                    )
+                }}
+            />
+        )
+    }
 
     const renderQuestionContent = () => {
         if(!newImage) {
@@ -89,7 +233,7 @@ export function AddFBDQuestion(){
                 </Tooltip>} 
             </Space>,
 
-            children: <div></div>
+            children: <div>{renderAddQuestionBody()}</div>
         },
         {
             key:2,
@@ -121,7 +265,7 @@ export function AddFBDQuestion(){
                     <ExclamationCircleOutlined  style = {{color:'orange'}}/>
                 </Tooltip>} 
             </Space>,
-            children: <div></div>
+            children: <div>{renderVectorTerms()}</div>
         }]
 
         return(
@@ -279,7 +423,24 @@ export function AddFBDQuestion(){
                                 size="small"
                                 type="primary"
                                 onClick={() => {
-                                    
+                                    const newTerm = ({
+                                        Code:'',
+                                        Latex:'',
+                                        LatexText:'',
+
+                                        ObjectBody:[],
+                                        Keyboard: null,
+                                        Answers:[],
+                                        Color: 'green',
+                                        Type: FBD_VECTOR_LINEAR
+                                    })
+
+                                    let _terms = [...VTs]
+
+                                    _terms.push(newTerm)
+
+                                    setVTs(_terms)
+                                    setCurrentSubtab(3)
 
                                 }}
                             >
@@ -292,6 +453,7 @@ export function AddFBDQuestion(){
                         <br/>
                         <br/>
                         <Tabs
+                            defaultActiveKey={1}
                             items={tabs}
                             onChange={(t) => setCurrentSubtab(t)}
                             activeKey={currentSubtab}
