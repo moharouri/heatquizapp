@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
-import { Button, Col, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled, DragOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FBD_VECTOR_LINEAR } from "../Shared/Constants";
@@ -92,6 +92,86 @@ export function AddFBDQuestion(){
                 />
 
             </div>
+        )
+    }
+
+    const renderObjectBodies = () => {
+        return(
+            <List 
+                dataSource={newParts}
+
+                renderItem={(p, pi) => {
+                    return(
+                        <div
+                            key={pi}
+                            className="hq-full-width">
+                                <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove body</p>}
+                                        color="white"
+                                    >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                if(isMovingElement){
+                                                    api.destroy()
+                                                    api.warning("Please finish moving element #" + (movedElement + 1))
+                                                    return
+                                                }
+            
+                                                if(isAddingElementSecond){
+                                                    api.destroy()
+                                                    api.warning("Please finish adding")
+                                                    return
+                                                } 
+
+                                                let _newParts = [...newParts]
+
+                                                _newParts = _newParts.filter((a, ai) => ai !== pi)
+
+                                                if(_newParts.length === 1){
+                                                    _newParts[0].correct = true
+                                                }
+
+                                                setNewParts(_newParts)
+
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p className="default-gray">{pi+1}</p>
+                               
+                                
+                                <Tooltip
+                                    color="white"
+                                    title={<p>Click to move</p>}
+                                >
+                                    <DragOutlined style={{color:'blue', cursor:'pointer'}} onClick={() => {
+                                        if(isAddingElementSecond){
+                                            api.destroy()
+                                            api.warning("Please finish adding")
+                                            return
+                                        }
+
+                                        if(isMovingElement){
+                                            setIsMovingElement(false)
+                                            setMovedElement(null)
+                                            return
+                                        }
+
+                                        setIsMovingElement(true)
+                                        setMovedElement(pi)
+                                    }}/>
+                                </Tooltip>
+                                
+                            </Space>
+                        <Divider />
+                    </div>
+                    )
+                }}
+            />
         )
     }
 
@@ -249,7 +329,7 @@ export function AddFBDQuestion(){
                     <ExclamationCircleOutlined  style = {{color:'orange'}}/>
                 </Tooltip>} 
             </Space>,
-            children: <div></div>
+            children: <div>{renderObjectBodies()}</div>
         },
         {
             key:3,
