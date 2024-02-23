@@ -1,3 +1,7 @@
 .add-fbd-question-hide-element{
     opacity: 0%;
 }
+
+.add-fbd-vt-term-type{
+    width: 20vmin;
+}

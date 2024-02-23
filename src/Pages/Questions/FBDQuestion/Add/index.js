@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
-import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
+import { Button, Col, ColorPicker, Divider, Input, List, Row, Select, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled, DragOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled, DragOutlined, InsertRowAboveOutlined} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { FBD_VECTOR_LINEAR } from "../Shared/Constants";
+import { FBD_VECTOR_LINEAR, FBD_VECTOR_ROTATIONAL } from "../Shared/Constants";
 import './index.css'
+import { AssignAnswersToVectorTerm } from "./AssignAnswersToVectorTerm";
 
 const { TextArea } = Input;
 
@@ -47,6 +48,11 @@ export function AddFBDQuestion(){
     const [arrowLength, setArrowLength] = useState(100)
 
     const [VTs, setVTs] = useState([])
+
+    const [showAddVTAnswers, setShowAddVTAnswers] = useState(false)
+    const [selectedVT, setSelectedVT] = useState(null)
+    const [selectedVTIndex, setSelectedVTIndex] = useState(0)
+
 
     const renderAddImage = () => {
         return(
@@ -257,6 +263,38 @@ export function AddFBDQuestion(){
 
                                     <LatexRenderer latex={"$$" + Latex + "$$"}/>
                                 </Space>
+                                <Space>
+                                    &nbsp;
+                                    <div className="add-fbd-question-hide-element">
+                                        <Tooltip>
+                                        <CloseCircleFilled />
+                                        </Tooltip>
+                                    </div>
+                                    &nbsp;
+                                    <p className="default-white">{vti+1}</p>
+                                    <div>
+                                       <Space>
+                                            <p className="default-gray">Color</p>
+                                            <ColorPicker
+                                                value={Color}
+
+                                                defaultValue={Color} 
+
+                                                onChange={(c, h) => {
+                                                    let _terms = [...VTs]
+
+                                                    _terms[vti].Color = h
+
+                                                    setVTs(_terms)
+                                                }}
+
+                                                showText = {true}
+                                            />
+                                       </Space>
+
+                                    </div>
+                                   
+                                </Space>
 
                                 <br/>
                                 <p className="default-gray">Latex text (optional)</p>
@@ -275,6 +313,102 @@ export function AddFBDQuestion(){
                                     className="hq-full-width"
                                 />
                                 <LatexRenderer latex={LatexText || ""}/>
+                                <br/>
+                                <p className="default-gray">Answers</p>
+                                <p className="hq-clickable hoverable-plus"
+                                    onClick={() => {
+                                        setShowAddVTAnswers(true)
+                                        setSelectedVTIndex(vti)
+                                        setSelectedVT(vt)
+                                    }}
+                                >Set keyboard/answers</p>
+                                {Keyboard && 
+                                <Space>
+                                    <InsertRowAboveOutlined />
+                                    <p> {Keyboard.Name} </p>
+                                </Space>}
+                                {Answers.map((ans, ans_i) => {
+                                                const {List} = ans 
+                                                const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+                        
+                                                return(
+                                                    <div
+                                                        key={ans_i}
+                                                        className="hq-full-width"
+                                                    >
+                                                        <Space>
+                                                            &nbsp;
+                                                            <Tooltip 
+                                                                title={<p>Click to remove answer</p>}
+                                                                color="white"
+                                                            >
+                                                                <CloseCircleFilled 
+                                                                    style={{cursor:'pointer', color:'red'}}
+                        
+                                                                    onClick={() => {
+                                                                        let _terms = [...VTs]
+                        
+                                                                        _terms[vti].Answers = 
+                                                                        _terms[vti].Answers.filter((a, ai) => ans_i !== ai)
+
+                                                                        setVTs(_terms)
+                                                                    }}
+                                                                />
+                                                            </Tooltip>
+                                                            &nbsp;
+                                                            <p>{ans_i+1}</p>
+                                                            &nbsp;
+                                                            <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                                        </Space>
+                                                    </div>
+                                                )
+                                            })}
+                            <p className="default-gray">Type</p>
+                            <Space size={"large"}>
+                                <Select 
+                                    value={Type}
+                                    onChange={(v) => {
+                                        let _terms = [...VTs]
+
+                                        _terms[vti].Type = v
+
+                                        setVTs(_terms)                                
+                                    }}
+
+                                    className="add-fbd-vt-term-type"
+                                >
+                                    <Select.Option value={FBD_VECTOR_LINEAR}>Linear</Select.Option>
+                                    <Select.Option value={FBD_VECTOR_ROTATIONAL}>Rotational</Select.Option>
+                                </Select>
+
+                                {Type === FBD_VECTOR_LINEAR ? 
+                                
+                                <div/>
+
+                                : <div/>}
+                            </Space>
+                            <p className="default-gray">Association</p>
+                            <Select 
+                                value={(ObjectBody || {}).Id}
+                                onChange={(v) => {
+                                    let _terms = [...VTs]
+
+                                    const ob = newParts[v]
+
+                                    _terms[vti].ObjectBody = ob
+
+                                    setVTs(_terms)                                
+                                }}
+
+                                className="add-fbd-vt-term-type"
+                            >
+                                {newParts.map((p, pi) => {
+                                    return(
+                                        <Select.Option value={pi}>Object #{pi+1}</Select.Option>
+                                    )
+                                })}
+                                
+                            </Select>
                         </Space>
                     )
                 }}
@@ -507,12 +641,16 @@ export function AddFBDQuestion(){
                                         Code:'',
                                         Latex:'',
                                         LatexText:'',
+                                        Color: 'green',
 
                                         ObjectBody:[],
+
                                         Keyboard: null,
                                         Answers:[],
-                                        Color: 'green',
-                                        Type: FBD_VECTOR_LINEAR
+                                        
+                                        Type: FBD_VECTOR_LINEAR,
+                                        Angle: 0,
+                                        Clockwise: true
                                     })
 
                                     let _terms = [...VTs]
@@ -537,6 +675,7 @@ export function AddFBDQuestion(){
                             items={tabs}
                             onChange={(t) => setCurrentSubtab(t)}
                             activeKey={currentSubtab}
+                            moreIcon = {null}
                         />
                 </Col>
             </Row>
@@ -638,6 +777,34 @@ export function AddFBDQuestion(){
             <br/>
             {selectContent()}
 
+            <AssignAnswersToVectorTerm 
+
+                open={showAddVTAnswers}
+
+                onClose={() => {
+                    setSelectedVT(null)
+                    setShowAddVTAnswers(false)
+                }}
+
+                usedKeyboard = {(selectedVT || {}).Keyboard}
+                addedAnswers={(selectedVT || {}).Answers}
+
+                onUpdateAnswers={(a) => {
+                    let _terms = [...VTs]
+
+                    _terms[selectedVTIndex].Answers = a
+
+                    setVTs(_terms)
+                }} 
+
+                onUpdateKeyboard = {(k) => {
+                    let _terms = [...VTs]
+
+                    _terms[selectedVTIndex].Keyboard = k
+
+                    setVTs(_terms)
+                }}
+            />
         </PagesWrapper>
     )
 }
