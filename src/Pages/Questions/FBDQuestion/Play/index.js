@@ -9,6 +9,7 @@ import { Keyboard } from "../../../../Components/Keyboard";
 import './index.css'
 import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { DropVectorOnImage } from "./DropVectorOnImage";
+import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 
 export function FBDQuestionPlay({Id}){
 
@@ -52,7 +53,7 @@ export function FBDQuestionPlay({Id}){
                     
                     selectedVT={selectedVTDrop}
                     
-                    onDropVT = {() => {
+                    onDropVT = {(vt, a) => {
                         const isDropped = selectedVTDrop && vectors.filter(a => a.Id === selectedVTDrop.Id)
 
                         let vts = [...addedVT]
@@ -67,7 +68,7 @@ export function FBDQuestionPlay({Id}){
                                 List:[],
                                 echoNumber:0
                             },
-                            Angle:0,
+                            Angle:a,
                             ObjectBody:null
                         })
 
@@ -84,19 +85,50 @@ export function FBDQuestionPlay({Id}){
 
                                 const isSelected = selectedVTDrop && selectedVTDrop.Id === Id
 
+                                const existingSelection = addedVT.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === Id)[0]
+
                                 return(
                                         <div key ={Id} >
 
-                                            <div
-                                            className={(isSelected ? 'default-title' : '') + " hoverable-plus"}
-                                            onClick={() => {
-                                                if(isSelected) setSelectedVTDrop(null)
-                                                else setSelectedVTDrop(v)
-                                            }}>
-                                                <LatexRenderer
-                                                className="fbd-question-add-term-element"
-                                                latex={"$$" + Latex + "$$"} />
-                                            </div>
+                                            <Space>
+                                                <div
+                                                    className={(isSelected ? 'default-title' : '') + " hoverable-plus"}
+                                                    onClick={() => {
+                                                        if(isSelected) setSelectedVTDrop(null)
+                                                        else setSelectedVTDrop(v)
+                                                    }}>
+                                                        <LatexRenderer
+                                                            className="fbd-question-add-term-element"
+                                                            latex={"$$" + Latex + "$$"} 
+                                                        />
+                                                </div>
+                                                &nbsp;
+                                                &nbsp;
+
+                                                {existingSelection && 
+                                                <VectorDirectionComponent 
+                                                    angleStep={5}
+                                                    currentAngle={existingSelection.Angle}
+                                                    widthHeight={0.03*window.innerWidth}
+                                                    onUpdateAngle={(v, a) => {
+                                                        let vts = [...addedVT]
+                                                        vts[existingSelection.index].Angle = a
+
+                                                        setAddedVT(vts)
+                                                    }}
+                                                />}
+                                                &nbsp;
+                                                &nbsp;
+                                                {existingSelection && 
+                                                <p 
+                                                onClick={() => {
+                                                    let vts = [...addedVT]
+                                                    vts = vts.filter(a => a.Id !== v.Id)
+                                                    setAddedVT(vts)
+                                                }}
+                                                className="default-gray default-small hq-clickable">Remove</p>}
+                                            </Space>
+                                            <br/>
                                             <br/>
                                         </div>
                                     )
