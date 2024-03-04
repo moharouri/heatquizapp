@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../contexts/QuestionsContext";
-import { CLICKABLE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
+import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
 import { PagesWrapper } from "../../../PagesWrapper";
 import { Col, Divider, Dropdown, Popconfirm, Row, Skeleton, Space, Spin, Statistic, Tooltip, message } from "antd";
 import { useParams } from "react-router-dom";
@@ -19,12 +19,14 @@ import { KeyboardQuestionEditView } from "../KeyboardQuestion/EditView";
 import { ClickableQuestionEditView } from "../ClickableQuestion/ViewEdit";
 import { ErrorComponent } from "../../../Components/ErrorComponent";
 import { QuestionMeanTimeStatistics } from "../../../Components/QuestionMeanTimeStatistics";
+import { EnergyBalanceQuestionEditView } from "../EnergyBalanceQuestion/ViewEdit";
 
 export function QuestionEditView(){
     const {
         clickableQuestionPlay, errorGetClickableQuestionPlay, isLoadingClickableQuestionPlay, getClickableQuestionPlay,
         keyboardQuestionPlay, errorGetKeyboardQuestionPlay, isLoadingKeyboardQuestionPlay, getKeyboardQuestionPlay,
         multipleChoiceQuestionPlay, errorGetMultipleChoiceQuestionPlay, isLoadingMultipleChoiceQuestionPlay, getMultipleChoiceQuestionPlay,
+        energyBalanceQuestionPlay, errorGetEnergyBalanceQuestionPlay, isLoadingEnergyBalanceQuestionPlay, getEnergyBalanceQuestionPlay,
 
         questionStatistics, errorGetQuestionStatistics, isLoadingGetQuestionStatistics, getQuestionStatistics,
 
@@ -56,6 +58,10 @@ export function QuestionEditView(){
                 return getMultipleChoiceQuestionPlay
             }
 
+            case ENERGY_BALANCE_QUESTION_PARAMETER: {
+                return getEnergyBalanceQuestionPlay
+            }
+
             default:{
                 return () => <div/>
             }
@@ -74,6 +80,10 @@ export function QuestionEditView(){
 
             case MULTIPLE_CHOICE_QUESTION_PARAMETER: {
                 return <MultipleChoiceQuestionEditView reloadQuestion={() => getQueryFunction()(id)}/>
+            }
+
+            case ENERGY_BALANCE_QUESTION_PARAMETER: {
+                return <EnergyBalanceQuestionEditView reloadQuestion={() => getQueryFunction()(id)}/>
             }
 
             default:{
@@ -111,6 +121,10 @@ export function QuestionEditView(){
                 return isLoadingMultipleChoiceQuestionPlay
             }
 
+            case ENERGY_BALANCE_QUESTION_PARAMETER: {
+                return isLoadingEnergyBalanceQuestionPlay
+            }
+
             default:{
                 return false
             }
@@ -131,6 +145,10 @@ export function QuestionEditView(){
                 return errorGetMultipleChoiceQuestionPlay
             }
 
+            case ENERGY_BALANCE_QUESTION_PARAMETER: {
+                return errorGetEnergyBalanceQuestionPlay
+            }
+
             default:{
                 return null
             }
@@ -149,6 +167,10 @@ export function QuestionEditView(){
 
             case MULTIPLE_CHOICE_QUESTION_PARAMETER: {
                 return multipleChoiceQuestionPlay
+            }
+
+            case ENERGY_BALANCE_QUESTION_PARAMETER: {
+                return energyBalanceQuestionPlay
             }
 
             default:{

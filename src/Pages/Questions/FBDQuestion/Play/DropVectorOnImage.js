@@ -1,15 +1,23 @@
 import React, { useEffect } from "react"
 import { useState } from "react"
 import { FixURL } from "../../../../services/Auxillary"
+import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent"
 
-export function DropVectorOnImage({question, selectedVT, onDropVT}){
+export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
 
     const canvasRef = React.createRef()
 
     const [ctx, setCtx] = useState()
+    const [topOffset, setTopOffset] = useState(0)
+    const [leftOffset, setLeftOffset] = useState(0)
 
     const [mouseX, setMouseX] = useState(0)
     const [mouseY, setMouseY] = useState(0)
+
+    const [angleX, setAngleX] = useState(0)
+    const [angleY, setAngleY] = useState(0)
+
+    const [showSelectAngle, setShowSelectAngle] = useState(false)
 
     const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, ObjectBodies} = question
 
@@ -18,12 +26,19 @@ export function DropVectorOnImage({question, selectedVT, onDropVT}){
 
 
     useEffect(() => {
-        if(canvasRef){
+        if(canvasRef && canvasRef.current){
             const _ctx = canvasRef.current.getContext('2d')
+
+            const styles = canvasRef.current.getBoundingClientRect()
+
+            const {top, left} = styles
 
             if(_ctx){
                 setCtx(_ctx)
             }
+
+            setTopOffset(top)
+            setLeftOffset(left)
         }
     }, [canvasRef])
 
@@ -95,7 +110,11 @@ export function DropVectorOnImage({question, selectedVT, onDropVT}){
 
     const onMouseClick = (e) => {
         if(selectedVT){
-            onDropVT(selectedVT)
+            setShowSelectAngle(true)
+            let point = computePointInCanvas(e)
+
+            setAngleX(point.x)
+            setAngleY(point.y)
         }
     }
 
@@ -132,6 +151,8 @@ export function DropVectorOnImage({question, selectedVT, onDropVT}){
         }
     }
 
+    const widthHeight = window.innerWidth*0.035
+
       return(
         <div>
              <canvas
@@ -155,7 +176,33 @@ export function DropVectorOnImage({question, selectedVT, onDropVT}){
                         onMouseLeave={onMouseLeave}
                         onMouseMove={onMouseMove}
                         onClick = {onMouseClick}
-                    /> 
+                    > 
+                
+                </canvas>
+                {showSelectAngle && 
+                <div
+                    style={{position:'absolute', left:leftOffset + angleX - widthHeight/2, top:topOffset + angleY - widthHeight/2}}
+                >
+                    <VectorDirectionComponent 
+                        onUpdateAngle={(angle) => {
+                            onDropVT(selectedVT, angle)
+                            setShowSelectAngle(false)
+                        }}  
+
+                        widthHeight={widthHeight}
+                        angleStep={5}
+                    />
+                </div>}
+
+                {addedVT.map((vt) => {
+                    const {Id} = vt
+
+                    return(
+                        <div>
+
+                        </div>
+                    )
+                })}
         </div>
     )
 }

@@ -153,6 +153,9 @@ export function editClickableQuestionImageRequest(b){
     return EDIT_REQUEST_FILE_API('SimpleClickable/AddEditQuestionBackgroundImage', b)
 }
 
+//Energy balance question
+
+
 
 
 
