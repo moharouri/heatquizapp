@@ -236,6 +236,62 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
         )
     }
 
+    const renderItemBox = (t) => {
+        const {Id, North: isNorthSelected, East: isEastSelected, West: isWestSelected, South: isSouthSelected, Center: isCenterSelected} = t
+
+        const totalWidthHeight = 0.03*window.innerWidth
+        const shapesGap = 0.1*totalWidthHeight
+        const width1 = 0.125 * totalWidthHeight
+        const width2 = totalWidthHeight - 2 * shapesGap - 2 * width1
+
+        let selectedColor = '#28a745'
+
+        const notSelectedStyle = {backgroundColor:'#f1f4f8', border:'1px solid #e6e6e6',}
+        const selectedStyle = {backgroundColor:selectedColor, border:'1px solid green',} 
+
+        return(
+            <Space 
+            key={Id}
+            direction="vertical">
+                <div style={{flexDirection:'row', display:'flex', width: totalWidthHeight, height:totalWidthHeight, border:'1px solid #f1f4f8'}}>
+                
+                    <div 
+                        style={{width:width1, height: width2, marginRight:shapesGap, marginTop: (shapesGap + width1), ...(isEastSelected ? selectedStyle : notSelectedStyle)}}
+                    >
+                        {/* East */}
+                    </div>
+
+                    <div style={{width:width2, height: totalWidthHeight, marginRight:shapesGap}}>
+                        <div 
+                            style={{width:width2, height: width1, marginBottom:shapesGap, ...(isNorthSelected ? selectedStyle : notSelectedStyle)}}
+                        >
+                            {/* North */}
+                        </div>
+
+                        <div
+                            style={{width:width2, height: width2, marginBottom:shapesGap, ...(isCenterSelected ? selectedStyle : notSelectedStyle)}}
+                        >
+                            {/* Center */}
+                        </div>
+
+                        <div 
+                            style={{width:width2, height: width1, ...(isSouthSelected ? selectedStyle : notSelectedStyle)}}
+                        >
+                            {/* South */}
+                        </div>
+                    </div>
+
+                    <div 
+                        style={{width:width1, height: width2, marginTop: (shapesGap + width1), ...(isWestSelected ? selectedStyle : notSelectedStyle)}}
+                    >
+                        {/* West */}
+                    </div>
+                </div>
+            </Space>
+        )
+
+    }
+
     const renderEnergyBalanceTerms = () => {
         const {EnergyBalanceTerms} = question
 
@@ -254,6 +310,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                             >
                                 <Space>
                                     <p className="default-gray">{ti+1}</p>
+                                    {renderItemBox(t)}
                                     <p className="default-title">{Code}</p>
                                     <LatexRenderer latex={"$$" + Latex + "$$"}/>
                                 </Space>
@@ -266,7 +323,31 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                 <p>{LatexText}</p>
 
                                 <Divider/>
+                                {Questions.map((q, qi) => {
+                                    const {Id, Latex: qLatex, Keyboard, Answers} = q
 
+                                    return(
+                                        <div
+                                            key={Id}
+                                        >   
+                                            <Space>
+                                                <p className="default-gray">{qi+1}</p>
+                                                <LatexRenderer latex={"$$" + qLatex  + "$$"} />
+                                            </Space>
+                                            {Answers.map((a, ai) => {
+
+                                                return(
+                                                    <div
+                                                        key={ai}
+                                                    >
+                                                        <LatexRenderer latex={"$$1$$"}/>
+                                                    </div>
+                                                )
+                                            })}
+                                            <br/>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         )
                     }}
