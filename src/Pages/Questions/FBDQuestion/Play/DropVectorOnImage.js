@@ -2,8 +2,13 @@ import React, { useEffect } from "react"
 import { useState } from "react"
 import { FixURL } from "../../../../services/Auxillary"
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent"
+import Xarrow from "react-xarrows";
+import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
 export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
+
+    console.log("DropVectorOnImage")
+    console.log(addedVT)
 
     const canvasRef = React.createRef()
 
@@ -185,7 +190,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                 >
                     <VectorDirectionComponent 
                         onUpdateAngle={(angle) => {
-                            onDropVT(selectedVT, angle)
+                            onDropVT(selectedVT, angle, angleX, angleY)
                             setShowSelectAngle(false)
                         }}  
 
@@ -195,14 +200,74 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                 </div>}
 
                 {addedVT.map((vt) => {
-                    const {Id} = vt
-
+                    const {Id, X, Y} = vt
                     return(
-                        <div>
-
+                        <div
+                            key={Id}
+                            style={{position:'absolute', left: leftOffset + X, top: topOffset + Y}}
+                            id={"VT_START_" + Id}
+                        >
                         </div>
                     )
                 })}
+
+                {addedVT.map((vt) => {
+                    const {Id, X, Y, Angle, Latex} = vt
+
+                    const arrowRad = 50
+
+                    const radAngle = Math.PI * (Angle/180)
+
+                    const extraX = Math.cos(radAngle) * arrowRad
+                    const extraY = Math.sin(-radAngle) * arrowRad
+
+                    return(
+                        <div
+                            key={Id}
+                            style={{position:'absolute', left: leftOffset + X + extraX, top: topOffset + Y + extraY}}
+                            id={"VT_END_" + Id}
+                        >
+                        </div>
+                    )
+                })}
+
+                {addedVT.map((vt) => {
+                    const {Id, X, Y, Angle, Latex} = vt
+
+                    const arrowRad = 70
+
+                    const radAngle = Math.PI * (Angle/180)
+
+                    const extraX = Math.cos(radAngle) * arrowRad
+                    const extraY = Math.sin(-radAngle) * arrowRad
+
+                    return(
+                        <div
+                            key={Id}
+                            style={{position:'absolute', left: leftOffset + X + extraX, top: topOffset + Y + extraY}}
+                        >
+                            <LatexRenderer latex={"$$" + Latex + "$$"} />
+                        </div>
+                    )
+                })}
+
+            {addedVT.map((vt) => {
+                    const {Id} = vt
+
+                    return(<Xarrow
+                            key={Id}
+                            start={"VT_START_" + Id}
+                            end={"VT_END_" + Id}
+                            strokeWidth={2}
+                            headSize={4}
+                            startAnchor="auto"
+                            endAnchor="auto"
+                            color={"green"}
+                            path={"straight"}
+                        />)
+                })}
+
+           
         </div>
     )
 }
