@@ -53,7 +53,7 @@ export function FBDQuestionPlay({Id}){
                     
                     selectedVT={selectedVTDrop}
                     
-                    onDropVT = {(vt, a) => {
+                    onDropVT = {(vt, a, x, y) => {
                         const isDropped = selectedVTDrop && vectors.filter(a => a.Id === selectedVTDrop.Id)
 
                         let vts = [...addedVT]
@@ -68,6 +68,10 @@ export function FBDQuestionPlay({Id}){
                                 List:[],
                                 echoNumber:0
                             },
+
+                            X:x,
+                            Y:y,
+
                             Angle:a,
                             ObjectBody:null
                         })
@@ -75,6 +79,8 @@ export function FBDQuestionPlay({Id}){
                         setAddedVT(vts)
                         setSelectedVTDrop(null)
                     }}
+
+                    addedVT={addedVT}
                     />
 
                     <div className="hq-full-width">
@@ -110,7 +116,7 @@ export function FBDQuestionPlay({Id}){
                                                     angleStep={5}
                                                     currentAngle={existingSelection.Angle}
                                                     widthHeight={0.03*window.innerWidth}
-                                                    onUpdateAngle={(v, a) => {
+                                                    onUpdateAngle={(a) => {
                                                         let vts = [...addedVT]
                                                         vts[existingSelection.index].Angle = a
 

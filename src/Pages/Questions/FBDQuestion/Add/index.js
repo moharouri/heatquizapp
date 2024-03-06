@@ -8,6 +8,7 @@ import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FBD_VECTOR_LINEAR, FBD_VECTOR_ROTATIONAL } from "../Shared/Constants";
 import './index.css'
 import { AssignAnswersToVectorTerm } from "./AssignAnswersToVectorTerm";
+import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 
 const { TextArea } = Input;
 
@@ -81,6 +82,7 @@ export function AddFBDQuestion(){
                 <TextArea 
                     value={questionBody}
                     onChange={(v) => setQuestionBody(v.target.value)}
+                    className="add-fbd-input"
                 />
 
                 <br/>
@@ -94,7 +96,7 @@ export function AddFBDQuestion(){
                     value={arrowLength}
                     type="number"
                     onChange={(v) => setArrowLength(v.target.value)}
-
+                    className="add-fbd-input"
                 />
 
             </div>
@@ -103,14 +105,19 @@ export function AddFBDQuestion(){
 
     const renderObjectBodies = () => {
         return(
-            <List 
+        !newParts.length ? <div/> 
+        : <List 
                 dataSource={newParts}
 
                 renderItem={(p, pi) => {
+                    const {Color} = p
+
+                    const isHovered = (![null, undefined].includes(hoverElement)) && hoverElement === pi
+
                     return(
                         <div
                             key={pi}
-                            className="hq-full-width">
+                            className={"hq-full-width " + (isHovered ? "highlighted" : "") }>
                                 <Space>
                                     &nbsp;
                                     <Tooltip 
@@ -148,7 +155,34 @@ export function AddFBDQuestion(){
                                     </Tooltip>
                                     &nbsp;
                                     <p className="default-gray">{pi+1}</p>
-                               
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                    
+                                    <Space>
+                                            <ColorPicker
+                                                value={Color}
+
+                                                defaultValue={Color} 
+
+                                                onChange={(c, h) => {
+                                                    let _newParts = [...newParts]
+
+                                                    _newParts[pi].Color = h
+
+                                                    setNewParts(_newParts)
+                                                }}
+
+                                                showText = {true}
+                                            />
+                                            <p className="highlighted">{Color}</p>
+                                       </Space>
+                                       &nbsp;
+                                       &nbsp;
+                                       &nbsp;
+                                       &nbsp;
+                                       &nbsp;
+                                       &nbsp;
                                 
                                 <Tooltip
                                     color="white"
@@ -183,11 +217,12 @@ export function AddFBDQuestion(){
 
     const renderVectorTerms = () => {
         return(
+            !VTs.length ? <div/> :
             <List 
                 dataSource={VTs}
 
                 renderItem={(vt, vti) => {
-                    const {Code, Latex, LatexText, Keyboard, Answers, Color, Type, ObjectBody} = vt 
+                    const {Code, Latex, LatexText, Keyboard, Answers, Color, Type, Angle, Clockwise, ObjectBody} = vt 
 
                     return(
                         <Space
@@ -223,7 +258,7 @@ export function AddFBDQuestion(){
                                     <Input 
                                         type="text"
                                         value={Code}
-                                        className="hq-full-width"
+                                        className="add-fbd-input"
                                         placeholder="Term code (must be unique)"
                                         onChange={(v) => {
                                             const value = v.target.value
@@ -248,7 +283,7 @@ export function AddFBDQuestion(){
                                     <Input 
                                         type="text"
                                         value={Latex}
-                                        className="hq-full-width"
+                                        className="add-fbd-input"
                                         placeholder="Latex code (must be unique)"
                                         onChange={(v) => {
                                             const value = v.target.value
@@ -290,6 +325,7 @@ export function AddFBDQuestion(){
 
                                                 showText = {true}
                                             />
+                                            <p className="highlighted">{Color}</p>
                                        </Space>
 
                                     </div>
@@ -310,8 +346,8 @@ export function AddFBDQuestion(){
                                         setVTs(_terms)
                                     }}
 
-                                    className="hq-full-width"
-                                />
+                                    className="add-fbd-input"
+                                    />
                                 <LatexRenderer latex={LatexText || ""}/>
                                 <br/>
                                 <p className="default-gray">Answers</p>
@@ -364,7 +400,7 @@ export function AddFBDQuestion(){
                                                 )
                                             })}
                             <p className="default-gray">Type</p>
-                            <Space size={"large"}>
+                            <Space size={"large"} align="center">
                                 <Select 
                                     value={Type}
                                     onChange={(v) => {
@@ -383,7 +419,18 @@ export function AddFBDQuestion(){
 
                                 {Type === FBD_VECTOR_LINEAR ? 
                                 
-                                <div/>
+                                <VectorDirectionComponent
+                                    widthHeight={window.innerWidth * 0.025}
+                                    currentAngle={Angle}
+                                    angleStep={5}
+                                    onUpdateAngle={(a) => {
+                                        let _terms = [...VTs]
+
+                                        _terms[vti].Angle = a
+
+                                        setVTs(_terms)
+                                    }}
+                                />
 
                                 : <div/>}
                             </Space>
@@ -497,6 +544,11 @@ export function AddFBDQuestion(){
                         onClick={(e) => {
                             if(!(isAddingElement || isMovingElement)) return;
 
+                            if(isMovingElement){
+                                setIsMovingElement(false)
+                                return;
+                            }
+
                             e.persist()
 
                             const {pageX, pageY} = e
@@ -510,7 +562,7 @@ export function AddFBDQuestion(){
 
                             const {top, left} = imgRef.getBoundingClientRect()
                             
-                            if(!isAddingElementSecond && !isMovingElement){
+                            if(!isAddingElementSecond){
 
                                 let newPart = ({
                                     x: pageX - left + offset,
@@ -518,7 +570,8 @@ export function AddFBDQuestion(){
                                     offsetX: offset,
                                     width: 1,
                                     height: 1,
-                                    correct: !newParts.length
+                                    correct: !newParts.length,
+                                    Color: '#00FF00',
                                 })
 
 
@@ -549,21 +602,6 @@ export function AddFBDQuestion(){
                                 return
                             }
 
-                            if(isMovingElement){
-                                let parts = [...newParts]
-
-                                const newX = pageX - left + offset
-                                const newY = pageY - top
-                                    
-                                parts[movedElement].x = newX
-                                parts[movedElement].y = newY
-
-                                setNewParts(parts)
-
-                                setIsMovingElement(false)
-                                setMovedElement(null)
-                                return
-                            }
                         }}
 
                         onLoad={(img) => {
@@ -573,10 +611,39 @@ export function AddFBDQuestion(){
                             setNewImageWidth(img.target.naturalWidth)
                             setNewImageHeight(img.target.naturalHeight)
                         }}
+
+                        onMouseMove={(e) => {
+                            if(!(isAddingElement || isMovingElement)) return;
+
+                            e.persist()
+
+                            const {pageX, pageY} = e
+
+                            const imgRef = imageRef.current
+                            const parentNode = imgRef.parentNode.parentNode
+                            const styles = window.getComputedStyle(parentNode)
+                            const offset = Number(styles.getPropertyValue('padding-right').replace('px', ''))
+
+                            setLeftOffset(offset)
+
+                            const {top, left} = imgRef.getBoundingClientRect()
+
+                            if(isMovingElement){
+                                let parts = [...newParts]
+
+                                const newX = pageX - left + offset
+                                const newY = pageY - top
+                                    
+                                parts[movedElement].x = newX
+                                parts[movedElement].y = newY
+
+                                setNewParts(parts)                                
+                            }
+                        }}
                     />
 
                     {newParts.map((p, pi) => {
-                        const {x, y, width, height, backgroundImage} = p
+                        const {x, y, width, height, Color} = p
 
                         return( 
                             <div
@@ -586,16 +653,21 @@ export function AddFBDQuestion(){
 
                                 onMouseEnter={() => setHoverElement(pi)}
                                 onMouseLeave={() => setHoverElement(null)}
+
+                                onClick={() => {
+                                    if(isMovingElement){
+                                        setIsMovingElement(false)
+                                        return;
+                                    }
+                                }}
                             >
-                                {backgroundImage && 
-                                <img 
-                                    alt="background"
-                                    src={backgroundImage.URL}
-                                    style={{width: width, height: height}}
-                                />}
-                                <Space className="hq-full-width" direction="vertical" align="center">
-                                    <p className="default-red default-larger">{pi+1}</p>
-                                </Space>
+                               
+                                <div
+                                    style={{width:'100%', height:'100%', backgroundColor:Color, flexDirection:'column', alignItems:'center', justifyContent:'center', display:'flex'}}
+                                >
+                                     
+                                    <p className="default-red">+</p>
+                                </div>
                             </div>
                         )
                     })}
@@ -641,7 +713,7 @@ export function AddFBDQuestion(){
                                         Code:'',
                                         Latex:'',
                                         LatexText:'',
-                                        Color: 'green',
+                                        Color: '#00FF00',
 
                                         ObjectBody:[],
 
