@@ -154,7 +154,9 @@ export function editClickableQuestionImageRequest(b){
 }
 
 //Energy balance question
-
+export function editEnergyBalanceControlVolumeStatusRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeAsCorrect', b)
+}
 
 
 

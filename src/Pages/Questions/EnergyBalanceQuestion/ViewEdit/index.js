@@ -2,12 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Col, Divider, Dropdown, List, Row, Space, Tabs, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { FixURL } from "../../../../services/Auxillary";
-import { ControlOutlined } from '@ant-design/icons';
+import { FixURL, handleResponse } from "../../../../services/Auxillary";
+import { ControlOutlined, InsertRowAboveOutlined } from '@ant-design/icons';
+import './index.css'
+import { UpdateControlVolumeImage } from "./UpdateControlVolumeImage";
+import { UpdateEBTermCodeLatex } from "./UpdateEBTermCodeLatex";
+import { UpdateEBTermLatexText } from "./UpdateEBTermLatexText";
+import { UpdateEBTermDirections } from "./UpdateEBTermDirections";
+import { UpdateEBTermQuestionLatex } from "./UpdateEBTermQuestionLatex";
+import { AddEbTermQuestion } from "./AddEbTermQuestion";
 
 export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
-    const {energyBalanceQuestionPlay: question} = useQuestions()
+    const {energyBalanceQuestionPlay: question,
+        editEnergyBalanceControlVolumeStatus,
+    } = useQuestions()
 
     const imageRef = React.createRef()
     const imageRef2 = React.createRef()
@@ -26,6 +35,20 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     const [leftOffset, setLeftOffset] = useState(0)
 
     const [newParts, setNewParts] = useState([])
+
+    const [showEditCVImage, setShowEditCVImage] = useState(false)
+    const [selectedCV, setSelectedCV] = useState(null)
+
+    const [showEditTermCodeLatex, setShowEditTermCodeLatex] = useState(false)
+    const [showEditTermLatexText, setShowEditTermLatexText] = useState(false)
+    const [showEditTermDirections, setShowEditTermDirections] = useState(false)
+
+    const [selectedEBTerm, setSelectedEBTerm] = useState(null)
+
+    const [showEditTermQuestionLatex, setShowEditTermQuestionLatex] = useState(false)
+    const [selectedEBTermQuestion, setSelectedEBTermQuestion] = useState(null)
+
+    const [showAddTermQuestion, setShowAddTermQuestion] = useState(false)
 
     useEffect(() => {
         let _offset = 0
@@ -172,7 +195,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
         return(
             <div>
                 <List 
-                    dataSource={ControlVolumes}
+                    dataSource={ControlVolumes.sort((a, b) => a.Id - b.Id)}
 
                     renderItem={(cv, cvi) => {
                         const {Id, Correct} = cv
@@ -184,6 +207,12 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                             >
                                 <Space align="start">
                                     <p className={Correct ? "default-green" : "default-gray"}>{cvi+1}</p>
+
+                                    &nbsp;
+                                    &nbsp;
+                                    <p className={Correct ? "default-green" : "default-white"}>Correct</p>
+                                    &nbsp;
+                                    &nbsp;
 
                                     <div 
                                         style = {{
@@ -207,12 +236,22 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                             {
                                                 key: 'set_as_correct',
                                                 label: 'Set as correct',
-                                                onClick: () => {}
+                                                onClick: () => {
+                                                    let data = new FormData()
+                                                    data.append('Id', cv.Id)
+
+                                                    editEnergyBalanceControlVolumeStatus(data).then((r) => handleResponse(r, api, 'Updated', 1, () => {
+                                                        reloadQuestion()
+                                                    }))
+                                                }
                                             },
                                             {
                                                 key: 'set_update_image',
                                                 label: 'Set/Update image',
-                                                onClick: () => {}
+                                                onClick: () => {
+                                                    setShowEditCVImage(true)
+                                                    setSelectedCV({...cv, smallImageWidth, smallImageHeight, dimensions:cvDimesions, Base_ImageURL})
+                                                }
                                             },
                                             {
                                                 key: 'delete_cv',
@@ -244,16 +283,16 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
         const width1 = 0.125 * totalWidthHeight
         const width2 = totalWidthHeight - 2 * shapesGap - 2 * width1
 
-        let selectedColor = '#28a745'
+        let selectedColor = 'rgba(2, 117, 216, 0.5)'
 
         const notSelectedStyle = {backgroundColor:'#f1f4f8', border:'1px solid #e6e6e6',}
-        const selectedStyle = {backgroundColor:selectedColor, border:'1px solid green',} 
+        const selectedStyle = {backgroundColor:selectedColor, border:'1px solid #0275d8',} 
 
         return(
             <Space 
             key={Id}
             direction="vertical">
-                <div style={{flexDirection:'row', display:'flex', width: totalWidthHeight, height:totalWidthHeight, border:'1px solid #f1f4f8'}}>
+                <div style={{flexDirection:'row', display:'flex', width: totalWidthHeight, height:totalWidthHeight}}>
                 
                     <div 
                         style={{width:width1, height: width2, marginRight:shapesGap, marginTop: (shapesGap + width1), ...(isEastSelected ? selectedStyle : notSelectedStyle)}}
@@ -308,12 +347,68 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                 key={Id}
                                 className="hq-element-container"
                             >
-                                <Space>
-                                    <p className="default-gray">{ti+1}</p>
-                                    {renderItemBox(t)}
-                                    <p className="default-title">{Code}</p>
-                                    <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                    <Space
+                                        className="hq-full-width hq-opposite-arrangement"
+                                    >
+                                        <Space>
+                                            <p className="default-title">{ti+1}</p>
+                                            {renderItemBox(t)}
+                                            <p className="default-title">{Code}</p>
+                                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                        </Space>
+
+                                        <Dropdown
+                                        menu={{
+                                            items:[
+                                            {
+                                                key: 'edit_code',
+                                                label: 'Update code/LaTeX',
+                                                onClick: () => {
+                                                    setShowEditTermCodeLatex(true)
+                                                    setSelectedEBTerm(t)
+                                                }
+                                            },
+                                            {
+                                                key: 'edit_text',
+                                                label: 'Update LaTeX text',
+                                                onClick: () => {
+                                                    setShowEditTermLatexText(true)
+                                                    setSelectedEBTerm(t)
+                                                }
+                                            },
+                                            {
+                                                key: 'edit_directions',
+                                                label: 'Update directions',
+                                                onClick: () => {
+                                                    setShowEditTermDirections(true)
+                                                    setSelectedEBTerm(t)
+                                                }
+                                            },
+                                            {
+                                                key: 'set_dummy',
+                                                label: 'Set as dummy',
+                                                onClick: () => {}
+                                            },
+                                            {
+                                                key: 'add_question',
+                                                label: 'Add question',
+                                                onClick: () => {
+                                                    setShowAddTermQuestion(true)
+                                                    setSelectedEBTerm(t)
+                                                }
+                                            },
+                                            {
+                                                key: 'delete_eb_term',
+                                                label: 'Delete',
+                                                onClick: () => {}
+                                            }],
+                                            title:'Actions'
+                                        }}
+                                    >
+                                        <ControlOutlined className="default-gray hoverable"/>
+                                    </Dropdown>
                                 </Space>
+                                    
 
                                 <Divider/>
 
@@ -324,28 +419,82 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
                                 <Divider/>
                                 {Questions.map((q, qi) => {
-                                    const {Id, Latex: qLatex, Keyboard, Answers} = q
+                                    const {Id, LatexCode, Inflow, Keyboard, Answers} = q
 
                                     return(
-                                        <div
+                                        <Space
                                             key={Id}
+                                            direction="vertical hq-full-width "
                                         >   
+                                            <Space
+                                                className="hq-full-width hq-opposite-arrangement"
+                                            >
+                                                <Space>
+                                                    <p className="default-gray">{qi+1}</p>
+                                                    {Inflow ? 
+                                                        <div
+                                                        className={"eb-question-view-edit-term-direction-green"}>
+                                                            <span className="eb-question-view-edit-term-word">Inflow</span>
+                                                        </div>
+                                                        :
+                                                        <div 
+                                                        className={"eb-question-view-edit-term-direction-red"}>
+                                                            <span className="eb-question-view-edit-term-word">Outflow</span>
+                                                        </div>}
+                                                    
+                                                    <LatexRenderer latex={"$$" + LatexCode  + "$$"} />
+                                                </Space>
+                                                <Dropdown
+                                                    menu={{
+                                                        items:[{
+                                                            key: 'edit_latex',
+                                                            label: 'Update LaTeX',
+                                                            onClick: () => {
+                                                                setShowEditTermQuestionLatex(true)
+                                                                setSelectedEBTermQuestion(q)
+                                                            }
+                                                        },
+                                                        {
+                                                            key: 'flip_flow',
+                                                            label: 'Flip flow direction',
+                                                            onClick: () => {
+                                                              
+                                                            }
+                                                        },
+                                                        {
+                                                            key: 'delete',
+                                                            label: 'Delete',
+                                                            onClick: () => {
+                                                               
+                                                            }
+                                                        }],
+                                                        title:'Actions'
+                                                    }}
+                                                >
+                                                    <ControlOutlined className="default-gray hoverable"/>
+                                                </Dropdown>
+                                            </Space>
                                             <Space>
-                                                <p className="default-gray">{qi+1}</p>
-                                                <LatexRenderer latex={"$$" + qLatex  + "$$"} />
+                                                <InsertRowAboveOutlined />
+                                                <p> {Keyboard.Name} </p>
                                             </Space>
                                             {Answers.map((a, ai) => {
+
+                                                const answerReduced = a.AnswerElements
+                                                .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                                .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
 
                                                 return(
                                                     <div
                                                         key={ai}
+                                                        style={{width:'fit-content'}}
                                                     >
-                                                        <LatexRenderer latex={"$$1$$"}/>
+                                                        <LatexRenderer latex={"$$" + answerReduced + "$$"}/>
                                                     </div>
                                                 )
                                             })}
                                             <br/>
-                                        </div>
+                                        </Space>
                                     )
                                 })}
                             </div>
@@ -419,6 +568,42 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                     {renderContent()}
                 </Col>
             </Row>
+
+            <UpdateControlVolumeImage
+                open={showEditCVImage}
+                onClose={() => setShowEditCVImage(false)}
+                controlVolume={selectedCV}
+            />
+
+            <UpdateEBTermCodeLatex 
+                open={showEditTermCodeLatex}
+                onClose={() => setShowEditTermCodeLatex(false)}
+                ebTerm={selectedEBTerm}
+            />
+
+            <UpdateEBTermLatexText 
+                open={showEditTermLatexText}
+                onClose={() => setShowEditTermLatexText(false)}
+                ebTerm={selectedEBTerm}
+            />
+
+            <UpdateEBTermDirections 
+                open={showEditTermDirections}
+                onClose={() => setShowEditTermDirections(false)}
+                ebTerm={selectedEBTerm}
+            />
+
+            <UpdateEBTermQuestionLatex 
+                open={showEditTermQuestionLatex}
+                onClose={() => setShowEditTermQuestionLatex(false)}
+                ebTermQuestion={selectedEBTermQuestion}
+            />
+
+            <AddEbTermQuestion 
+                open={showAddTermQuestion}
+                onClose={() => setShowAddTermQuestion(false)}
+                ebTerm={selectedEBTerm}
+            />
         </div>
     )
 }
