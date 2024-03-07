@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Col, Divider, Dropdown, List, Row, Space, Tabs, message } from "antd";
+import { Button, Col, Divider, Dropdown, List, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL, handleResponse } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined } from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined } from '@ant-design/icons';
 import './index.css'
 import { UpdateControlVolumeImage } from "./UpdateControlVolumeImage";
 import { UpdateEBTermCodeLatex } from "./UpdateEBTermCodeLatex";
@@ -11,6 +11,8 @@ import { UpdateEBTermLatexText } from "./UpdateEBTermLatexText";
 import { UpdateEBTermDirections } from "./UpdateEBTermDirections";
 import { UpdateEBTermQuestionLatex } from "./UpdateEBTermQuestionLatex";
 import { AddEbTermQuestion } from "./AddEbTermQuestion";
+import { AddEbTerm } from "./AddEbTerm";
+import { SetKeyboardBCIC } from "./SetKeyboardBCIC";
 
 export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
@@ -49,6 +51,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     const [selectedEBTermQuestion, setSelectedEBTermQuestion] = useState(null)
 
     const [showAddTermQuestion, setShowAddTermQuestion] = useState(false)
+    const [showAddTerm, setShowAddTerm] = useState(false)
+
+    const [showSetKeyboardBCIC, setShowKeyboardBCIC] = useState(false)
+    const [showSetKeyboardBCIC_IsBC, setShowKeyboardBCIC_IsBC] = useState(false)
 
     useEffect(() => {
         let _offset = 0
@@ -336,6 +342,24 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
         return(
             <div>
+                <Tooltip
+                    color="white"
+                    title={<p>Add new energy balance term</p>}
+                >
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowAddTerm(true)
+                        }}
+
+                        icon={<PlusOutlined style={{color:'green'}}/>}
+                    >
+                        Add
+                    </Button>
+                </Tooltip>
+
+                <br/>
+                <br/>
                 <List 
                     dataSource={EnergyBalanceTerms}
 
@@ -505,6 +529,38 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
         )
     }
 
+    const renderBoundaryConditions = () => {
+        const {BoundaryConditionKeyboard} = question
+        return(
+            <div>
+                <Space size={'large'}>
+                    {BoundaryConditionKeyboard && 
+                    <Space>
+                        <InsertRowAboveOutlined className="default-title"/>
+                        <p> {BoundaryConditionKeyboard.Name} </p>
+                    </Space>}
+                    {BoundaryConditionKeyboard && 
+                        <div>
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                        </div>
+                    }
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowKeyboardBCIC(true)
+                            setShowKeyboardBCIC_IsBC(true)
+                        }}
+                    >
+                        {!BoundaryConditionKeyboard && <InsertRowAboveOutlined className="default-title"/>}
+                        Update keyboard
+                    </Button>
+                </Space>
+            </div>
+        )
+    }
+
     const renderContent = () => {
         const {Question} = question
         const tabs = [
@@ -519,7 +575,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
             },{
                 key:3,
                 label:"Boundary conditions",
-                children: <div></div>
+                children: <div>{renderBoundaryConditions()}</div>
             },{
                 key:4,
                 label:"Initial conditions",
@@ -603,6 +659,17 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 open={showAddTermQuestion}
                 onClose={() => setShowAddTermQuestion(false)}
                 ebTerm={selectedEBTerm}
+            />
+
+            <AddEbTerm 
+                open={showAddTerm}
+                onClose={() => setShowAddTerm(false)}
+            />
+
+            <SetKeyboardBCIC 
+                open={showSetKeyboardBCIC}
+                onClose={() => setShowKeyboardBCIC(false)}
+                IsBC={showSetKeyboardBCIC_IsBC}
             />
         </div>
     )

@@ -44,6 +44,14 @@ export function AddEbTermQuestion({open, onClose, ebTerm}) {
     }
 
     const renderAddAnswers = () => {
+        if(!selectedKeyboard){
+            return(
+                <div>
+                    <p className="default-red">Please select a keyboard</p>
+                </div>
+            )
+        }
+
         return(
             <div className="hq-full-width">
             <p

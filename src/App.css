@@ -79,6 +79,10 @@
     font-size: larger;
 }
 
+.default-x-larger{
+    font-size: x-large;
+}
+
 .default-small{
     font-size: small;
 }
