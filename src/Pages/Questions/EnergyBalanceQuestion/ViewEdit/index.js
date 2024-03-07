@@ -584,7 +584,9 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
         return(
             <div>
-                <Space align="start" size={'large'}>
+                <Space
+                direction="vertical"
+                align="start" size={'large'}>
                     <p className="default-gray">Question</p>
 
                     <LatexRenderer 
