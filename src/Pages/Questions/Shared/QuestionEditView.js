@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../contexts/QuestionsContext";
-import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
+import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
 import { PagesWrapper } from "../../../PagesWrapper";
 import { Col, Divider, Dropdown, Popconfirm, Row, Skeleton, Space, Spin, Statistic, Tooltip, message } from "antd";
 import { useParams } from "react-router-dom";
@@ -20,6 +20,7 @@ import { ClickableQuestionEditView } from "../ClickableQuestion/ViewEdit";
 import { ErrorComponent } from "../../../Components/ErrorComponent";
 import { QuestionMeanTimeStatistics } from "../../../Components/QuestionMeanTimeStatistics";
 import { EnergyBalanceQuestionEditView } from "../EnergyBalanceQuestion/ViewEdit";
+import { FBDQuestionEditView } from "../FBDQuestion/ViewEdit";
 
 export function QuestionEditView(){
     const {
@@ -27,6 +28,7 @@ export function QuestionEditView(){
         keyboardQuestionPlay, errorGetKeyboardQuestionPlay, isLoadingKeyboardQuestionPlay, getKeyboardQuestionPlay,
         multipleChoiceQuestionPlay, errorGetMultipleChoiceQuestionPlay, isLoadingMultipleChoiceQuestionPlay, getMultipleChoiceQuestionPlay,
         energyBalanceQuestionPlay, errorGetEnergyBalanceQuestionPlay, isLoadingEnergyBalanceQuestionPlay, getEnergyBalanceQuestionPlay,
+        FBDQuestionPlay, errorGetFBDQuestionPlay, isLoadingFBDQuestionPlay, getFBDQuestionPlay,
 
         questionStatistics, errorGetQuestionStatistics, isLoadingGetQuestionStatistics, getQuestionStatistics,
 
@@ -62,6 +64,10 @@ export function QuestionEditView(){
                 return getEnergyBalanceQuestionPlay
             }
 
+            case FBD_QUESTION_PARAMETER: {
+                return getFBDQuestionPlay
+            }
+
             default:{
                 return () => <div/>
             }
@@ -84,6 +90,10 @@ export function QuestionEditView(){
 
             case ENERGY_BALANCE_QUESTION_PARAMETER: {
                 return <EnergyBalanceQuestionEditView reloadQuestion={() => getQueryFunction()(id)}/>
+            }
+
+            case FBD_QUESTION_PARAMETER: {
+                return <FBDQuestionEditView reloadQuestion={() => getQueryFunction()(id)}/>
             }
 
             default:{
@@ -125,6 +135,10 @@ export function QuestionEditView(){
                 return isLoadingEnergyBalanceQuestionPlay
             }
 
+            case FBD_QUESTION_PARAMETER: {
+                return isLoadingFBDQuestionPlay
+            }
+
             default:{
                 return false
             }
@@ -149,6 +163,10 @@ export function QuestionEditView(){
                 return errorGetEnergyBalanceQuestionPlay
             }
 
+            case FBD_QUESTION_PARAMETER: {
+                return errorGetFBDQuestionPlay
+            }
+
             default:{
                 return null
             }
@@ -171,6 +189,10 @@ export function QuestionEditView(){
 
             case ENERGY_BALANCE_QUESTION_PARAMETER: {
                 return energyBalanceQuestionPlay
+            }
+
+            case FBD_QUESTION_PARAMETER: {
+                return FBDQuestionPlay
             }
 
             default:{
