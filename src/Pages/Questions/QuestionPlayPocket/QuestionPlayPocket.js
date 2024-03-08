@@ -1,12 +1,13 @@
 import { Drawer } from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
-import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
+import { CLICKABLE_QUESTION_PARAMETER, DIAGRAM_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../List/constants";
 import { ClickableQuestionPlay } from "../ClickableQuestion/Play";
 import { MultipleChoiceQuestion } from "../MultipleChoiceQuestion/Play";
 import { KeyboardQuestionPlay } from "../KeyboardQuestion/Play";
 import { EnergyBalanceQuestionPlay } from "../EnergyBalanceQuestion/Play";
 import { FBDQuestionPlay } from "../FBDQuestion/Play";
+import { DiagramQuestionPlay } from "../DiagramQuestion/Play";
 
 export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
 
@@ -19,6 +20,7 @@ export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
             [MULTIPLE_CHOICE_QUESTION_PARAMETER]: () => <MultipleChoiceQuestion Id={Id} showSolution={true} deadLoad={deadLoad}/>,
             [ENERGY_BALANCE_QUESTION_PARAMETER]: () => <EnergyBalanceQuestionPlay Id={Id} showSolution={true} deadLoad={deadLoad}/>,
             [FBD_QUESTION_PARAMETER]: () => <FBDQuestionPlay Id={Id} showSolution={true} deadLoad={deadLoad}/>,
+            [DIAGRAM_QUESTION_PARAMETER]: () => <DiagramQuestionPlay Id={Id} showSolution={true} deadLoad={deadLoad}/>,
         }
         
         return selectionList[Type]()
@@ -31,6 +33,7 @@ export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
             [MULTIPLE_CHOICE_QUESTION_PARAMETER]: '70%',
             [ENERGY_BALANCE_QUESTION_PARAMETER]: '100%',
             [FBD_QUESTION_PARAMETER]: '100%',
+            [DIAGRAM_QUESTION_PARAMETER]: '100%',
         }
         
         return selectionList[Type]

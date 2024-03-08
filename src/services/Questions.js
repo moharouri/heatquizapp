@@ -34,6 +34,10 @@ export function getFBDQuestionPlayRequest(Id){
     return GET_REQUEST_API('FreebodyDiagramQuestion/GetQuestion_PORTAL', Id)
 }
 
+export function getDiagramQuestionPlayRequest(Id){
+    return GET_REQUEST_API('DiagramQuestion/GetQuestion_PORTAL', Id)
+}
+
 export function addQuestionStatisticRequest(b){
     return ADD_REQUEST_BODY_API('SimpleClickable/PostStatistic', b)
 }

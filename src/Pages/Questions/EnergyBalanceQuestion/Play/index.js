@@ -6,6 +6,7 @@ import { FixURL } from "../../../../services/Auxillary";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "./Constants";
 import Xarrow from "react-xarrows";
+import { CloseCircleFilled } from '@ant-design/icons';
 
 import './Play.css'
 import { Keyboard } from "../../../../Components/Keyboard";
@@ -33,6 +34,9 @@ export function EnergyBalanceQuestionPlay({Id}){
     const [selectedTermDefine, setSelectedTermDefine] = useState(null)
 
     const [BCAnswers, setBCAnswers] = useState([])
+    const [newList, setNewList] = useState([])
+
+    const [selectedIndex, setSelectedIndex] = useState(0)
 
     const [selectedBCDefine, setSelectedBCDefine] = useState(null)
 
@@ -44,7 +48,7 @@ export function EnergyBalanceQuestionPlay({Id}){
        if(energyBalanceQuestionPlay){
         const {BoundaryConditions} = energyBalanceQuestionPlay
 
-        setBCAnswers(BoundaryConditions.map((bc) => ({...bc, AddedAnswer:{List:[], echoNumber:0}})))
+        //setBCAnswers(BoundaryConditions.map((bc) => ({...bc, AddedAnswer:{List:[], echoNumber:0}})))
        }
     }, [energyBalanceQuestionPlay])
 
@@ -1064,14 +1068,104 @@ export function EnergyBalanceQuestionPlay({Id}){
                 </div>)
     }
 
-    const renderBoundaryConditions = () => {
+    const renderAddAnswers = () => {
+        const {BoundaryConditions} = energyBalanceQuestionPlay
 
+        const KeyboardId = BoundaryConditions[0].KeyboardId
+
+        return(
+            <div className="hq-full-width">
+            <p
+                        className="default-green hq-clickable"
+                        onClick={() => {
+                            let _terms = [...newList]
+
+                            _terms.push({
+                                List:[],
+                                echoNumber:0
+                            })
+
+                            setSelectedIndex(_terms.length - 1)
+
+                            setNewList(_terms)
+                        }}
+                    >Add new line</p>
+
+                    {newList.map((a, ai) => {
+
+                        const {List} = a
+
+                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+                        const checkTerm = validateKeyboardAnswer(a)
+
+                        const termSelected = (ai === selectedIndex)
+
+                        return(
+                            <Space
+                                key={ai}
+                                className="hq-full-width"
+                                direction="vertical"
+                            >
+                                <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove term</p>}
+                                        color="white"
+                                    >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                let _terms = [...newList]
+
+                                                _terms = _terms.filter((t, ti) => ai !== ti)
+                                                setNewList(_terms)
+
+                                                setSelectedIndex(0)
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p 
+                                    onClick={() => setSelectedIndex(ai)}
+                                    className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}>{ai+1}</p>
+                                    &nbsp;
+                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                </Space>
+
+                                <small className="default-red">{checkTerm}</small>
+                            </Space>
+                        )
+                    })}
+
+                    <br/>
+                    <br/>
+                    {newList.length ?
+                    <Keyboard
+                        Id={KeyboardId}
+                        List={newList[selectedIndex]}
+                        onEnterKey={(l) => {
+                            let _terms = [...newList]
+
+                            _terms[selectedIndex] = l
+                            setNewList(_terms)
+                        }}
+
+                        isEnergyBalance={true}
+                    /> : <p className="default-red">Please add new line</p>}
+            </div>
+        )
+    }
+
+    const renderBoundaryConditions = () => {
+        
         return(
             <Space size={'large'} align="start">
                 {renderImageWithControlVolume()}
                 <Space direction="vertical" align="start">
                     <Row className="hq-full-width">
-                        {BCAnswers.map((t) => {
+                        {/*BCAnswers.map((t) => {
                             const {Id, Latex, AddedAnswer} = t
 
                             const isSelectedDefine = selectedBCDefine && selectedBCDefine.Id === Id
@@ -1107,10 +1201,12 @@ export function EnergyBalanceQuestionPlay({Id}){
                                     <LatexRenderer latex={"$$" + Latex + "$$"} />
                                 </Col>
                             )
-                        })}
+                        })*/}
                     </Row>
 
-                    {selectedBCDefine && renderDefineSpecificBC()}
+                    {/*selectedBCDefine && renderDefineSpecificBC()*/}
+                        
+                    {renderAddAnswers()}
                 </Space>
             </Space>
         )

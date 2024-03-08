@@ -134,6 +134,11 @@ const NavigationDrawer = () => {
             label:'Freebody diagram question',
             key:'/add_fbd_q',
             icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'Diagram question',
+            key:'/add_d_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
         ],
         type:'group'

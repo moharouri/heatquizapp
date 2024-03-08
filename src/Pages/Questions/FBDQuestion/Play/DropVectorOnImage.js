@@ -7,9 +7,6 @@ import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
 export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
 
-    console.log("DropVectorOnImage")
-    console.log(addedVT)
-
     const canvasRef = React.createRef()
 
     const [ctx, setCtx] = useState()
@@ -29,6 +26,8 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     const newImageWidth = window.innerWidth * 0.25
     const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
 
+
+    const [orientedVTs, setOrientedVTs] = useState([])
 
     useEffect(() => {
         if(canvasRef && canvasRef.current){
@@ -50,6 +49,10 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     useEffect(() => {
         drawPlot()
     }, [mouseX, mouseY, selectedVT])
+
+    useEffect(() => {
+        
+    }, [addedVT])
 
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
         return({            
