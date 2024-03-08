@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {Button, ColorPicker, Drawer, Form, Space, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
-import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
+import { FixURL } from "../../../../services/Auxillary";
+import { calculateCPdimensions } from "./Functions";
 
-export function UpdateVTColor({open, onClose, vtTerm, question}) {
+export function UpdateOBColor({open, onClose, OB, question}) {
 
     if(!open) return <div/>;
     const [newColor, setNewColor] = useState('')
@@ -13,13 +13,18 @@ export function UpdateVTColor({open, onClose, vtTerm, question}) {
 
     useEffect(() => {
         if(open){
-            const {ArrowColor} = vtTerm
+            const {Color} = OB
 
-            setNewColor(ArrowColor)
+            setNewColor(Color)
         }
     }, [open])
 
-    const {Linear, Code, Latex, Angle} = vtTerm
+    const {Base_ImageURL, Base_ImageURL_Width, Base_ImageURL_Height} = question
+
+    const smallImageWidth = window.innerWidth * 0.20
+    const smallImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*smallImageWidth
+
+    const dimesions = calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height, smallImageWidth, smallImageHeight, OB )
 
     return(
         <Drawer
@@ -34,25 +39,25 @@ export function UpdateVTColor({open, onClose, vtTerm, question}) {
         footer={<div/>}
     >   
         {contextHolder}
-        <Space size={"large"} align="start">
-            <div>
-                <p className="default-title">{Code}</p>
-                <LatexRenderer latex={"$$" + Latex + "$$"} />
+        <div 
+            style = {{
+                height:smallImageHeight,
+                width: smallImageWidth,
+                backgroundImage: `url(${FixURL(Base_ImageURL)})`,
+                backgroundPosition:'center',
+                backgroundRepeat:'no-repeat',
+                backgroundSize:'contain',
+                border:'1px solid gainsboro'
+            }}
+        >
+            <div style={{...dimesions, position:'relative', border:'1px solid #28a745' }}>
+                <div style={{width:'100%', height:'100%', backgroundColor:newColor,}}></div>
+                </div>    
             </div>
-            &nbsp;
-            &nbsp;
-            {Linear ? 
-                <VectorDirectionComponent 
-                    angleStep={5}
-                    currentAngle={Angle}
-                    widthHeight={0.03*window.innerWidth}
-                    onUpdateAngle={(a) => {}}
-                /> : <div/>}
-        </Space>
         <br/>
         <Form>
             <Form.Item>
-                <small className="default-gray">New arrow color</small>
+                <small className="default-gray">New color</small>
                 <br/>
                 <Space>
                     <ColorPicker

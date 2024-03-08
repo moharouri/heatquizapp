@@ -5,6 +5,7 @@ import { FixURL } from "../../../../services/Auxillary";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import './index.css'
+import { calculateCPdimensions } from "./Functions";
 
 export function UpdateVTAssociation({open, onClose, vtTerm, question}) {
 
@@ -19,15 +20,6 @@ export function UpdateVTAssociation({open, onClose, vtTerm, question}) {
             setSelectedOB(OB)
         }
     }, [open])
-
-    const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
-        return({            
-            width: (element.Width)  * (specificedWidth/imageWidth),
-            height: (element.Height)* (specificedHeight/imageHeight),
-            left: (element.X) * (specificedWidth/imageWidth)  - 10,
-            top: (element.Y) * (specificedHeight/imageHeight),
-        })
-    }
 
     const {Base_ImageURL, Base_ImageURL_Width, Base_ImageURL_Height, ObjectBodies} = question
     const {Linear, Code, Latex, Angle} = vtTerm

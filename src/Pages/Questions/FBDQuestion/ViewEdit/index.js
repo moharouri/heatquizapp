@@ -8,6 +8,10 @@ import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { UpdateVTCodeLatex } from "./UpdateVTCodeLatex";
 import { UpdateVTLatexText } from "./UpdateVTLatexText";
 import { UpdateVTAssociation } from "./UpdateVTAssociation";
+import { UpdateVTAngle } from "./UpdateVTAngle";
+import { UpdateVTColor } from "./UpdateVTColor";
+import { UpdateOBColor } from "./UpdateOBColor";
+import { calculateCPdimensions } from "./Functions";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
@@ -37,6 +41,10 @@ export function FBDQuestionEditView({reloadQuestion}){
 
     const [selectedVTTerm, setSelectedVTTerm] = useState(null)
 
+
+    const [showEditOBColor, setShowEditOBColor] = useState(false)
+    const [selectedOB, setSelectedOB] = useState(null)
+
     useEffect(() => {
         let _offset = 0
 
@@ -49,15 +57,6 @@ export function FBDQuestionEditView({reloadQuestion}){
 
         }
     }, [imageRef])
-
-    const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
-        return({            
-            width: (element.Width)  * (specificedWidth/imageWidth),
-            height: (element.Height)* (specificedHeight/imageHeight),
-            left: (element.X) * (specificedWidth/imageWidth)  - 10,
-            top: (element.Y) * (specificedHeight/imageHeight),
-        })
-    }
 
     const renderQuestionImage = () => {
         const {Code, Base_ImageURL, Base_ImageURL_Width, Base_ImageURL_Height, ObjectBodies} = question
@@ -228,9 +227,10 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             items:[
                                             {
                                                 key: 'edit_color',
-                                                label: 'Edit color',
+                                                label: 'Update color',
                                                 onClick: () => {
-                                                   
+                                                    setShowEditOBColor(true)
+                                                    setSelectedOB(o)
                                                 }
                                             },
                                             {
@@ -355,7 +355,10 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             },{
                                                 key: 'edit_color',
                                                 label: 'Update color',
-                                                onClick: () => {}
+                                                onClick: () => {
+                                                    setShowEditTermColor(true)
+                                                    setSelectedVTTerm(vt)
+                                                }
                                             },{
                                                 key: 'edit_angle',
                                                 label: Linear ? 'Update angle' : 'Flip direction',
@@ -472,6 +475,20 @@ export function FBDQuestionEditView({reloadQuestion}){
                 open={showEditTermAssociation}
                 onClose={() => setShowEditTermAssociation(false)}
                 vtTerm={selectedVTTerm}
+                question={question}
+            />
+
+            <UpdateVTColor
+                open={showEditTermColor}
+                onClose={() => setShowEditTermColor(false)}
+                vtTerm={selectedVTTerm}
+                question={question}
+            />
+
+            <UpdateOBColor 
+                open={showEditOBColor}
+                onClose={() => setShowEditOBColor(false)}
+                OB={selectedOB}
                 question={question}
             />
         </div>
