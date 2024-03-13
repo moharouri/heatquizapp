@@ -13,6 +13,7 @@ import { UpdateEBTermQuestionLatex } from "./UpdateEBTermQuestionLatex";
 import { AddEbTermQuestion } from "./AddEbTermQuestion";
 import { AddEbTerm } from "./AddEbTerm";
 import { SetKeyboardBCIC } from "./SetKeyboardBCIC";
+import { AddBCICTerms } from "./AddBCICTerms";
 
 export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
@@ -55,6 +56,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
     const [showSetKeyboardBCIC, setShowKeyboardBCIC] = useState(false)
     const [showSetKeyboardBCIC_IsBC, setShowKeyboardBCIC_IsBC] = useState(false)
+
+    const [showAddConditions, setShowAddConditions] = useState(false)
+    const [showAddConditions_IsBC, setShowAddConditions_IsBC] = useState(false)
+    const [showAddConditions_SelectedKeyboard, setShowAddConditions_SelectedKeyboard] = useState(null)
 
     useEffect(() => {
         let _offset = 0
@@ -530,16 +535,16 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     }
 
     const renderBoundaryConditions = () => {
-        const {BoundaryConditionKeyboard} = question
+        const {BoundryConditionKeyboard, BoundaryConditionLines} = question
         return(
             <div>
                 <Space size={'large'}>
-                    {BoundaryConditionKeyboard && 
+                    {BoundryConditionKeyboard && 
                     <Space>
                         <InsertRowAboveOutlined className="default-title"/>
-                        <p> {BoundaryConditionKeyboard.Name} </p>
+                        <p> {BoundryConditionKeyboard.Name} </p>
                     </Space>}
-                    {BoundaryConditionKeyboard && 
+                    {BoundryConditionKeyboard && 
                         <div>
                             &nbsp;
                             &nbsp;
@@ -553,10 +558,113 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                             setShowKeyboardBCIC_IsBC(true)
                         }}
                     >
-                        {!BoundaryConditionKeyboard && <InsertRowAboveOutlined className="default-title"/>}
+                        {!BoundryConditionKeyboard && <InsertRowAboveOutlined className="default-title"/>}
                         Update keyboard
                     </Button>
+
+                    {BoundryConditionKeyboard &&
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowAddConditions(true)
+                            setShowAddConditions_IsBC(true)
+                            setShowAddConditions_SelectedKeyboard(BoundryConditionKeyboard)
+                        }}
+                    >
+                        <PlusOutlined className="default-green"/>
+                        Add answers
+                    </Button>
+                    }
                 </Space>
+                <br/>
+                {BoundaryConditionLines.map((a, ai) => {
+                    const {Id} = a
+
+                    const answerReduced = a.AnswerElements
+                    .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                    .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                    
+                    return(
+                        <div
+                            key={Id}
+                        >
+                            <Space>
+                                <p className="default-gray">{ai+1}</p>
+
+                                <LatexRenderer latex={"$$" + answerReduced + "$$"} />
+                            </Space>
+                        </div>
+                    )
+                })}
+            </div>
+        )
+    }
+
+    const renderInitialConditions = () => {
+        const {InitialConditionKeyboard, InitialConditionLines} = question
+
+        return(
+            <div>
+                <Space size={'large'}>
+                    {InitialConditionKeyboard && 
+                    <Space>
+                        <InsertRowAboveOutlined className="default-title"/>
+                        <p> {InitialConditionKeyboard.Name} </p>
+                    </Space>}
+                    {InitialConditionKeyboard && 
+                        <div>
+                            &nbsp;
+                            &nbsp;
+                            &nbsp;
+                        </div>
+                    }
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowKeyboardBCIC(true)
+                            setShowKeyboardBCIC_IsBC(false)
+                        }}
+                    >
+                        {!InitialConditionKeyboard && <InsertRowAboveOutlined className="default-title"/>}
+                        Update keyboard
+                    </Button>
+
+                    {InitialConditionKeyboard &&
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowAddConditions(true)
+                            setShowAddConditions_IsBC(false)
+                            setShowAddConditions_SelectedKeyboard(InitialConditionKeyboard)
+                        }}
+                    >
+                        <PlusOutlined className="default-green"/>
+                        Add answers
+                    </Button>
+                    }
+                </Space>
+                <br/>
+                {InitialConditionLines.map((a, ai) => {
+                    const {Id} = a
+
+                    const answerReduced = a.AnswerElements
+                    .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                    .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                    
+                    return(
+                        <div
+                            key={Id}
+                        >
+                            <Space>
+                                <p className="default-gray">{ai+1}</p>
+
+                                <LatexRenderer latex={"$$" + answerReduced + "$$"} />
+                            </Space>
+                        </div>
+                    )
+                })}
             </div>
         )
     }
@@ -579,7 +687,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
             },{
                 key:4,
                 label:"Initial conditions",
-                children: <div></div>
+                children: <div>{renderInitialConditions()}</div>
             }]
 
         return(
@@ -672,6 +780,18 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 open={showSetKeyboardBCIC}
                 onClose={() => setShowKeyboardBCIC(false)}
                 IsBC={showSetKeyboardBCIC_IsBC}
+                question={question}
+                reloadQuestion={() => reloadQuestion()}
+            />
+
+            <AddBCICTerms 
+                open={showAddConditions}
+                onClose={() => setShowAddConditions(false)}
+                IsBC={showAddConditions_IsBC}
+                usedKeyboard={showAddConditions_SelectedKeyboard}
+
+                question={question}
+                reloadQuestion={() => reloadQuestion()}
             />
         </div>
     )

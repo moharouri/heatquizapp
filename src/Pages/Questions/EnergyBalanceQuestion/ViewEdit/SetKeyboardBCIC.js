@@ -2,15 +2,21 @@ import {Button, Drawer, Space, message} from "antd";
 import React, {useState } from "react";
 import {ArrowLeftOutlined, InsertRowAboveOutlined } from '@ant-design/icons';
 import { SelectKeyboardList } from "../../../Keyboards/Shared/SelectKeyboardList";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function SetKeyboardBCIC({open, onClose, IsBC}){
+export function SetKeyboardBCIC({open, onClose, question, reloadQuestion, IsBC}){
 
     if(!open) return <div/>;
+
+    const {
+        isLoadingEditEnergyBalanceBCKeyboard, editEnergyBalanceBCKeyboard,
+        isLoadingEditEnergyBalanceICKeyboard,editEnergyBalanceICKeyboard,} = useQuestions()
 
     const [selectedKeyboard, setSelectedKeyboard] = useState(null)
 
     const [messageApi, contextHolder] = message.useMessage()
-
+    
 
     return(
         <Drawer
@@ -22,8 +28,33 @@ export function SetKeyboardBCIC({open, onClose, IsBC}){
                     size="small"
                     type="primary"
 
+                    loading = {isLoadingEditEnergyBalanceBCKeyboard || isLoadingEditEnergyBalanceICKeyboard}
+
                     onClick={() => {
-                       
+                        if(!selectedKeyboard) 
+                        {
+                            messageApi.destroy()
+                            messageApi.warning("Please select a keyboard")
+                            return
+                        }
+
+                        const data = new FormData()
+
+                        data.append('QuestionId', question.Id)
+                        data.append('KeyboardId', selectedKeyboard.Id)
+
+                        if(IsBC){
+                            editEnergyBalanceBCKeyboard(data).then(r => handleResponse(r, messageApi, 'Updated', 1, () => {
+                                onClose()
+                                reloadQuestion()
+                            }))
+                        }
+                        else{
+                            editEnergyBalanceICKeyboard(data).then(r => handleResponse(r, messageApi, 'Updated', 1, () => {
+                                onClose()
+                                reloadQuestion()
+                            }))
+                        }
                     }}
 
                 >
