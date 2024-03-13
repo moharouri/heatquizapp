@@ -34,9 +34,12 @@ export function EnergyBalanceQuestionPlay({Id}){
     const [selectedTermDefine, setSelectedTermDefine] = useState(null)
 
     const [BCAnswers, setBCAnswers] = useState([])
-    const [newList, setNewList] = useState([])
-
-    const [selectedIndex, setSelectedIndex] = useState(0)
+    
+    const [newListBC, setNewListBC] = useState([])
+    const [selectedIndexBC, setSelectedIndexBC] = useState(0)
+    
+    const [newListIC, setNewListIC] = useState([])
+    const [selectedIndexIC, setSelectedIndexIC] = useState(0)
 
     const [selectedBCDefine, setSelectedBCDefine] = useState(null)
 
@@ -233,7 +236,7 @@ export function EnergyBalanceQuestionPlay({Id}){
         }
 
         const notSelectedStyle = {backgroundColor:'#f1f4f8', cursor:'pointer', border:'1px solid gray',} // 
-        const selectedStyle = {backgroundColor:selectedColor, cursor:'pointer', border:'1px solid green',} //border:'1px solid green', 
+        const selectedStyle = {backgroundColor:selectedColor, cursor:'pointer', border:'1px solid ' + selectedColor,} //border:'1px solid green', 
 
         return(
             <Space direction="vertical">
@@ -504,7 +507,7 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                     return(
                         <div 
-                        key={Id}
+                        key={ti}
                         style={style}
                         id={Id + "BASE"}>
 
@@ -521,7 +524,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                     return(
                         <div 
                         style={style}
-                        key={Id}
+                        key={ti}
                         id={Id + "TIP"}>
                         </div>
                     )
@@ -534,6 +537,8 @@ export function EnergyBalanceQuestionPlay({Id}){
                     const start = Id + (Inflow ? "TIP" : "BASE")
                     const end = Id + (!Inflow ? "TIP" : "BASE")
                     
+                    
+
                     return(
                     <Xarrow
                         start={start} 
@@ -1012,94 +1017,36 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
-    const addAnswerToBC = (l) => {
-        let originalIndex = BCAnswers.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === selectedBCDefine.Id)[0]
-
-        if(!originalIndex) return
-
-        originalIndex = originalIndex.index
-
-        let _answers = [...BCAnswers]
-        _answers[originalIndex] = ({..._answers[originalIndex], AddedAnswer: l})
-
-        setBCAnswers(_answers)
-
-    }
-
-    const renderDefineSpecificBC = () => {
-        const {Latex, LatexText, KeyboardId, AddedAnswer} = selectedBCDefine
-        
-        const list = AddedAnswer
-
-        const answerValidity = validateKeyboardAnswer(list)
-
-        const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
-
-            
-        return(
-                <div>
-                    <Space size={"large"} align="start">
-                        <Space direction="vertical" align="start">
-                            <p className="default-gray">Define:</p>
-
-                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
-                            <p className="default-gray">{LatexText}</p>
-                        </Space>
-
-                    </Space>
-
-                    <br/>
-                    <div className="eb-question-term-answer-zone">
-                        {reducedLatex && 
-                        <LatexRenderer 
-                            latex={"$$"+reducedLatex+"$$"}
-                        />}
-                    </div>
-                    <small className="default-red">{answerValidity || ""}</small>
-                    <br/>
-                    <br/>
-                    <Keyboard 
-                        Id={KeyboardId}
-
-                        List={list}
-
-                        onEnterKey={(l) => addAnswerToBC(l)}
-                    />
-                </div>)
-    }
-
-    const renderAddAnswers = () => {
-        const {BoundaryConditions} = energyBalanceQuestionPlay
-
-        const KeyboardId = BoundaryConditions[0].KeyboardId
+    const renderAddBCs = () => {
+        const {BoundryConditionKeyboardId} = energyBalanceQuestionPlay
 
         return(
             <div className="hq-full-width">
             <p
                         className="default-green hq-clickable"
                         onClick={() => {
-                            let _terms = [...newList]
+                            let _terms = [...newListBC]
 
                             _terms.push({
                                 List:[],
                                 echoNumber:0
                             })
 
-                            setSelectedIndex(_terms.length - 1)
+                            setSelectedIndexBC(_terms.length - 1)
 
-                            setNewList(_terms)
+                            setNewListBC(_terms)
                         }}
                     >Add new line</p>
 
-                    {newList.map((a, ai) => {
+                    {newListBC.map((a, ai) => {
 
                         const {List} = a
 
                         const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
-                        const checkTerm = validateKeyboardAnswer(a)
+                        const checkTerm = validateKeyboardAnswer(a, true)
 
-                        const termSelected = (ai === selectedIndex)
+                        const termSelected = (ai === selectedIndexBC)
 
                         return(
                             <Space
@@ -1110,25 +1057,25 @@ export function EnergyBalanceQuestionPlay({Id}){
                                 <Space>
                                     &nbsp;
                                     <Tooltip 
-                                        title={<p>Click to remove term</p>}
+                                        title={<p>Click to remove boundary condition</p>}
                                         color="white"
                                     >
                                         <CloseCircleFilled 
                                             style={{cursor:'pointer', color:'red'}}
 
                                             onClick={() => {
-                                                let _terms = [...newList]
+                                                let _terms = [...newListBC]
 
                                                 _terms = _terms.filter((t, ti) => ai !== ti)
-                                                setNewList(_terms)
+                                                setNewListBC(_terms)
 
-                                                setSelectedIndex(0)
+                                                setSelectedIndexBC(0)
                                             }}
                                         />
                                     </Tooltip>
                                     &nbsp;
                                     <p 
-                                    onClick={() => setSelectedIndex(ai)}
+                                    onClick={() => setSelectedIndexBC(ai)}
                                     className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}>{ai+1}</p>
                                     &nbsp;
                                     <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
@@ -1141,19 +1088,19 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                     <br/>
                     <br/>
-                    {newList.length ?
+                    {newListBC.length ?
                     <Keyboard
-                        Id={KeyboardId}
-                        List={newList[selectedIndex]}
+                        Id={BoundryConditionKeyboardId}
+                        List={newListBC[selectedIndexBC]}
                         onEnterKey={(l) => {
-                            let _terms = [...newList]
+                            let _terms = [...newListBC]
 
-                            _terms[selectedIndex] = l
-                            setNewList(_terms)
+                            _terms[selectedIndexBC] = l
+                            setNewListBC(_terms)
                         }}
 
                         isEnergyBalance={true}
-                    /> : <p className="default-red">Please add new line</p>}
+                    /> : <p className="default-red">Please add new boundary condition</p>}
             </div>
         )
     }
@@ -1164,56 +1111,113 @@ export function EnergyBalanceQuestionPlay({Id}){
             <Space size={'large'} align="start">
                 {renderImageWithControlVolume()}
                 <Space direction="vertical" align="start">
-                    <Row className="hq-full-width">
-                        {/*BCAnswers.map((t) => {
-                            const {Id, Latex, AddedAnswer} = t
+                    {renderAddBCs()}
+                </Space>
+            </Space>
+        )
+    }
 
-                            const isSelectedDefine = selectedBCDefine && selectedBCDefine.Id === Id
+    const renderAddICs = () => {
+        const {InitialConditionKeyboardId} = energyBalanceQuestionPlay
 
-                            const answerValidity = validateKeyboardAnswer(AddedAnswer)
+        return(
+            <div className="hq-full-width">
+            <p
+                        className="default-green hq-clickable"
+                        onClick={() => {
+                            let _terms = [...newListIC]
 
-                            const answerIsValid = (answerValidity === null)
+                            _terms.push({
+                                List:[],
+                                echoNumber:0
+                            })
 
-                            let keyColor = ""
+                            setSelectedIndexIC(_terms.length - 1)
 
-                            if(answerIsValid){
-                                keyColor = "eb-question-term-selected-answered"
-                            }
+                            setNewListIC(_terms)
+                        }}
+                    >Add new line</p>
 
-                            if(isSelectedDefine){
-                                keyColor = "eb-question-term-selected-define"
-                            }
+                    {newListIC.map((a, ai) => {
 
-                            return(
-                                <Col
-                                    key={Id}
-                                    className={"keyboard-key-item " + (keyColor)}
+                        const {List} = a
 
-                                    onClick={() => {
-                                        if(isSelectedDefine){
-                                            setSelectedBCDefine(null)
-                                            return
-                                        }
+                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
-                                        setSelectedBCDefine(t)
-                                    }}
-                                >
-                                    <LatexRenderer latex={"$$" + Latex + "$$"} />
-                                </Col>
-                            )
-                        })*/}
-                    </Row>
+                        const checkTerm = validateKeyboardAnswer(a, true)
 
-                    {/*selectedBCDefine && renderDefineSpecificBC()*/}
-                        
-                    {renderAddAnswers()}
+                        const termSelected = (ai === selectedIndexIC)
+                        return(
+                            <Space
+                                key={ai}
+                                className="hq-full-width"
+                                direction="vertical"
+                            >
+                                <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove initial condition</p>}
+                                        color="white"
+                                    >
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+
+                                            onClick={() => {
+                                                let _terms = [...newListIC]
+
+                                                _terms = _terms.filter((t, ti) => ai !== ti)
+                                                setNewListIC(_terms)
+
+                                                setSelectedIndexIC(0)
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    &nbsp;
+                                    <p 
+                                    onClick={() => setSelectedIndexIC(ai)}
+                                    className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}>{ai+1}</p>
+                                    &nbsp;
+                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                </Space>
+
+                                <small className="default-red">{checkTerm}</small>
+                            </Space>
+                        )
+                    })}
+
+                    <br/>
+                    <br/>
+                    {newListIC.length ?
+                    <Keyboard
+                        Id={InitialConditionKeyboardId}
+                        List={newListIC[selectedIndexIC]}
+                        onEnterKey={(l) => {
+                            let _terms = [...newListIC]
+
+                            _terms[selectedIndexIC] = l
+                            setNewListIC(_terms)
+                        }}
+
+                        isEnergyBalance={true}
+                    /> : <p className="default-red">Please add new initial condition</p>}
+            </div>
+        )
+    }
+
+    const renderInitialConditions = () => {
+        
+        return(
+            <Space size={'large'} align="start">
+                {renderImageWithControlVolume()}
+                <Space direction="vertical" align="start">
+                    {renderAddICs()}
                 </Space>
             </Space>
         )
     }
 
     const renderContent = () => {
-        const {BoundaryConditions} = energyBalanceQuestionPlay
+        const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
         const map = {
             0: () => renderSelectControlVolume(),
@@ -1222,8 +1226,12 @@ export function EnergyBalanceQuestionPlay({Id}){
 
         }
 
-        if(BoundaryConditions.length){
+        if(BoundaryConditionLines.length){
             map[3] = (() => renderBoundaryConditions())
+        }
+
+        if(InitialConditionLines.length){
+            map[4] = (() => renderInitialConditions())
         }
 
         return map[currentTab]()
@@ -1250,7 +1258,7 @@ export function EnergyBalanceQuestionPlay({Id}){
     }
 
     const renderQuestion = () => {
-        const {BoundaryConditions} = energyBalanceQuestionPlay
+        const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
         const items = [{
             key:'CV',
@@ -1266,11 +1274,19 @@ export function EnergyBalanceQuestionPlay({Id}){
         }]
 
         
-        if(BoundaryConditions.length){
+        if(BoundaryConditionLines.length){
             items.push(
                 {
                     key:'Boundary conditions',
                     title: <p className={currentTab === 4 ? "default-title highlighted" : "default-gray"}>Boundary conditions</p>
+                })
+        }
+
+        if(InitialConditionLines.length){
+            items.push(
+                {
+                    key:'Initial conditions',
+                    title: <p className={currentTab === 5 ? "default-title highlighted" : "default-gray"}>Initial conditions</p>
                 })
         }
 

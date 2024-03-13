@@ -28,8 +28,6 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     const newImageWidth = window.innerWidth * 0.25
     const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
 
-    const [orientedVTs, setOrientedVTs] = useState([])
-
     useEffect(() => {
         if(canvasRef && canvasRef.current){
             const _ctx = canvasRef.current.getContext('2d')
@@ -110,6 +108,10 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         setMouseY(0)
     }
 
+    const getSnippingBoxes = () => {
+
+    }
+
     const onMouseMove = (e) => {
         const {point, _snippedBox} = handleSnipping(e)
 
@@ -162,6 +164,36 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         }
     }
 
+
+    const getOrientedVTs = () => {
+        let boxes = {
+
+        }
+
+        const boxesIds = Object.keys(boxes)
+
+        for(let vt of addedVT){
+            const {ObjectBody} = vt
+
+            if(boxesIds.includes(ObjectBody.Id)){
+                boxes.list.push(vt)
+            }
+            else{
+                boxes[ObjectBody.Id] = ({})
+                
+                boxes[ObjectBody.Id].body = ObjectBody
+                boxes[ObjectBody.Id].list = [vt]
+            }
+        }
+
+        return boxes
+    }
+
+    const orientedBoxes = getOrientedVTs()
+
+    console.log("orientedBoxes")
+    console.log(orientedBoxes)
+
     const widthHeight = window.innerWidth*0.035
 
       return(
@@ -196,7 +228,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                 >
                     <VectorDirectionComponent 
                         onUpdateAngle={(angle) => {
-                            onDropVT(selectedVT, angle, angleX, angleY)
+                            onDropVT(selectedVT, angle, angleX, angleY, snippedBox)
                             setShowSelectAngle(false)
                         }}  
 

@@ -10,6 +10,7 @@ import './index.css'
 import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { DropVectorOnImage } from "./DropVectorOnImage";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
+import { FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT } from "./Constants";
 
 export function FBDQuestionPlay({Id}){
 
@@ -53,13 +54,28 @@ export function FBDQuestionPlay({Id}){
                     
                     selectedVT={selectedVTDrop}
                     
-                    onDropVT = {(vt, a, x, y) => {
+                    onDropVT = {(vt, a, x, y, sBox) => {
                         const isDropped = selectedVTDrop && vectors.filter(a => a.Id === selectedVTDrop.Id)
 
                         let vts = [...addedVT]
 
                         if(isDropped){
                             vts = vts.filter(a => a.Id !== selectedVTDrop.Id)
+                        }
+
+                        let box = sBox
+
+                        if(!box){
+                            
+                            box = ({
+                                X: x - FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT/2,
+                                Y: y - FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT/2,
+                                
+                                Width: FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT,
+                                Height: FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT,
+
+                                fake: true
+                            })
                         }
                         
                         vts.push({
@@ -73,7 +89,7 @@ export function FBDQuestionPlay({Id}){
                             Y:y,
 
                             Angle:a,
-                            ObjectBody:null
+                            ObjectBody:box
                         })
 
                         setAddedVT(vts)
