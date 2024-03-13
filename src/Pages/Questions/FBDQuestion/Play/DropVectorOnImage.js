@@ -21,11 +21,12 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
 
     const [showSelectAngle, setShowSelectAngle] = useState(false)
 
+    const [snippedBox, setSnippedBox] = useState(null) 
+
     const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, ObjectBodies} = question
 
     const newImageWidth = window.innerWidth * 0.25
     const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
-
 
     const [orientedVTs, setOrientedVTs] = useState([])
 
@@ -66,7 +67,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     const handleSnipping = (e) => {
         let point = computePointInCanvas(e)
 
-        let snippedBox = null
+        let _snippedBox = null
 
         const boxes = ObjectBodies.map((b) => {
             const dimensions = calculateCPdimensions (Base_ImageURL_Width, Base_ImageURL_Height, newImageWidth, newImageHeight, b)
@@ -93,10 +94,10 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
             point.x = centerX
             point.y = centerY
 
-            snippedBox = first_box
+            _snippedBox = first_box
         }
 
-        return ({point, snippedBox})
+        return ({point, _snippedBox})
     }
 
     const onMouseEnter = (e) => {
@@ -110,10 +111,12 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     }
 
     const onMouseMove = (e) => {
-        const {point} = handleSnipping(e)
+        const {point, _snippedBox} = handleSnipping(e)
 
         setMouseX(point.x)
         setMouseY(point.y)
+
+        setSnippedBox(_snippedBox)
     }
 
     const onMouseClick = (e) => {
