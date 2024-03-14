@@ -1,7 +1,7 @@
 import React, { useContext} from "react"
 
 import { useAsyncFn } from "../hooks/useAsync"
-import { GetQuestionStatisticsRequest, addClickableQuestionPartsRequest, addClickableQuestionRequest, addEnergyBalanceBCRequest, addEnergyBalanceICRequest, addKeyboardQuestionAnswerRequest, addKeyboardQuestionRequest, addMultipleChoiceQuestionChoiceRequest, addMultipleChoiceQuestionRequest, addQuestionPDFStatisticRequest, addQuestionSolutionRequest, addQuestionStatisticRequest, copyQuestionRequest, deleteClickableQuestionPartRequest, editClickableQuestionAnswerRequest, editClickableQuestionImageRequest, editEnergyBalanceBCKeyboardRequest, editEnergyBalanceControlVolumeStatusRequest, editEnergyBalanceICKeyboardRequest, editKeyboardQuestionImageRequest, editKeyboardQuestionLatexRequest, editMultipleChoiceQuestionAdditionalInfoRequest, editMultipleChoiceQuestionChoiceRequest, editMultipleChoiceQuestionImageRequest, editMultipleChoiceQuestionLatexRequest, editQuestionBasicInfoRequest, getClickableQuestionPlayRequest, getDiagramQuestionPlayRequest, getEnergyBalanceQuestionPlayRequest, getFBDQuestionPlayRequest, getKeyboardQuestionPlayRequest, getKeyboardQuestionWrongAnswersRequest, getMultipleChoiceQuestionPlayRequest, getQuestionMedianTimeRequest, getQuestionRelationsRequest, removeKeyboardQuestionAnswerRequest, removeMultipleChoiceQuestionChoiceImageRequest, removeMultipleChoiceQuestionChoiceLatexRequest, removeMultipleChoiceQuestionChoiceRequest, removeQuestionSolutionRequest, searchQuestionsByIdsRequest, searchQuestionsRequest } from "../services/Questions"
+import { GetQuestionStatisticsRequest, addClickableQuestionPartsRequest, addClickableQuestionRequest, addEnergyBalanceBCRequest, addEnergyBalanceICRequest, addKeyboardQuestionAnswerRequest, addKeyboardQuestionRequest, addMultipleChoiceQuestionChoiceRequest, addMultipleChoiceQuestionRequest, addQuestionPDFStatisticRequest, addQuestionSolutionRequest, addQuestionStatisticRequest, copyQuestionRequest, deleteClickableQuestionPartRequest, editClickableQuestionAnswerRequest, editClickableQuestionImageRequest, editEnergyBalanceBCKeyboardRequest, editEnergyBalanceControlVolumeStatusRequest, editEnergyBalanceICKeyboardRequest, editEnergyBalanceTermCodeLatexTextRequest, editKeyboardQuestionImageRequest, editKeyboardQuestionLatexRequest, editMultipleChoiceQuestionAdditionalInfoRequest, editMultipleChoiceQuestionChoiceRequest, editMultipleChoiceQuestionImageRequest, editMultipleChoiceQuestionLatexRequest, editQuestionBasicInfoRequest, getClickableQuestionPlayRequest, getDiagramQuestionPlayRequest, getEnergyBalanceQuestionPlayRequest, getFBDQuestionPlayRequest, getKeyboardQuestionPlayRequest, getKeyboardQuestionWrongAnswersRequest, getMultipleChoiceQuestionPlayRequest, getQuestionMedianTimeRequest, getQuestionRelationsRequest, removeEnergyBalanceBCRequest, removeEnergyBalanceControlVolumeRequest, removeEnergyBalanceICRequest, removeKeyboardQuestionAnswerRequest, removeMultipleChoiceQuestionChoiceImageRequest, removeMultipleChoiceQuestionChoiceLatexRequest, removeMultipleChoiceQuestionChoiceRequest, removeQuestionSolutionRequest, searchQuestionsByIdsRequest, searchQuestionsRequest } from "../services/Questions"
 
 const Context = React.createContext()
 
@@ -92,12 +92,17 @@ export function QuestionsProvider ({children}){
     const {value: editClickableQuestionImageResult, error:errorEditClickableQuestionImage, loading:isLoadingEditClickableQuestionImage, execute:editClickableQuestionImage} = useAsyncFn((b) => editClickableQuestionImageRequest(b)) 
     
     //Energy balance question
-    const {value: editEnergyBalanceControlVolumeStatusResult, error:errorEditEnergyBalanceControlVolumeStatus, loading:isLoadingEditEnergyBalanceControlVolumeStatus, execute:editEnergyBalanceControlVolumeStatus} = useAsyncFn((b) => editEnergyBalanceControlVolumeStatusRequest(b)) 
+    const {value: editEnergyBalanceControlVolumeStatusResult, error:errorEditEnergyBalanceControlVolumeStatus, loading:isLoadingEditEnergyBalanceControlVolumeStatus, execute:editEnergyBalanceControlVolumeStatus} = useAsyncFn((b) => editEnergyBalanceControlVolumeStatusRequest(b))
+    const {value: removeEnergyBalanceControlVolumeResult, error:errorRemoveEnergyBalanceControlVolume, loading:isLoadingRemoveEnergyBalanceControlVolume, execute:removeEnergyBalanceControlVolume} = useAsyncFn((b) => removeEnergyBalanceControlVolumeRequest(b))
+
+    const {value: editEnergyBalanceTermCodeLatexTextResult, error:errorEditEnergyBalanceTermCodeLatexText, loading:isLoadingEditEnergyBalanceTermCodeLatexText, execute:editEnergyBalanceTermCodeLatexText} = useAsyncFn((b) => editEnergyBalanceTermCodeLatexTextRequest(b)) 
     const {value: editEnergyBalanceBCKeyboardResult, error:errorEditEnergyBalanceBCKeyboard, loading:isLoadingEditEnergyBalanceBCKeyboard, execute:editEnergyBalanceBCKeyboard} = useAsyncFn((b) => editEnergyBalanceBCKeyboardRequest(b))
     const {value: addEnergyBalanceBCResult, error:errorAddEnergyBalanceBC, loading:isLoadingAddEnergyBalanceBC, execute:addEnergyBalanceBC} = useAsyncFn((b) => addEnergyBalanceBCRequest(b))
+    const {value: removeEnergyBalanceBCResult, error:errorRemoveEnergyBalanceBC, loading:isLoadingRemoveEnergyBalanceBC, execute:removeEnergyBalanceBC} = useAsyncFn((b) => removeEnergyBalanceBCRequest(b))
      
     const {value: editEnergyBalanceICKeyboardResult, error:errorEditEnergyBalanceICKeyboard, loading:isLoadingEditEnergyBalanceICKeyboard, execute:editEnergyBalanceICKeyboard} = useAsyncFn((b) => editEnergyBalanceICKeyboardRequest(b)) 
     const {value: addEnergyBalanceICResult, error:errorAddEnergyBalanceIC, loading:isLoadingAddEnergyBalanceIC, execute:addEnergyBalanceIC} = useAsyncFn((b) => addEnergyBalanceICRequest(b)) 
+    const {value: removeEnergyBalanceICResult, error:errorRemoveEnergyBalanceIC, loading:isLoadingRemoveEnergyBalanceIC, execute:removeEnergyBalanceIC} = useAsyncFn((b) => removeEnergyBalanceICRequest(b))
 
     //Question median time statistics
     const {value: getQuestionMedianTimeResult, error:errorGetQuestionMedianTime, loading:isLoadingGetQuestionMedianTime, execute:getQuestionMedianTime} = useAsyncFn((Id) => getQuestionMedianTimeRequest(Id)) 
@@ -283,6 +288,16 @@ export function QuestionsProvider ({children}){
             errorEditEnergyBalanceControlVolumeStatus,
             isLoadingEditEnergyBalanceControlVolumeStatus,
 
+            removeEnergyBalanceControlVolumeResult,
+            errorRemoveEnergyBalanceControlVolume,
+            isLoadingRemoveEnergyBalanceControlVolume,
+            removeEnergyBalanceControlVolume,
+
+            editEnergyBalanceTermCodeLatexTextResult,
+            errorEditEnergyBalanceTermCodeLatexText,
+            isLoadingEditEnergyBalanceTermCodeLatexText,
+            editEnergyBalanceTermCodeLatexText,
+
             editEnergyBalanceBCKeyboardResult,
             errorEditEnergyBalanceBCKeyboard,
             isLoadingEditEnergyBalanceBCKeyboard,
@@ -298,10 +313,20 @@ export function QuestionsProvider ({children}){
             isLoadingAddEnergyBalanceBC,
             addEnergyBalanceBC,
 
+            removeEnergyBalanceBCResult,
+            errorRemoveEnergyBalanceBC,
+            isLoadingRemoveEnergyBalanceBC,
+            removeEnergyBalanceBC,
+
             addEnergyBalanceICResult,
             errorAddEnergyBalanceIC,
             isLoadingAddEnergyBalanceIC,
             addEnergyBalanceIC,
+
+            removeEnergyBalanceICResult,
+            errorRemoveEnergyBalanceIC,
+            isLoadingRemoveEnergyBalanceIC,
+            removeEnergyBalanceIC,
 
             DiagramQuestionPlay,
             isLoadingDiagramQuestionPlay,

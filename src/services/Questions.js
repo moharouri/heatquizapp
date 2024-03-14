@@ -162,6 +162,14 @@ export function editEnergyBalanceControlVolumeStatusRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeAsCorrect', b)
 }
 
+export function removeEnergyBalanceControlVolumeRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/DeleteControlVolume', b)
+}
+
+export function editEnergyBalanceTermCodeLatexTextRequest(b){
+    return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditEBTermCodeLatexText', b)
+}
+
 export function editEnergyBalanceBCKeyboardRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetBoundaryConditionKeyboard', b)
 }
@@ -170,6 +178,11 @@ export function addEnergyBalanceBCRequest(b){
     return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddBoundaryCondition', b)
 }
 
+export function removeEnergyBalanceBCRequest(b){
+    return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/RemoveBoundaryCondition', b)
+}
+
+
 export function editEnergyBalanceICKeyboardRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetInitialConditionKeyboard', b)
 }
@@ -177,6 +190,11 @@ export function editEnergyBalanceICKeyboardRequest(b){
 export function addEnergyBalanceICRequest(b){
     return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddInitialCondition', b)
 }
+
+export function removeEnergyBalanceICRequest(b){
+    return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/RemoveInitialCondition', b)
+}
+
 
 
 

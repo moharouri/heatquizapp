@@ -3,11 +3,15 @@ import {Button, Drawer, Form, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import TextArea from "antd/es/input/TextArea";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function UpdateEBTermLatexText({open, onClose, ebTerm}) {
+export function UpdateEBTermLatexText({open, onClose, ebTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
     const [newLatex, setNewLatex] = useState('')
+
+    const { isLoadingEditEnergyBalanceTermCodeLatexText, editEnergyBalanceTermCodeLatexText,} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -52,8 +56,26 @@ export function UpdateEBTermLatexText({open, onClose, ebTerm}) {
         <Button 
             size="small"
             type="primary"
-            onClick={() => {
 
+            loading={isLoadingEditEnergyBalanceTermCodeLatexText}
+
+            onClick={() => {
+                if(!newLatex.trim()){
+                    api.destroy()
+                    api.warning("Please add values for code and LaTeX")
+
+                    return
+                }
+
+                const VM = ({
+                    ...ebTerm,
+                    LatexText: newLatex
+                })
+
+                editEnergyBalanceTermCodeLatexText(VM).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                    onClose()
+                }))
             }}
         >
             Update

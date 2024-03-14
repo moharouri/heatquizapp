@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import {Alert, Button, Drawer, Form, Input, message } from "antd";
+import {Button, Drawer, Form, Input, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function UpdateEBTermCodeLatex({open, onClose, ebTerm}) {
+export function UpdateEBTermCodeLatex({open, onClose, ebTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
     const [newCode, setNewCode] = useState('')
     const [newLatex, setNewLatex] = useState('')
+
+    const { isLoadingEditEnergyBalanceTermCodeLatexText, editEnergyBalanceTermCodeLatexText,} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -58,7 +62,27 @@ export function UpdateEBTermCodeLatex({open, onClose, ebTerm}) {
         <Button 
             size="small"
             type="primary"
+
+            loading={isLoadingEditEnergyBalanceTermCodeLatexText}
+
             onClick={() => {
+                if(!newCode.trim() || !newLatex.trim()){
+                    api.destroy()
+                    api.warning("Please add values for code and LaTeX")
+
+                    return
+                }
+
+                const VM = ({
+                    ...ebTerm,
+                    Code: newCode,
+                    Latex: newLatex
+                })
+
+                editEnergyBalanceTermCodeLatexText(VM).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                    onClose()
+                }))
 
             }}
         >

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Col, Divider, Dropdown, List, Row, Space, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, Dropdown, List, Popconfirm, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL, handleResponse } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined } from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined, CloseCircleFilled } from '@ant-design/icons';
 import './index.css'
 import { UpdateControlVolumeImage } from "./UpdateControlVolumeImage";
 import { UpdateEBTermCodeLatex } from "./UpdateEBTermCodeLatex";
@@ -19,6 +19,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
     const {energyBalanceQuestionPlay: question,
         editEnergyBalanceControlVolumeStatus,
+        removeEnergyBalanceControlVolume,
+
+        removeEnergyBalanceBC,
+        removeEnergyBalanceIC,
     } = useQuestions()
 
     const imageRef = React.createRef()
@@ -266,7 +270,25 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'delete_cv',
-                                                label: 'Delete',
+                                                label:
+                                                <Popconfirm
+                                                    title="Remove control volume"
+                                                    description="Are you sure to delete this control volume?"
+                                                            onConfirm={() => {
+                                                                let data = new FormData()
+                                                                data.append('Id', cv.Id)
+                                                                removeEnergyBalanceControlVolume(data)
+                                                                .then(r => handleResponse(r, api, 'Removed', 1, () => reloadQuestion()))
+                                                            }}
+                                                    onCancel={() => {}}
+                                                    okText="Yes"
+                                                    cancelText="No"
+                                                    placement="right"
+                                                >
+                                                
+                                                    Delete
+                                                </Popconfirm>,
+                                                
                                                 onClick: () => {}
                                             }],
                                             title:'Actions'
@@ -592,6 +614,37 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                             <Space>
                                 <p className="default-gray">{ai+1}</p>
 
+                                &nbsp;
+                                <Tooltip 
+                                    title={<p>Click to remove boundary condition</p>}
+                                    color="white"
+                                >
+                                    <Popconfirm
+                                        title="Remove boundary condition"
+                                        description="Are you sure to delete this boundary condition?"
+                                        onConfirm={() => {
+                                            const data = new FormData()
+
+                                            data.append('Id', Id)
+
+                                            removeEnergyBalanceBC(data).then(r => handleResponse(r, api, 'Removed', 1, () => {
+                                                reloadQuestion()
+                                            }))
+                                        }}
+                                        onCancel={() => {}}
+                                        okText="Yes"
+                                        cancelText="No"
+                                        placement="right"
+                                    >
+                                                
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+                                        />
+                                    </Popconfirm>
+                                  
+                                </Tooltip>
+                                &nbsp;
+
                                 <LatexRenderer latex={"$$" + answerReduced + "$$"} />
                             </Space>
                         </div>
@@ -659,6 +712,36 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                         >
                             <Space>
                                 <p className="default-gray">{ai+1}</p>
+
+                                &nbsp;
+                                <Tooltip 
+                                    title={<p>Click to remove initial condition</p>}
+                                    color="white"
+                                >
+                                    <Popconfirm
+                                        title="Remove initial condition"
+                                        description="Are you sure to delete this initial condition?"
+                                        onConfirm={() => {
+                                            const data = new FormData()
+
+                                            data.append('Id', Id)
+
+                                            removeEnergyBalanceIC(data).then(r => handleResponse(r, api, 'Removed', 1, () => {
+                                                reloadQuestion()
+                                            }))
+                                        }}
+                                        onCancel={() => {}}
+                                        okText="Yes"
+                                        cancelText="No"
+                                        placement="right"
+                                    >
+                                                
+                                        <CloseCircleFilled 
+                                            style={{cursor:'pointer', color:'red'}}
+                                        />
+                                    </Popconfirm>
+                                </Tooltip>
+                                &nbsp;
 
                                 <LatexRenderer latex={"$$" + answerReduced + "$$"} />
                             </Space>
@@ -745,12 +828,15 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 open={showEditTermCodeLatex}
                 onClose={() => setShowEditTermCodeLatex(false)}
                 ebTerm={selectedEBTerm}
+                reloadQuestion = {() => reloadQuestion()}
             />
 
             <UpdateEBTermLatexText 
                 open={showEditTermLatexText}
                 onClose={() => setShowEditTermLatexText(false)}
                 ebTerm={selectedEBTerm}
+                reloadQuestion = {() => reloadQuestion()}
+
             />
 
             <UpdateEBTermDirections 
