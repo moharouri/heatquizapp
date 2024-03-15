@@ -21,6 +21,9 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
         editEnergyBalanceControlVolumeStatus,
         removeEnergyBalanceControlVolume,
 
+        removeEnergyBalanceEBT_Question,
+        flipEnergyBalanceEBT_Question_Direction,
+
         removeEnergyBalanceBC,
         removeEnergyBalanceIC,
     } = useQuestions()
@@ -509,15 +512,36 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                                             key: 'flip_flow',
                                                             label: 'Flip flow direction',
                                                             onClick: () => {
-                                                              
+                                                                let VM = ({...q})
+                                                                VM.Inflow = !q.Inflow
+
+                                                                flipEnergyBalanceEBT_Question_Direction(VM).then(r => handleResponse(r, api, 'Flipped', 1, () => {
+                                                                    reloadQuestion()
+                                                                }))
                                                             }
                                                         },
                                                         {
                                                             key: 'delete',
-                                                            label: 'Delete',
-                                                            onClick: () => {
-                                                               
-                                                            }
+                                                            label:
+                                                            <Popconfirm
+                                                            title="Remove question"
+                                                            description="Are you sure to delete this question?"
+                                                                    onConfirm={() => {
+                                                                        let data = new FormData()
+                                                                        data.append('Id', q.Id)
+                                                                        removeEnergyBalanceEBT_Question(data).then(r => handleResponse(r, api, 'Removed', 1, () => {
+                                                                            reloadQuestion()
+                                                                        }))
+                                                                    }}
+                                                            onCancel={() => {}}
+                                                            okText="Yes"
+                                                            cancelText="No"
+                                                            placement="right"
+                                                        >
+                                                        
+                                                            Delete
+                                                        </Popconfirm>,
+                                                        onClick: () => {}
                                                         }],
                                                         title:'Actions'
                                                     }}
@@ -849,12 +873,16 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 open={showEditTermQuestionLatex}
                 onClose={() => setShowEditTermQuestionLatex(false)}
                 ebTermQuestion={selectedEBTermQuestion}
+
+                reloadQuestion = {() => reloadQuestion()}
             />
 
             <AddEbTermQuestion 
                 open={showAddTermQuestion}
                 onClose={() => setShowAddTermQuestion(false)}
                 ebTerm={selectedEBTerm}
+
+                reloadQuestion={() => reloadQuestion()}
             />
 
             <AddEbTerm 

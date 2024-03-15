@@ -5,10 +5,15 @@ import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { SelectKeyboardList } from "../../../Keyboards/Shared/SelectKeyboardList";
 import { Keyboard } from "../../../../Components/Keyboard";
 import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function AddEbTermQuestion({open, onClose, ebTerm}) {
+export function AddEbTermQuestion({open, onClose, ebTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
+
+    const {isLoadingAddEnergyBalanceEBT_Question, addEnergyBalanceEBT_Question} = useQuestions()
+
     const [newLatex, setNewLatex] = useState('')
     const [selectedKeyboard, setSelectedKeyboard] = useState(null)
 
@@ -145,8 +150,31 @@ export function AddEbTermQuestion({open, onClose, ebTerm}) {
             <Button 
                 size="small"
                 type="primary"
-                onClick={() => {
 
+                loading={isLoadingAddEnergyBalanceEBT_Question}
+
+                onClick={() => {
+                    let data = new FormData()
+
+                    data.append('TermId', ebTerm.Id)
+                    data.append('QuestionCodeLateX', newLatex)
+                    data.append('Infow', true)
+                    data.append('KeyboardId', selectedKeyboard.Id)
+                    data.append('Answers', JSON.stringify(newList.map((a) => ({
+                        AnswerElements: a.List.map((e,i) => (
+                            {
+                                NumericKeyId: e.NumericKeyId,
+                                ImageId: e.VariableImageId,
+                                Value:e.char,
+                                Id: i,
+                                Order:i
+                            }))}
+                        ))))
+
+                    addEnergyBalanceEBT_Question(data).then(r => handleResponse(r, api, 'Added', 1, () => {
+                        reloadQuestion()
+                        onClose()
+                    }))
                 }}
             >
                 Add

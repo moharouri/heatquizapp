@@ -170,6 +170,22 @@ export function editEnergyBalanceTermCodeLatexTextRequest(b){
     return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditEBTermCodeLatexText', b)
 }
 
+export function addEnergyBalanceEBT_Question_Request(b){
+    return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddEBTermQuestion', b)
+}
+
+export function removeEnergyBalanceEBT_Question_Request(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/DeleteEBTermQuestion', b)
+}
+
+export function editEnergyBalanceEBT_Question_Latex_Request(b){
+    return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditEBTermQuestionLatex', b)
+}
+
+export function flipEnergyBalanceEBT_Question_Direction_Request(b){
+    return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditEBTermQuestionFlow', b)
+}
+
 export function editEnergyBalanceBCKeyboardRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetBoundaryConditionKeyboard', b)
 }
