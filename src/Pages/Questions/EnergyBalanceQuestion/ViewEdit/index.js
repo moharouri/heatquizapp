@@ -21,6 +21,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
         editEnergyBalanceControlVolumeStatus,
         removeEnergyBalanceControlVolume,
 
+        editEnergyBalanceEBT_Direction,
         removeEnergyBalanceEBT_Question,
         flipEnergyBalanceEBT_Question_Direction,
 
@@ -394,7 +395,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                     dataSource={EnergyBalanceTerms}
 
                     renderItem={(t, ti) => {
-                        const {Id, Code, Latex, LatexText, Questions} = t
+                        const {Id, IsDummy, Code, Latex, LatexText, Questions} = t
 
                         return(
                             <div
@@ -406,7 +407,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                     >
                                         <Space>
                                             <p className="default-title">{ti+1}</p>
-                                            {renderItemBox(t)}
+                                            {IsDummy ? <Space><p className="default-gray">Dummy term</p>&nbsp;&nbsp;&nbsp;</Space>  : renderItemBox(t)}
                                             <p className="default-title">{Code}</p>
                                             <LatexRenderer latex={"$$" + Latex + "$$"}/>
                                         </Space>
@@ -441,7 +442,22 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                             {
                                                 key: 'set_dummy',
                                                 label: 'Set as dummy',
-                                                onClick: () => {}
+                                                onClick: () => {
+
+                                                    let data = new FormData()
+                                                    data.append("TermId", t.Id)
+
+                                                    data.append("West", false)
+                                                    data.append("East", false)
+                                                    data.append("North", false)
+                                                    data.append("South", false)
+                                                    data.append("Center", false)
+                                                    data.append("IsDummy", true)
+
+                                                    editEnergyBalanceEBT_Direction(data).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                                                        reloadQuestion()
+                                                    }))
+                                                }
                                             },
                                             {
                                                 key: 'add_question',
@@ -846,6 +862,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 open={showEditCVImage}
                 onClose={() => setShowEditCVImage(false)}
                 controlVolume={selectedCV}
+                reloadQuestion = {() => reloadQuestion()}
             />
 
             <UpdateEBTermCodeLatex 
@@ -867,6 +884,8 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 open={showEditTermDirections}
                 onClose={() => setShowEditTermDirections(false)}
                 ebTerm={selectedEBTerm}
+
+                reloadQuestion = {() => reloadQuestion()}
             />
 
             <UpdateEBTermQuestionLatex 

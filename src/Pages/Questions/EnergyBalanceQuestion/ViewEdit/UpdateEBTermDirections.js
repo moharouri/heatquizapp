@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import {Button, Drawer, Space, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function UpdateEBTermDirections({open, onClose, ebTerm}) {
+export function UpdateEBTermDirections({open, onClose, ebTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
+
+    const {isLoadingEditEnergyBalanceEBT_Direction, editEnergyBalanceEBT_Direction} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -77,8 +81,6 @@ export function UpdateEBTermDirections({open, onClose, ebTerm}) {
         const shapesGap = 0.1*totalWidthHeight
         const width1 = 0.125 * totalWidthHeight
         const width2 = totalWidthHeight - 2 * shapesGap - 2 * width1
-
-        const isSelected = (northSelected || eastSelected || westSelected || southSelected || centerSelected)
 
         let selectedColor = 'rgba(2, 117, 216, 0.5)'
 
@@ -166,8 +168,23 @@ export function UpdateEBTermDirections({open, onClose, ebTerm}) {
         <Button 
             size="small"
             type="primary"
-            onClick={() => {
 
+            loading={isLoadingEditEnergyBalanceEBT_Direction}
+
+            onClick={() => {
+                let data = new FormData()
+                data.append("TermId", ebTerm.Id)
+
+                data.append("West", westSelected)
+                data.append("East", eastSelected)
+                data.append("North", northSelected)
+                data.append("South", southSelected)
+                data.append("Center", centerSelected)
+                data.append("IsDummy", false)
+
+                editEnergyBalanceEBT_Direction(data).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                }))
             }}
         >
             Update

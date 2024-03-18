@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import {Alert, Button, Drawer, message } from "antd";
+import {Alert, Button, Drawer, Space, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
-import { FixURL } from "../../../../services/Auxillary";
+import { FixURL, handleResponse } from "../../../../services/Auxillary";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
 
-export function UpdateControlVolumeImage({open, onClose, controlVolume}) {
+export function UpdateControlVolumeImage({open, onClose, controlVolume, reloadQuestion}) {
 
     if(!open) return <div/>;
+
+    const {isLoadingEditEnergyBalanceControlVolumeImage, editEnergyBalanceControlVolumeImage,} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -15,9 +18,41 @@ export function UpdateControlVolumeImage({open, onClose, controlVolume}) {
 
     const {Correct, Base_ImageURL, smallImageHeight, smallImageWidth, dimensions} = controlVolume
 
+
+    
     return(
         <Drawer
-        title="Update Control Volume Image"
+        title={
+        <Space>
+            <p>Update Control Volume Image</p>
+            <Button
+                size="small"
+                type="primary"
+
+                loading={isLoadingEditEnergyBalanceControlVolumeImage}
+
+                onClick={() => {
+                    if(!newImage){
+                        api.destroy()
+                        api.warning("Please add image")
+
+                        return
+                    }
+
+                    let data = new FormData()
+                    data.append('Id', controlVolume.Id)
+                    data.append('Picture', newImage)
+
+                    editEnergyBalanceControlVolumeImage(data).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                        reloadQuestion()
+                        onClose()
+                    }))
+                }}
+            >
+                Update
+            </Button>
+        </Space>
+        }
         width={'50%'}
         onClose={onClose}
         open={open}

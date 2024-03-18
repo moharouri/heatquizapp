@@ -162,12 +162,20 @@ export function editEnergyBalanceControlVolumeStatusRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeAsCorrect', b)
 }
 
+export function editEnergyBalanceControlVolumeImageRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/EditControlVolumePicture', b)
+}
+
 export function removeEnergyBalanceControlVolumeRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/DeleteControlVolume', b)
 }
 
 export function editEnergyBalanceTermCodeLatexTextRequest(b){
     return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditEBTermCodeLatexText', b)
+}
+
+export function editEnergyBalanceEBT_Direction_Request(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/EditEBTermDirections', b)
 }
 
 export function addEnergyBalanceEBT_Question_Request(b){

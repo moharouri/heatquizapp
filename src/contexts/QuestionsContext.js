@@ -1,7 +1,7 @@
 import React, { useContext} from "react"
 
 import { useAsyncFn } from "../hooks/useAsync"
-import { GetQuestionStatisticsRequest, addClickableQuestionPartsRequest, addClickableQuestionRequest, addEnergyBalanceBCRequest, addEnergyBalanceEBT_Question_Request, addEnergyBalanceICRequest, addKeyboardQuestionAnswerRequest, addKeyboardQuestionRequest, addMultipleChoiceQuestionChoiceRequest, addMultipleChoiceQuestionRequest, addQuestionPDFStatisticRequest, addQuestionSolutionRequest, addQuestionStatisticRequest, copyQuestionRequest, deleteClickableQuestionPartRequest, editClickableQuestionAnswerRequest, editClickableQuestionImageRequest, editEnergyBalanceBCKeyboardRequest, editEnergyBalanceControlVolumeStatusRequest, editEnergyBalanceEBT_Question_Latex_Request, editEnergyBalanceICKeyboardRequest, editEnergyBalanceTermCodeLatexTextRequest, editKeyboardQuestionImageRequest, editKeyboardQuestionLatexRequest, editMultipleChoiceQuestionAdditionalInfoRequest, editMultipleChoiceQuestionChoiceRequest, editMultipleChoiceQuestionImageRequest, editMultipleChoiceQuestionLatexRequest, editQuestionBasicInfoRequest, flipEnergyBalanceEBT_Question_Direction_Request, getClickableQuestionPlayRequest, getDiagramQuestionPlayRequest, getEnergyBalanceQuestionPlayRequest, getFBDQuestionPlayRequest, getKeyboardQuestionPlayRequest, getKeyboardQuestionWrongAnswersRequest, getMultipleChoiceQuestionPlayRequest, getQuestionMedianTimeRequest, getQuestionRelationsRequest, removeEnergyBalanceBCRequest, removeEnergyBalanceControlVolumeRequest, removeEnergyBalanceEBT_Question_Request, removeEnergyBalanceICRequest, removeKeyboardQuestionAnswerRequest, removeMultipleChoiceQuestionChoiceImageRequest, removeMultipleChoiceQuestionChoiceLatexRequest, removeMultipleChoiceQuestionChoiceRequest, removeQuestionSolutionRequest, searchQuestionsByIdsRequest, searchQuestionsRequest } from "../services/Questions"
+import { GetQuestionStatisticsRequest, addClickableQuestionPartsRequest, addClickableQuestionRequest, addEnergyBalanceBCRequest, addEnergyBalanceEBT_Question_Request, addEnergyBalanceICRequest, addKeyboardQuestionAnswerRequest, addKeyboardQuestionRequest, addMultipleChoiceQuestionChoiceRequest, addMultipleChoiceQuestionRequest, addQuestionPDFStatisticRequest, addQuestionSolutionRequest, addQuestionStatisticRequest, copyQuestionRequest, deleteClickableQuestionPartRequest, editClickableQuestionAnswerRequest, editClickableQuestionImageRequest, editEnergyBalanceBCKeyboardRequest, editEnergyBalanceControlVolumeImageRequest, editEnergyBalanceControlVolumeStatusRequest, editEnergyBalanceEBT_Direction_Request, editEnergyBalanceEBT_Question_Latex_Request, editEnergyBalanceICKeyboardRequest, editEnergyBalanceTermCodeLatexTextRequest, editKeyboardQuestionImageRequest, editKeyboardQuestionLatexRequest, editMultipleChoiceQuestionAdditionalInfoRequest, editMultipleChoiceQuestionChoiceRequest, editMultipleChoiceQuestionImageRequest, editMultipleChoiceQuestionLatexRequest, editQuestionBasicInfoRequest, flipEnergyBalanceEBT_Question_Direction_Request, getClickableQuestionPlayRequest, getDiagramQuestionPlayRequest, getEnergyBalanceQuestionPlayRequest, getFBDQuestionPlayRequest, getKeyboardQuestionPlayRequest, getKeyboardQuestionWrongAnswersRequest, getMultipleChoiceQuestionPlayRequest, getQuestionMedianTimeRequest, getQuestionRelationsRequest, removeEnergyBalanceBCRequest, removeEnergyBalanceControlVolumeRequest, removeEnergyBalanceEBT_Question_Request, removeEnergyBalanceICRequest, removeKeyboardQuestionAnswerRequest, removeMultipleChoiceQuestionChoiceImageRequest, removeMultipleChoiceQuestionChoiceLatexRequest, removeMultipleChoiceQuestionChoiceRequest, removeQuestionSolutionRequest, searchQuestionsByIdsRequest, searchQuestionsRequest } from "../services/Questions"
 
 const Context = React.createContext()
 
@@ -93,14 +93,16 @@ export function QuestionsProvider ({children}){
     
     //Energy balance question
     const {value: editEnergyBalanceControlVolumeStatusResult, error:errorEditEnergyBalanceControlVolumeStatus, loading:isLoadingEditEnergyBalanceControlVolumeStatus, execute:editEnergyBalanceControlVolumeStatus} = useAsyncFn((b) => editEnergyBalanceControlVolumeStatusRequest(b))
+    const {value: editEnergyBalanceControlVolumeImageResult, error:errorEditEnergyBalanceControlVolumeImage, loading:isLoadingEditEnergyBalanceControlVolumeImage, execute:editEnergyBalanceControlVolumeImage} = useAsyncFn((b) => editEnergyBalanceControlVolumeImageRequest(b))
     const {value: removeEnergyBalanceControlVolumeResult, error:errorRemoveEnergyBalanceControlVolume, loading:isLoadingRemoveEnergyBalanceControlVolume, execute:removeEnergyBalanceControlVolume} = useAsyncFn((b) => removeEnergyBalanceControlVolumeRequest(b))
 
-    const {value: editEnergyBalanceTermCodeLatexTextResult, error:errorEditEnergyBalanceTermCodeLatexText, loading:isLoadingEditEnergyBalanceTermCodeLatexText, execute:editEnergyBalanceTermCodeLatexText} = useAsyncFn((b) => editEnergyBalanceTermCodeLatexTextRequest(b)) 
+    const {value: editEnergyBalanceTermCodeLatexTextResult, error:errorEditEnergyBalanceTermCodeLatexText, loading:isLoadingEditEnergyBalanceTermCodeLatexText, execute:editEnergyBalanceTermCodeLatexText} = useAsyncFn((b) => editEnergyBalanceTermCodeLatexTextRequest(b))
+    const {value: editEnergyBalanceEBT_DirectionResult, error:errorEditEnergyBalanceEBT_Direction, loading:isLoadingEditEnergyBalanceEBT_Direction, execute:editEnergyBalanceEBT_Direction} = useAsyncFn((b) => editEnergyBalanceEBT_Direction_Request(b))
+
     const {value: addEnergyBalanceEBT_QuestionResult, error:errorAddEnergyBalanceEBT_Question, loading:isLoadingAddEnergyBalanceEBT_Question, execute:addEnergyBalanceEBT_Question} = useAsyncFn((b) => addEnergyBalanceEBT_Question_Request(b)) 
     const {value: editEnergyBalanceEBT_Question_LatexResult, error:errorEditEnergyBalanceEBT_Question_Latex, loading:isLoadingEditEnergyBalanceEBT_Question_Latex, execute:editEnergyBalanceEBT_Question_Latex} = useAsyncFn((b) => editEnergyBalanceEBT_Question_Latex_Request(b)) 
     const {value: flipEnergyBalanceEBT_Question_DirectionResult, error:errorFlipEnergyBalanceEBT_Question_Direction, loading:isLoadingFlipEnergyBalanceEBT_Question_Direction, execute:flipEnergyBalanceEBT_Question_Direction} = useAsyncFn((b) => flipEnergyBalanceEBT_Question_Direction_Request(b)) 
     const {value: removeEnergyBalanceEBT_QuestionResult, error:errorRemoveEnergyBalanceEBT_Question, loading:isLoadingRemoveEnergyBalanceEBT_Question, execute:removeEnergyBalanceEBT_Question} = useAsyncFn((b) => removeEnergyBalanceEBT_Question_Request(b)) 
-    
     
     const {value: editEnergyBalanceBCKeyboardResult, error:errorEditEnergyBalanceBCKeyboard, loading:isLoadingEditEnergyBalanceBCKeyboard, execute:editEnergyBalanceBCKeyboard} = useAsyncFn((b) => editEnergyBalanceBCKeyboardRequest(b))
     const {value: addEnergyBalanceBCResult, error:errorAddEnergyBalanceBC, loading:isLoadingAddEnergyBalanceBC, execute:addEnergyBalanceBC} = useAsyncFn((b) => addEnergyBalanceBCRequest(b))
@@ -289,11 +291,17 @@ export function QuestionsProvider ({children}){
             editClickableQuestionImageResult,
             editClickableQuestionImage,
 
+            //Energy balance question
             editEnergyBalanceControlVolumeStatusResult,
             editEnergyBalanceControlVolumeStatus,
             errorEditEnergyBalanceControlVolumeStatus,
             isLoadingEditEnergyBalanceControlVolumeStatus,
 
+            editEnergyBalanceControlVolumeImageResult,
+            errorEditEnergyBalanceControlVolumeImage,
+            isLoadingEditEnergyBalanceControlVolumeImage,
+            editEnergyBalanceControlVolumeImage,
+            
             removeEnergyBalanceControlVolumeResult,
             errorRemoveEnergyBalanceControlVolume,
             isLoadingRemoveEnergyBalanceControlVolume,
@@ -303,6 +311,11 @@ export function QuestionsProvider ({children}){
             errorEditEnergyBalanceTermCodeLatexText,
             isLoadingEditEnergyBalanceTermCodeLatexText,
             editEnergyBalanceTermCodeLatexText,
+
+            editEnergyBalanceEBT_DirectionResult,
+            errorEditEnergyBalanceEBT_Direction,
+            isLoadingEditEnergyBalanceEBT_Direction,
+            editEnergyBalanceEBT_Direction,
 
             addEnergyBalanceEBT_QuestionResult,
             errorAddEnergyBalanceEBT_Question,
