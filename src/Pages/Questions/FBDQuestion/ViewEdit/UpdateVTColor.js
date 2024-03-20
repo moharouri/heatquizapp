@@ -3,10 +3,15 @@ import {Button, ColorPicker, Drawer, Form, Space, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function UpdateVTColor({open, onClose, vtTerm, question}) {
+export function UpdateVTColor({open, onClose, vtTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
+    const {isLoadingEditFBDVectorTermColor, editFBDVectorTermColor} = useQuestions()
+
+
     const [newColor, setNewColor] = useState('')
 
     const [api, contextHolder] = message.useMessage()
@@ -72,8 +77,17 @@ export function UpdateVTColor({open, onClose, vtTerm, question}) {
         <Button 
             size="small"
             type="primary"
-            onClick={() => {
 
+            loading={isLoadingEditFBDVectorTermColor}
+
+            onClick={() => {
+                let VM = {...vtTerm}
+                VM.ArrowColor = newColor
+
+                editFBDVectorTermColor(VM).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                    onClose()
+                }))
             }}
         >
             Update

@@ -38,6 +38,7 @@ export function FBDQuestionEditView({reloadQuestion}){
     const [showEditTermLatexText, setShowEditTermLatexText] = useState(false)
     const [showEditTermAssociation, setShowEditTermAssociation] = useState(false)
     const [showEditTermColor, setShowEditTermColor] = useState(false)
+    const [showEditTermAngle, setShowEditTermAngle] = useState(false)
 
     const [selectedVTTerm, setSelectedVTTerm] = useState(null)
 
@@ -354,7 +355,7 @@ export function FBDQuestionEditView({reloadQuestion}){
                                                 }
                                             },{
                                                 key: 'edit_color',
-                                                label: 'Update color',
+                                                label: 'Update arrow color',
                                                 onClick: () => {
                                                     setShowEditTermColor(true)
                                                     setSelectedVTTerm(vt)
@@ -362,7 +363,15 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             },{
                                                 key: 'edit_angle',
                                                 label: Linear ? 'Update angle' : 'Flip direction',
-                                                onClick: () => {}
+                                                onClick: () => {
+                                                    if(Linear){
+                                                        setShowEditTermAngle(true)
+                                                        setSelectedVTTerm(vt)
+                                                        
+                                                        return
+                                                    }
+
+                                                }
                                             },
                                             {
                                                 key: 'delete',
@@ -463,12 +472,16 @@ export function FBDQuestionEditView({reloadQuestion}){
                 open={showEditTermCodeLatex}
                 onClose={() => setShowEditTermCodeLatex(false)}
                 vtTerm={selectedVTTerm}
+
+                reloadQuestion={() => reloadQuestion()}
             />
 
             <UpdateVTLatexText 
                 open={showEditTermLatexText}
                 onClose={() => setShowEditTermLatexText(false)}
                 vtTerm={selectedVTTerm}
+
+                reloadQuestion={() => reloadQuestion()}
             />
 
             <UpdateVTAssociation 
@@ -476,13 +489,25 @@ export function FBDQuestionEditView({reloadQuestion}){
                 onClose={() => setShowEditTermAssociation(false)}
                 vtTerm={selectedVTTerm}
                 question={question}
+                
+                reloadQuestion={() => reloadQuestion()}
             />
 
             <UpdateVTColor
                 open={showEditTermColor}
                 onClose={() => setShowEditTermColor(false)}
                 vtTerm={selectedVTTerm}
-                question={question}
+
+                reloadQuestion={() => reloadQuestion()}
+            />
+
+            
+            <UpdateVTAngle
+                open={showEditTermAngle}
+                onClose={() => setShowEditTermAngle(false)}
+                vtTerm={selectedVTTerm}
+
+                reloadQuestion={() => reloadQuestion()}
             />
 
             <UpdateOBColor 
@@ -490,6 +515,8 @@ export function FBDQuestionEditView({reloadQuestion}){
                 onClose={() => setShowEditOBColor(false)}
                 OB={selectedOB}
                 question={question}
+
+                reloadQuestion={() => reloadQuestion()}
             />
         </div>
     )

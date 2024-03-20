@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import {Button, Drawer, Form, Input, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function UpdateVTCodeLatex({open, onClose, vtTerm}) {
+export function UpdateVTCodeLatex({open, onClose, vtTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
+    const {isLoadingEditFBDVectorTerm, editFBDVectorTerm,} = useQuestions()
+
     const [newCode, setNewCode] = useState('')
     const [newLatex, setNewLatex] = useState('')
 
@@ -58,8 +62,25 @@ export function UpdateVTCodeLatex({open, onClose, vtTerm}) {
         <Button 
             size="small"
             type="primary"
-            onClick={() => {
 
+            loading={isLoadingEditFBDVectorTerm}
+
+            onClick={() => {
+                if(!newCode.trim() || !newLatex.trim()){
+                    api.destroy()
+                    api.warning("Please add code and LaTeX")
+
+                    return
+                }
+
+                let VM = {...vtTerm}
+                VM.Code = newCode
+                VM.Latex = newLatex
+
+                editFBDVectorTerm(VM).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                    onClose()
+                }))
             }}
         >
             Update

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {Button, ColorPicker, Drawer, Form, Space, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
-import { FixURL } from "../../../../services/Auxillary";
+import { FixURL, handleResponse } from "../../../../services/Auxillary";
 import { calculateCPdimensions } from "./Functions";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
 
-export function UpdateOBColor({open, onClose, OB, question}) {
+export function UpdateOBColor({open, onClose, OB, question, reloadQuestion}) {
 
     if(!open) return <div/>;
+
+    const {isLoadingEditFBDObjectBodyColor, editFBDObjectBodyColor} = useQuestions()
+
     const [newColor, setNewColor] = useState('')
 
     const [api, contextHolder] = message.useMessage()
@@ -77,7 +81,17 @@ export function UpdateOBColor({open, onClose, OB, question}) {
         <Button 
             size="small"
             type="primary"
+
+            loading={isLoadingEditFBDObjectBodyColor}
+
             onClick={() => {
+                let VM = {...OB}
+                VM.Color = newColor
+
+                editFBDObjectBodyColor(VM).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                    onClose()
+                }))
 
             }}
         >

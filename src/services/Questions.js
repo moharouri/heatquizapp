@@ -219,6 +219,19 @@ export function removeEnergyBalanceICRequest(b){
     return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/RemoveInitialCondition', b)
 }
 
+//FBD Quesiton
+export function editFBDObjectBodyColorRequest(b){
+    return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditOBColor', b)
+}
+
+export function editFBDVectorTermColorRequest(b){
+    return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditVTColor', b)
+}
+
+export function editFBDVectorTermRequest(b){
+    return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditVTCodeLatexTextAngleDirection', b)
+}
+
 
 
 
