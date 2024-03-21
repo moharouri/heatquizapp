@@ -89,4 +89,6 @@
     object-fit: contain;
 }
 
-
+.assign-relations-element-select-element{
+    width: 15vw;
+}

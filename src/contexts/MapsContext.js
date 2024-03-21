@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 import { useAsyncFn } from "../hooks/useAsync"
-import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, getRecentlyVistedMapsRequest, reassignMapToCourseRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
+import {addBadgeSystemEntityRequest, addMapBadgeSystemRequest, addMapPDFStatisticRequest, addMapRequest, assignBadgeSystemToElementRequest, assignClickListToMapElementRequest, assignPDFToMapElementRequest, assignRelationToMapElementRequest, assignRelationsToMapElementRequest, assignSeriesToMapElementRequest, attachMapToElementRequest, deassignClickListToMapElementRequest, deattachMapToElementRequest, deleteMapElementRequest, editBadgeSystemEntityRequest, editMapBadgeSystemRequest, editMapBasicInfoRequest, editMapElementBadgeImageRequest, editMapElementBadgeProgressRequest, editMapElementBasicInfoRequest, getMapElementStatisticsRequest, getMapExtendedRequest, getMapRequest, getRecentlyVistedMapsRequest, reassignMapToCourseRequest, removeBadgeSystemRequest, removeMapBadgeEntityRequest, removeMapElementBadgeRequest, removePDFToMapElementRequest, removeRelationToMapElementRequest, removeSeriesFromMapElementRequest } from "../services/Maps"
 
 const Context = React.createContext()
 
@@ -37,6 +37,8 @@ export function MapsProvider ({children}){
     const {loading: loadingDeattachMapToElement, value: deattachMapToElementResult, error: deattachMapToElementError, execute: deattachMapToElement} = useAsyncFn((b) => deattachMapToElementRequest(b))
 
     const {loading: loadingAssignRelationToMapElement, value: assignRelationToMapElementResult, error: assignRelationToMapElementError, execute: assignRelationToMapElement} = useAsyncFn((b) => assignRelationToMapElementRequest(b))
+    const {loading: loadingAssignRelationsToMapElement, value: assignRelationsToMapElementResult, error: assignRelationsToMapElementError, execute: assignRelationsToMapElement} = useAsyncFn((b) => assignRelationsToMapElementRequest(b))
+
     const {loading: loadingRemoveRelationToMapElement, value: removeRelationToMapElementResult, error: removeRelationToMapElementError, execute: removeRelationToMapElement} = useAsyncFn((b) => removeRelationToMapElementRequest(b))
 
     const {loading: loadingAssignClickListToMapElement, value: assignClickListToMapElementResult, error: assignClickListToMapElementError, execute: assignClickListToMapElement} = useAsyncFn((b) => assignClickListToMapElementRequest(b))
@@ -128,6 +130,11 @@ export function MapsProvider ({children}){
             assignRelationToMapElementResult,
             assignRelationToMapElementError,
             assignRelationToMapElement,
+
+            loadingAssignRelationsToMapElement,
+            assignRelationsToMapElementResult,
+            assignRelationsToMapElementError,
+            assignRelationsToMapElement,
 
             loadingRemoveRelationToMapElement,
             removeRelationToMapElementResult,

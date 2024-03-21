@@ -73,6 +73,10 @@ export function assignRelationToMapElementRequest(b){
     return ADD_REQUEST_BODY_API('CourseMap/AddEditElementRelation/', b, true)
 }
 
+export function assignRelationsToMapElementRequest(b){
+    return ADD_REQUEST_FILE_API('CourseMap/AssingElementRelations/', b, true)
+}
+
 export function removeRelationToMapElementRequest(b){
     return ADD_REQUEST_BODY_API('CourseMap/RemoveElementRelation/', b, true)
 }
