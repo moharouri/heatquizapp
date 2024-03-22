@@ -27,6 +27,14 @@
     padding-right: 0.25vw;
 }
 
+.highlighted-silent{
+    width: fit-content;
+    background-color: whitesmoke;
+    border-radius: 0.5em;
+    padding-left: 0.25vw;
+    padding-right: 0.25vw;
+}
+
 
 .hoverable-plus{
     width: fit-content;

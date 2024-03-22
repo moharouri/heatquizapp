@@ -220,6 +220,14 @@ export function removeEnergyBalanceICRequest(b){
 }
 
 //FBD Quesiton
+export function editFBDQuestionBodyRequest(b){
+    return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditQuestionText', b)
+}
+
+export function editFBDArrowLengthRequest(b){
+    return EDIT_REQUEST_FILE_API('FreebodyDiagramQuestion/EditArrowLength', b)
+}
+
 export function editFBDObjectBodyColorRequest(b){
     return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditOBColor', b)
 }
@@ -231,6 +239,7 @@ export function editFBDVectorTermColorRequest(b){
 export function editFBDVectorTermRequest(b){
     return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditVTCodeLatexTextAngleDirection', b)
 }
+
 export function editFBDVectorTermAssociationRequest(b){
     return EDIT_REQUEST_FILE_API('FreebodyDiagramQuestion/EditVTAssociation', b)
 }

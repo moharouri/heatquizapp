@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Col, Divider, Dropdown, List, Row, Space, Tabs, message } from "antd";
+import { Button, Col, Divider, Dropdown, List, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined } from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, QuestionCircleOutlined, PictureOutlined, FullscreenOutlined  } from '@ant-design/icons';
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { UpdateVTCodeLatex } from "./UpdateVTCodeLatex";
 import { UpdateVTLatexText } from "./UpdateVTLatexText";
@@ -12,6 +12,8 @@ import { UpdateVTAngle } from "./UpdateVTAngle";
 import { UpdateVTColor } from "./UpdateVTColor";
 import { UpdateOBColor } from "./UpdateOBColor";
 import { calculateCPdimensions } from "./Functions";
+import { EditQuestionLatex } from "./EditQuestionLatex";
+import { EditQuestionArrowLength } from "./EditQuestionArrowLength";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
@@ -20,6 +22,11 @@ export function FBDQuestionEditView({reloadQuestion}){
 
     const imageRef = React.createRef()
     const imageRef2 = React.createRef()
+
+    const [showEditImage, setShowEditImage] = useState(false)
+    const [showEditExplanation, setShowEditExplanation] = useState(false)
+    const [showEditArrowLength, setShowEditArrowLength] = useState(false)
+
     const [offset, setOffset] = useState(0)
     const [leftOffset, setLeftOffset] = useState(0)
 
@@ -60,7 +67,7 @@ export function FBDQuestionEditView({reloadQuestion}){
     }, [imageRef])
 
     const renderQuestionImage = () => {
-        const {Code, Base_ImageURL, Base_ImageURL_Width, Base_ImageURL_Height, ObjectBodies} = question
+        const {Code, Base_ImageURL, Base_ImageURL_Width, Base_ImageURL_Height, ObjectBodies, ArrowLength} = question
         
         const backgroundImageStyle = ({
             backgroundPosition:'center',
@@ -177,7 +184,17 @@ export function FBDQuestionEditView({reloadQuestion}){
                     </div>    
                 )
                })}
-            
+
+                <br/>
+                <br/>
+                <Space
+                    align="center"
+                >
+                    <p className="default-gray">Arrow length</p>
+                    <p className="default-title highlighted-silent">{ArrowLength} {' px'}</p>
+                </Space>
+               
+               
             </div>
         )
     }
@@ -453,6 +470,7 @@ export function FBDQuestionEditView({reloadQuestion}){
             {contextHolder}
             <Row
                 gutter={12}
+                className="hq-full-width"
             >
                 <Col
                     ref = {imageRef}
@@ -465,6 +483,51 @@ export function FBDQuestionEditView({reloadQuestion}){
                     xs ={12}
                 >
                     {renderContent()}
+                </Col>
+                <Col xs={1} />
+                <Col
+                    xs={1}
+                >
+                    <Space
+                    align="end"
+                    direction="vertical">
+                       
+                        <Tooltip
+                            color="white"
+                            title={<p>Update image</p>}
+                            placement="left"
+                        >
+                            <Button
+                                onClick={() => setShowEditImage(true)}
+                            >
+                                 <PictureOutlined />
+                            </Button>
+                        </Tooltip>
+
+                        <Tooltip
+                            color="white"
+                            title={<p>Update/View question body</p>}
+                            placement="left"
+                        >
+                            <Button
+                                onClick={() => setShowEditExplanation(true)}
+                            >
+                                 <QuestionCircleOutlined />
+                            </Button>
+                        </Tooltip>
+
+                        <Tooltip
+                            color="white"
+                            title={<p>Update arrow length</p>}
+                            placement="left"
+                        >
+                            <Button
+                                onClick={() => setShowEditArrowLength(true)}
+                            >
+                                <FullscreenOutlined  />
+                            </Button>
+                        </Tooltip>
+                    </Space> 
                 </Col>
             </Row>
 
@@ -517,6 +580,20 @@ export function FBDQuestionEditView({reloadQuestion}){
                 question={question}
 
                 reloadQuestion={() => reloadQuestion()}
+            />
+
+            <EditQuestionLatex 
+                open={showEditExplanation}
+                onClose={() => setShowEditExplanation(false)}
+                question={question}
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <EditQuestionArrowLength 
+                open={showEditArrowLength}
+                onClose={() => setShowEditArrowLength(false)}
+                question={question}
+                reloadQuestion = {() => reloadQuestion()}
             />
         </div>
     )
