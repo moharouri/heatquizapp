@@ -3,10 +3,15 @@ import {Button, Drawer, Form, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import TextArea from "antd/es/input/TextArea";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function UpdateVTLatexText({open, onClose, vtTerm}) {
+export function UpdateVTLatexText({open, onClose, vtTerm, reloadQuestion}) {
 
     if(!open) return <div/>;
+    const {isLoadingEditFBDVectorTerm, editFBDVectorTerm,} = useQuestions()
+
+
     const [newLatex, setNewLatex] = useState('')
 
     const [api, contextHolder] = message.useMessage()
@@ -42,18 +47,27 @@ export function UpdateVTLatexText({open, onClose, vtTerm}) {
                         setNewLatex(value)
                     }}
                 />
+                <small className="default-gray">You can delete the text by simply entering empty input</small>
             </Form.Item>
-            <br/>
             <small className="default-gray">LaTeX rendering</small>
             <LatexRenderer latex={newLatex}/>
         </Form> 
-
+        <br/>
         <br/>
         <Button 
             size="small"
             type="primary"
-            onClick={() => {
 
+            loading={isLoadingEditFBDVectorTerm}
+
+            onClick={() => {
+                let VM = {...vtTerm}
+                VM.LatexText = newLatex
+
+                editFBDVectorTerm(VM).then(r => handleResponse(r, api, 'Updated', 1, () => {
+                    reloadQuestion()
+                    onClose()
+                }))
             }}
         >
             Update
