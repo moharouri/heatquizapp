@@ -231,6 +231,9 @@ export function editFBDVectorTermColorRequest(b){
 export function editFBDVectorTermRequest(b){
     return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditVTCodeLatexTextAngleDirection', b)
 }
+export function editFBDVectorTermAssociationRequest(b){
+    return EDIT_REQUEST_FILE_API('FreebodyDiagramQuestion/EditVTAssociation', b)
+}
 
 
 

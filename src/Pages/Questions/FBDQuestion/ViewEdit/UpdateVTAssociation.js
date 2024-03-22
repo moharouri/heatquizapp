@@ -1,15 +1,18 @@
 import React, {useEffect, useState } from "react";
 import {Button, Drawer, List, Space, message } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
-import { FixURL } from "../../../../services/Auxillary";
+import { FixURL, handleResponse } from "../../../../services/Auxillary";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import './index.css'
 import { calculateCPdimensions } from "./Functions";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
 
-export function UpdateVTAssociation({open, onClose, vtTerm, question}) {
+export function UpdateVTAssociation({open, onClose, vtTerm, question, reloadQuestion}) {
 
     if(!open) return <div/>;
+    const {isLoadingEditFBDVectorTermAssociation, editFBDVectorTermAssociation,} = useQuestions()
+
     const [selectedOB, setSelectedOB] = useState(null)
 
     const [api, contextHolder] = message.useMessage()
@@ -36,7 +39,27 @@ export function UpdateVTAssociation({open, onClose, vtTerm, question}) {
                 <Button
                     size="small"
                     type="primary"
-                    onClick={() => {}}
+
+                    loading={isLoadingEditFBDVectorTermAssociation}
+
+                    onClick={() => {
+                        if(!selectedOB){
+                            api.destroy()
+                            api.warning("Please select an object body")
+
+                            return
+                        }
+
+                        const data = new FormData()
+
+                        data.append("VTId", vtTerm.Id)
+                        data.append("OBId", selectedOB.Id)
+
+                        editFBDVectorTermAssociation(data).then(r => handleResponse(r, api, 'Updated', () => {
+                            reloadQuestion()
+                            onClose()
+                        }))
+                    }}
                 >
                     Update
                 </Button>
