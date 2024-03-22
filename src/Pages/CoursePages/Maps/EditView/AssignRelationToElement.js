@@ -50,6 +50,7 @@ export function AssignRelationshipToElement({open, onClose, element, elements, r
                         data.append('BaseElementId', element.Id)
 
                         for(let e of selectedElements){
+                            console.log(e.selectedElement.value)
                             data.append('RequiredElementsIds', e.selectedElement.value)
                         }
 
@@ -91,7 +92,7 @@ export function AssignRelationshipToElement({open, onClose, element, elements, r
                         <Space>
                             <p className="default-gray">{ri+1}</p>
                             <p className="default-title">{Title}</p>
-                            <p className="default-gray">@{Threshold}</p>
+                            <p className="default-gray">@{Threshold}%</p>
                         </Space>
                     </div>
                     )

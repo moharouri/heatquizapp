@@ -43,6 +43,8 @@ export function MapEditView(){
 
         loadingRemoveRelationToMapElement, removeRelationToMapElement,
 
+        loadingClearRelationsOfMapElement, clearRelationsOfMapElement,
+
         loadingAssignClickListToMapElement, assignClickListToMapElement,
 
         loadingDeassignClickListToMapElement, deassignClickListToMapElement,
@@ -465,7 +467,7 @@ export function MapEditView(){
                 <List 
                 dataSource={Elements}
                 renderItem={(e, ei) => {
-                    const {Title, PDFURL, ExternalVideoLink, QuestionSeries, MapAttachment, Badges, CourseMapElementImages, RequiredElement, Threshold, Background_Image} = e
+                    const {Title, PDFURL, ExternalVideoLink, QuestionSeries, MapAttachment, Badges, CourseMapElementImages, RequiredElement, Relations, Threshold, Background_Image} = e
                     
                     const isHovered = hoveredElement === e.Id
 
@@ -819,83 +821,6 @@ export function MapEditView(){
                                     <TrophyOutlined  style={{color:'gray', fontSize:'large'}}/>
                                 </div>)}
                                 </Col>
-
-                                <Col>
-                                {RequiredElement ?
-                                (loadingRemoveRelationToMapElement ?
-                                <Spin />
-                                :
-                                <Dropdown
-                                    menu={{
-                                        items:[{
-                                            key:'assign_new_relationship',
-                                            label:'Assign new relationship',
-                                            icon: <EditOutlined/>,
-                                            onClick: () => {
-                                                setShowAssignRelationship(true)
-                                                setSelectedElement(e)
-                                            }
-                                        },{
-                                            key:'remove_relationship',
-                                            label:'Remove relationship',
-                                            icon: <DeleteOutlined />,
-                                            onClick: () => {
-                                                const VM = e
-                        
-                                                removeRelationToMapElement(VM)
-                                                .then(
-                                                    (r) => handleResponse(
-                                                        r,
-                                                        api,
-                                                        'Relationship removed successfuly',
-                                                        1,
-                                                        () => loadData()))
-
-                                                
-                                            }
-                                        }],
-                                        title:'Actions'
-                                    }}
-                                >
-                                <Space 
-                                    title="Required element"
-                                    className="please-select-area"
-                                    onMouseEnter={() => setHoveredElement(RequiredElement.Id)}
-                                    onMouseLeave={() => setHoveredElement(null)}
-                                    onClick={() => {
-                                        const index = Elements
-                                        .map((e, ei) => ({Id: e.Id, index: ei}))
-                                        .filter(a => a.Id === RequiredElement.Id)[0]
-                                        .index
-                                        
-                                        const ref = elementRefs[index]
-
-                                        ref.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'start',
-                                        })
-                                    }}
-                                >
-                                    <NodeIndexOutlined className="default-gray"/>
-                                    <p className="default-gray">{RequiredElement.Title}</p>
-                                    <small className="default-blue">@{Threshold}%</small>
-                                    <small className="default-gray"> threshold</small>
-                                </Space>
-                                </Dropdown>):
-                                <div 
-
-                                onClick={() => {
-                                    setShowAssignRelationship(true)
-                                    setSelectedElement(e)
-                                }}
-
-                                title="Assign required element relationship"
-                                className="please-select-area please-select-area-special">
-                                    <PlusOutlined className="default-gray default-smaller"/>
-                                    <NodeIndexOutlined style={{color:'gray', fontSize:'large'}}/>
-                                </div>}
-                                </Col>
-
                                 <Col>
                                 {MapAttachment ?
                                 (isAttachmentChanged ?
@@ -977,6 +902,72 @@ export function MapEditView(){
                                 ghost 
                                 expandIcon={({ isActive }) => <CaretRightOutlined style={{color:'gray'}} rotate={isActive ? 90 : 0} />}
                                 defaultActiveKey={[]} onChange={(v) => {}}>
+                                    <Collapse.Panel header={<small className="default-gray">Relations ({Relations.length})</small>} key="0">
+                                        <Space>
+                                            <div 
+                                                onClick={() => {
+                                                    setShowAssignRelationship(true)
+                                                    setSelectedElement(e)
+                                                }}
+
+                                                title="(Re)Assign required element relationship(s)"
+                                                className="please-select-area please-select-area-special"
+                                            >
+                                                <PlusOutlined className="default-gray default-smaller"/>
+                                                <NodeIndexOutlined style={{color:'gray', fontSize:'large'}}/>
+                                            </div>
+                                            {Relations.length && 
+                                            <div>
+                                                {loadingClearRelationsOfMapElement && selectedElement && selectedElement.Id === e.Id ? 
+                                                <Spin/>
+                                                :
+                                                <div 
+                                                    onClick={() => {
+                                                        setSelectedElement(e)
+                                                        
+                                                        const data = new FormData()
+
+                                                        data.append("BaseElementId", e.Id)
+
+                                                        clearRelationsOfMapElement(data).then(r => handleResponse(r, api, 'Removed', () => {
+                                                            loadData()
+                                                        }))
+                                                    }}
+
+                                                    title="Delete all relationships"
+                                                    className="please-select-area please-select-area-special-delete"
+                                                >
+                                                    <DeleteOutlined className="default-gray default-large"/>
+                                                </div>}
+                                            </div>}
+                                        </Space>
+                                        <br/>
+                                        <br/>
+                                        {Relations.map((r, ri) => {
+                                            const {Id, Threshold, RequiredElementId} = r
+                                            const RequiredElement = Elements.filter(a => a.Id === RequiredElementId)[0]
+                                            
+                                            const {Title} = RequiredElement
+                        
+                                            return(
+                                            <div 
+                                                key={Id}
+                                                className="hq-full-width"
+                                            >
+                                                
+                                                <Space
+                                                    className="hoverable"
+                                                >
+                                                        <p className="default-gray">{ri+1}</p>
+                                                        <p className="default-title">{Title}</p>
+                                                        <p className="default-gray">@{Threshold}%</p>
+                                                </Space>
+                                                <br/>
+                                                <br/>
+                                            </div>
+                                            )
+                                        })}
+                                    </Collapse.Panel>
                                     <Collapse.Panel header={<small className="default-gray">Badges</small>} key="1">
                                         {Badges.length ? 
                                         

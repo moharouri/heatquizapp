@@ -116,10 +116,8 @@ export function MapPlay(){
         setSelectedMapElement(e)
     }   
 
-    const renderRequiredElement = (e) => {
-        const {RequiredElement, Title, Threshold} = e
-
-        const requiredElementFull = map.Elements.filter(a => a.Id === RequiredElement.Id)[0]
+    const renderRequiredElement = (e, requiredElementFull, Threshold) => {
+        const {Title} = e
 
         notificationApi.open({
             message: Title,
@@ -133,7 +131,7 @@ export function MapPlay(){
                         <strong
                         className="map-required-element-modal-click"
                         onClick={() => onClickElement(requiredElementFull)}>
-                            {RequiredElement.Title}
+                            {requiredElementFull.Title}
                         </strong>
                         <p>successfully to unlock</p>
                     </div>
@@ -158,35 +156,49 @@ export function MapPlay(){
         notificationApi.destroy()
         setSelectedMapElement(e)
 
-        const {QuestionSeries, PDFURL, ExternalVideoLink, VideoURL, RequiredElement, Threshold, MapAttachment} = e
+        const {QuestionSeries, PDFURL, ExternalVideoLink, VideoURL, Relations, MapAttachment} = e
 
-        if(RequiredElement){
-            console.log(RequiredElement)
-            console.log(playStats)
-            console.log(playStats.ElementsProgress)
-            console.log(playStats.ElementsProgress[existingElementIndex])
-            console.log(progress, Threshold)
+        const requiredElementsIdsInitial = Relations.map(a => a.RequiredElementId)
 
-            let existingElementIndex = playStats.ElementsProgress.map((a, ai) => a.Id === e.Id ? (ai) : null)[0]
+        const requiredElements = map.Elements.filter(e => e.QuestionSeries && requiredElementsIdsInitial.includes(e.Id))
+        let requiredElementsThresholds = {}
+
+        for(let r of Relations){
+            requiredElementsThresholds[r.RequiredElementId] = r.Threshold 
+        }
+
+        console.log(e)
+        console.log(Relations)
+        console.log(requiredElementsThresholds)
+        console.log(requiredElements)
+
+        for(let re of requiredElements){
+            const {QuestionSeries: requiredSeries} = re
+
+            let existingElementIndex = playStats.ElementsProgress.map((a, ai) => a.Id === re.Id ? (ai) : null)[0]
 
             const progress = playStats.ElementsProgress[existingElementIndex]
 
+            const threshold = requiredElementsThresholds[re.Id]
+
             if(!progress){
 
-                renderRequiredElement(e)
+                renderRequiredElement(e, re, threshold)
 
                 return
             }
         
-            const finalProgress = evaluateElementProgress(QuestionSeries, progress)
-            console.log(QuestionSeries, progress)
-            console.log(finalProgress)
+            const finalProgress = evaluateElementProgress(requiredSeries, progress)
 
-            if(finalProgress < Threshold){
-                renderRequiredElement(e)
+            if(finalProgress < threshold){
+
+                renderRequiredElement(e, re, threshold)
+
                 return
             }
         }
+
+      
 
         //Only question series 
         if(QuestionSeries && !(PDFURL || ExternalVideoLink || VideoURL || MapAttachment)){

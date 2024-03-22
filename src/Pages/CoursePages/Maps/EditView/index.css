@@ -2,6 +2,10 @@
     color: green;
 }
 
+.please-select-area-special-delete:hover > .default-gray{
+    color: red;
+}
+
 .map-edit-view-basic-list{
     height: 67vh;
     overflow-y: scroll;
