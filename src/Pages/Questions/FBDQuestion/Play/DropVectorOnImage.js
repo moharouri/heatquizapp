@@ -235,7 +235,6 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                     const b = orientedBoxes[bk]
                     const {body, list} = b
                     const {Id, X, Y, Width, Height} = body
-                    console.log(b)
 
                     return(
                            <div>
@@ -260,8 +259,6 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                
                                    const extraX = Math.cos(radAngle) * arrowRad
                                    const extraY = Math.sin(-radAngle) * arrowRad
-
-                                   console.log(Angle, radAngle, extraX, extraY)
                
                                    return(
                                        <div
