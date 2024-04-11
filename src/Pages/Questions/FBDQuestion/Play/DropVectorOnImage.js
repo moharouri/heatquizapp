@@ -108,10 +108,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         setMouseY(0)
     }
 
-    const getSnippingBoxes = () => {
-
-    }
-
+   
     const onMouseMove = (e) => {
         const {point, _snippedBox} = handleSnipping(e)
 
@@ -190,10 +187,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     }
 
     const orientedBoxes = getOrientedVTs()
-
-    console.log("orientedBoxes")
-    console.log(orientedBoxes)
-
+    const orientedBoxesKeys = Object.keys(orientedBoxes)
     const widthHeight = window.innerWidth*0.035
 
       return(
@@ -237,7 +231,68 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                     />
                 </div>}
 
-                {addedVT.map((vt) => {
+                {orientedBoxesKeys.map((bk) => {
+                    const b = orientedBoxes[bk]
+                    const {body, list} = b
+                    const {Id, X, Y, Width, Height} = body
+                    console.log(b)
+
+                    return(
+                           <div>
+                                <div
+                                    key={Id}
+                                    style={{position:'absolute', width: Width, height: Height, left: leftOffset + X + Width/2, top: topOffset + Y + Height/2, border:'1px solid red'}}
+                                >
+                                    <div
+                                    id={"B_START_" + Id}
+                                    style={{left:Width/2, top: Height/2, position:'relative', width: 1, height:1}}
+                                    >
+
+                                    </div>
+                                </div>
+
+                                {list.map((vt) => {
+                                   const {Id: vId, X, Y, Angle, Latex} = vt
+
+                                   const arrowRad = 50
+               
+                                   const radAngle = Math.PI * (Angle/180)
+               
+                                   const extraX = Math.cos(radAngle) * arrowRad
+                                   const extraY = Math.sin(-radAngle) * arrowRad
+
+                                   console.log(Angle, radAngle, extraX, extraY)
+               
+                                   return(
+                                       <div
+                                           key={vId}
+                                           style={{position:'absolute', left: leftOffset + X + extraX, top: topOffset + Y + extraY}}
+                                           id={"VT_END_" + vId}
+                                       >
+                                       </div>
+                                   )
+                                })}
+
+                                {list.map((vt) => {
+                                    const {Id:vId} = vt
+
+                                    return(<Xarrow
+                                            key={Id}
+                                            start={"B_START_" + Id}
+                                            end={"VT_END_" + vId}
+                                            strokeWidth={2}
+                                            headSize={4}
+                                            startAnchor="auto"
+                                            endAnchor="auto"
+                                            color={"green"}
+                                            path={"straight"}
+                                        />)
+                                })}
+
+                                </div>)
+                            })}
+                
+                {/*addedVT.map((vt) => {
                     const {Id, X, Y} = vt
                     return(
                         <div
@@ -303,7 +358,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                             color={"green"}
                             path={"straight"}
                         />)
-                })}
+                })*/}
 
            
         </div>
