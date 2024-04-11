@@ -509,9 +509,9 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {northTerms.map((t, ti) => {
                     const {Id} = t
 
-                    const tleft = left + ((ti+1)/(1+ northTerms.length)) * width
+                    const tleft = ((ti+1)/(1+ northTerms.length)) * width
 
-                    const style = {top: boxLocationY, left: boxLocationX, width:1, height:1, position:'absolute'}
+                    const style = {top: boxLocationY, left: boxLocationX + tleft , width:1, height:1, position:'absolute'}
 
                     return(
                         <div 
@@ -527,8 +527,8 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {northTerms.map((t, ti) => {
                     const {Id, Latex} = t
 
-                    const tleft = left + ((ti+1)/(1+ northTerms.length)) * width
-                    const style = {top: boxLocationY + 10, left:boxLocationX, width:1, height:1, position:'absolute'}
+                    const tleft = ((ti+1)/(1+ northTerms.length)) * width
+                    const style = {top: boxLocationY  - arrowLength, left:boxLocationX + tleft, width:1, height:1, position:'absolute'}
                     return(
                         <div 
                         style={style}
@@ -577,9 +577,9 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {southTerms.map((t, ti) => {
                     const {Id} = t
 
-                    const tleft = left + ((ti+1)/(1+ southTerms.length)) * width
+                    const tleft = ((ti+1)/(1+ southTerms.length)) * width
 
-                    const style = {top:top, left: tleft, width:1, height:1, position:'relative'}
+                    const style = {top: height + boxLocationY, left: boxLocationX + tleft , width:1, height:1, position:'absolute'}
 
                     return(
                         <div 
@@ -595,8 +595,10 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {southTerms.map((t, ti) => {
                     const {Id, Latex} = t
 
-                    const tleft = left + ((ti+1)/(1+ southTerms.length)) * width
-                    const style = {top:top   + arrowLength , left: tleft, width:1, height:1, position:'relative'}
+                    const tleft = ((ti+1)/(1+ southTerms.length)) * width
+
+                    const style = {top: height + boxLocationY + arrowLength, left: boxLocationX + tleft , width:1, height:1, position:'absolute'}
+
                     return(
                         <div
                         key={Id}
@@ -643,9 +645,9 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {eastTerms.map((t, ti) => {
                     const {Id} = t
 
-                    const tTop = top - ((ti+1)/(1+ eastTerms.length)) * height
+                    const tTop = ((ti+1)/(1+ eastTerms.length)) * height
 
-                    const style = {top:tTop, left: left, width:1, height:1, position:'relative'}
+                    const style = {top: boxLocationY + tTop, left: boxLocationX, width:1, height:1, position:'absolute'}
 
                     return(
                         <div 
@@ -661,9 +663,9 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {eastTerms.map((t, ti) => {
                     const {Id, Latex} = t
 
-                    const tTop = top - ((ti+1)/(1+ eastTerms.length)) * height
+                    const tTop =  ((ti+1)/(1+ eastTerms.length)) * height
 
-                    const style = {top:tTop , left: left - arrowLength, width:1, height:1, position:'relative'}
+                    const style = {top:boxLocationY + tTop , left: boxLocationX - arrowLength, width:1, height:1, position:'absolute'}
                     return(
                         <div
                         key={Id}
@@ -710,9 +712,9 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {westTerms.map((t, ti) => {
                     const {Id} = t
 
-                    const tTop = top - ((ti+1)/(1+ westTerms.length)) * height
+                    const tTop = ((ti+1)/(1+ westTerms.length)) * height
 
-                    const style = {top:tTop, left: left + width, width:1, height:1, position:'relative'}
+                    const style = {top: boxLocationY + tTop, left: boxLocationX + width, width:1, height:1, position:'absolute'}
 
                     return(
                         <div 
@@ -728,9 +730,9 @@ export function EnergyBalanceQuestionPlay({Id}){
                 {westTerms.map((t, ti) => {
                     const {Id, Latex} = t
 
-                    const tTop = top - ((ti+1)/(1+ westTerms.length)) * height
+                    const tTop = ((ti+1)/(1+ westTerms.length)) * height
 
-                    const style = {top:tTop , left: left + width + arrowLength, width:1, height:1, position:'relative'}
+                    const style = {top:boxLocationY + tTop , left: boxLocationX + width + arrowLength, width:1, height:1, position:'absolute'}
                     return(
                         <div
                         key={Id}
