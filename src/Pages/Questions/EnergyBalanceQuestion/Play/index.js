@@ -538,6 +538,22 @@ export function EnergyBalanceQuestionPlay({Id}){
                     )
                 })}
 
+                 {/* Latex */}
+                 {northTerms.map((t, ti) => {
+                    const {Id, Latex} = t
+
+                    const tleft = ((ti+1)/(1+ northTerms.length)) * width
+                    const style = {top: boxLocationY  - arrowLength*1.5, left:boxLocationX + tleft, width:1, height:1, position:'absolute'}
+                    return(
+                        <div 
+                        style={style}
+                        key={ti}
+                        >
+                            <LatexRenderer latex={"$$" + Latex + "$$"} />
+                        </div>
+                    )
+                })}
+
                 {/* Arrow */}
                 {northTerms.map((t, ti) => {
                     const {Id, Inflow} = t
@@ -604,6 +620,22 @@ export function EnergyBalanceQuestionPlay({Id}){
                         key={Id}
                         style={style}
                         id={Id + "TIP"}>
+                        </div>
+                    )
+                })}
+
+                {/* Latex */}
+                {southTerms.map((t, ti) => {
+                    const {Id, Latex} = t
+
+                    const tleft = ((ti+1)/(1+ southTerms.length)) * width
+                    const style = {top: height + boxLocationY + arrowLength * 1.5, left: boxLocationX + tleft , width:1, height:1, position:'absolute'}
+                    return(
+                        <div 
+                        style={style}
+                        key={ti}
+                        >
+                            <LatexRenderer latex={"$$" + Latex + "$$"} />
                         </div>
                     )
                 })}
