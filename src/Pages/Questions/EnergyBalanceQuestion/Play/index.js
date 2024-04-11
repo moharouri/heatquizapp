@@ -16,6 +16,10 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     const { energyBalanceQuestionPlay, errorGetEnergyBalanceQuestionPlay, isLoadingEnergyBalanceQuestionPlay, getEnergyBalanceQuestionPlay} = useQuestions()
 
+    const boxRef = React.createRef()
+
+    const [boxLocationX, setBoxLocationX] = useState(0)
+    const [boxLocationY, setBoxLocationY] = useState(0)
 
     const [currentTab, setCurrentTab] = useState(0)
 
@@ -32,8 +36,6 @@ export function EnergyBalanceQuestionPlay({Id}){
     const [selectedTerm, setSelectedTerm] = useState(null)
 
     const [selectedTermDefine, setSelectedTermDefine] = useState(null)
-
-    const [BCAnswers, setBCAnswers] = useState([])
     
     const [newListBC, setNewListBC] = useState([])
     const [selectedIndexBC, setSelectedIndexBC] = useState(0)
@@ -41,20 +43,24 @@ export function EnergyBalanceQuestionPlay({Id}){
     const [newListIC, setNewListIC] = useState([])
     const [selectedIndexIC, setSelectedIndexIC] = useState(0)
 
-    const [selectedBCDefine, setSelectedBCDefine] = useState(null)
-
     useEffect(() => {
         getEnergyBalanceQuestionPlay(Id)
     }, [Id])
 
+
     useEffect(() => {
-       if(energyBalanceQuestionPlay){
-        const {BoundaryConditions} = energyBalanceQuestionPlay
+        if(boxRef && boxRef.current){
 
-        //setBCAnswers(BoundaryConditions.map((bc) => ({...bc, AddedAnswer:{List:[], echoNumber:0}})))
-       }
-    }, [energyBalanceQuestionPlay])
+            const box = boxRef.current
+            const styles = box.getBoundingClientRect()
 
+            const {top, left} = styles
+
+            setBoxLocationX(left)
+            setBoxLocationY(top)
+            
+        }
+    }, [boxRef])
 
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
         return({            
@@ -444,7 +450,9 @@ export function EnergyBalanceQuestionPlay({Id}){
         const elementStyle = {backgroundColor:'#f1f4f8', opacity:'60%', cursor: selectedTerm ? 'pointer' : 'default'}
 
         return(
-            <div>
+            <div
+                ref={boxRef}
+            >
                 <div style={{flexDirection:'row', display:'flex'}}>
                 
                 <div 
@@ -503,7 +511,7 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                     const tleft = left + ((ti+1)/(1+ northTerms.length)) * width
 
-                    const style = {top:top - height, left: tleft, width:1, height:1, position:'relative'}
+                    const style = {top: boxLocationY, left: boxLocationX, width:1, height:1, position:'absolute'}
 
                     return(
                         <div 
@@ -520,7 +528,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                     const {Id, Latex} = t
 
                     const tleft = left + ((ti+1)/(1+ northTerms.length)) * width
-                    const style = {top: top - height -arrowLength - latexSpace, left: tleft, width:1, height:1, position:'relative'}
+                    const style = {top: boxLocationY + 10, left:boxLocationX, width:1, height:1, position:'absolute'}
                     return(
                         <div 
                         style={style}
@@ -1036,8 +1044,9 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                             setNewListBC(_terms)
                         }}
-                    >Add new line</p>
-
+                    >Add new boundary condition</p>
+                    <br/>
+                    <br/>
                     {newListBC.map((a, ai) => {
 
                         const {List} = a
@@ -1051,7 +1060,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                         return(
                             <Space
                                 key={ai}
-                                className="hq-full-width"
+                                className="hq-full-width eb-question-bc-ic-line"
                                 direction="vertical"
                             >
                                 <Space>
@@ -1073,12 +1082,17 @@ export function EnergyBalanceQuestionPlay({Id}){
                                             }}
                                         />
                                     </Tooltip>
-                                    &nbsp;
-                                    <p 
-                                    onClick={() => setSelectedIndexBC(ai)}
-                                    className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}>{ai+1}</p>
-                                    &nbsp;
-                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                    <Space
+                                        className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}
+                                        onClick={() => setSelectedIndexBC(ai)}
+                                    >
+                                        &nbsp;
+                                        <p
+                                         className={(termSelected ? "default-title highlighted" : "default-gray")}
+                                        >{ai+1}</p>
+                                        &nbsp;
+                                        <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                    </Space>
                                 </Space>
 
                                 <small className="default-red">{checkTerm}</small>
@@ -1100,7 +1114,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                         }}
 
                         isEnergyBalance={true}
-                    /> : <p className="default-red">Please add new boundary condition</p>}
+                    /> : <div/>}
             </div>
         )
     }
@@ -1136,8 +1150,9 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                             setNewListIC(_terms)
                         }}
-                    >Add new line</p>
-
+                    >Add new initial condition</p>
+                    <br/>
+                    <br/>
                     {newListIC.map((a, ai) => {
 
                         const {List} = a
@@ -1150,7 +1165,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                         return(
                             <Space
                                 key={ai}
-                                className="hq-full-width"
+                                className="hq-full-width eb-question-bc-ic-line"
                                 direction="vertical"
                             >
                                 <Space>
@@ -1172,12 +1187,18 @@ export function EnergyBalanceQuestionPlay({Id}){
                                             }}
                                         />
                                     </Tooltip>
-                                    &nbsp;
-                                    <p 
-                                    onClick={() => setSelectedIndexIC(ai)}
-                                    className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}>{ai+1}</p>
-                                    &nbsp;
-                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                   
+                                    <Space
+                                        className={"hoverable-plus " + (termSelected ? "default-title highlighted" : "default-gray")}
+                                        onClick={() => setSelectedIndexIC(ai)}
+                                    >
+                                        &nbsp;
+                                        <p
+                                         className={(termSelected ? "default-title highlighted" : "default-gray")}
+                                        >{ai+1}</p>
+                                        &nbsp;
+                                        <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                    </Space>
                                 </Space>
 
                                 <small className="default-red">{checkTerm}</small>
@@ -1199,7 +1220,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                         }}
 
                         isEnergyBalance={true}
-                    /> : <p className="default-red">Please add new initial condition</p>}
+                    /> : <div/>}
             </div>
         )
     }
