@@ -199,6 +199,40 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
 
     const widthHeight = window.innerWidth*0.035
 
+    const getOrderedList = (list) => {
+
+        //Positive only reference
+        let matrix = {}
+
+        for(let vt of list){            
+            const currentKeys = Object.keys(matrix).map(a => Number(a))
+
+            const {Angle} = vt
+
+            let _angle = Angle
+
+            if(_angle < 0) _angle = _angle + 360
+
+
+            let oppositeAngle = _angle + 180
+            oppositeAngle = (oppositeAngle % 360)
+
+            
+            if(currentKeys.includes(_angle)){
+                matrix[_angle].push({...vt, Direction: +1})
+            }   
+            else if(currentKeys.includes(oppositeAngle)){
+                matrix[oppositeAngle].push({...vt, Direction: -1})
+            }
+            else{
+                matrix[_angle] = []
+                matrix[_angle].push({...vt, Direction: +1})
+            }
+        }
+
+        return matrix
+    }
+
       return(
         <div>
              <canvas
@@ -245,11 +279,13 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                     const {body, list} = b
                     const {Id, X, Y, Width, Height} = body
 
-                    return(
+                    const orderedList = getOrderedList(list)
+                    const orderedListKeys = Object.keys(orderedList).map(a => Number(a))
+                    return(     
                            <div>
                                 <div
                                     key={Id}
-                                    style={{position:'absolute', width: 0, height: 0, left: leftOffset + X + Width/2, top: topOffset + Y + Height/2}}
+                                    style={{position:'absolute', width: Width, height: Height, border:'1px solid red', left: leftOffset + X + Width/2, top: topOffset + Y + Height/2}}
                                 >
                                     <div
                                     id={"B_START_" + Id}
@@ -259,112 +295,58 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                                     </div>
                                 </div>
 
-                                {list.map((vt) => {
-                                   const {Id: vId, X, Y, Angle, Latex} = vt
+                                {orderedListKeys.map((k, ki) => {
+                                    const Angle = k
 
-                                   const arrowRad = 50
+                                    const arrowRad = 50
                
-                                   const radAngle = Math.PI * (Angle/180)
-               
-                                   const extraX = Math.cos(radAngle) * arrowRad
-                                   const extraY = Math.sin(-radAngle) * arrowRad
-               
-                                   return(
-                                       <div
-                                           key={vId}
-                                           style={{position:'absolute', left: leftOffset + X + extraX, top: topOffset + Y + extraY}}
-                                           id={"VT_END_" + vId}
-                                       >
-                                       </div>
-                                   )
+                                    const radAngle = Math.PI * (Angle/180)
+                
+                                    const extraX = Math.cos(radAngle) * arrowRad
+                                    const extraY = Math.sin(-radAngle) * arrowRad
+                                    
+                                    console.log(Width, Height, X, Y, leftOffset, extraX, extraY)
+
+                                    const left = leftOffset + X + Width*2 + extraX
+                                    const top = topOffset + Y + Height + extraY 
+                                    console.log("------")
+                                    console.log(left)
+                                    console.log(top)
+                                    console.log(Math.pow(extraX, 2) + Math.pow(extraY, 2))
+                                    console.log(Math.sqrt(Math.pow(extraX, 2) + Math.pow(extraY, 2)))
+                                    console.log("******")
+
+                                    return(
+                                        <div
+                                            key={ki}
+                                            style={{position:'absolute', left: left, top: top}}
+                                            id={"VT_END_" + k}
+                                        >
+                                        </div>
+                                    )
                                 })}
 
-                                {list.map((vt) => {
-                                    const {Id:vId} = vt
+                                {orderedListKeys.map((k) => {
+                                    const Angle = k
 
                                     return(<Xarrow
                                             key={Id}
                                             start={"B_START_" + Id}
-                                            end={"VT_END_" + vId}
+                                            end={"VT_END_" + Angle}
                                             strokeWidth={2}
                                             headSize={4}
                                             startAnchor="auto"
                                             endAnchor="auto"
                                             color={"green"}
                                             path={"straight"}
-                                        />)
+                                    />)
                                 })}
+
 
                                 </div>)
                             })}
                 
-                {/*addedVT.map((vt) => {
-                    const {Id, X, Y} = vt
-                    return(
-                        <div
-                            key={Id}
-                            style={{position:'absolute', left: leftOffset + X, top: topOffset + Y}}
-                            id={"VT_START_" + Id}
-                        >
-                        </div>
-                    )
-                })}
-
-                {addedVT.map((vt) => {
-                    const {Id, X, Y, Angle, Latex} = vt
-
-                    const arrowRad = 50
-
-                    const radAngle = Math.PI * (Angle/180)
-
-                    const extraX = Math.cos(radAngle) * arrowRad
-                    const extraY = Math.sin(-radAngle) * arrowRad
-
-                    return(
-                        <div
-                            key={Id}
-                            style={{position:'absolute', left: leftOffset + X + extraX, top: topOffset + Y + extraY}}
-                            id={"VT_END_" + Id}
-                        >
-                        </div>
-                    )
-                })}
-
-                {addedVT.map((vt) => {
-                    const {Id, X, Y, Angle, Latex} = vt
-
-                    const arrowRad = 70
-
-                    const radAngle = Math.PI * (Angle/180)
-
-                    const extraX = Math.cos(radAngle) * arrowRad
-                    const extraY = Math.sin(-radAngle) * arrowRad
-
-                    return(
-                        <div
-                            key={Id}
-                            style={{position:'absolute', left: leftOffset + X + extraX, top: topOffset + Y + extraY}}
-                        >
-                            <LatexRenderer latex={"$$" + Latex + "$$"} />
-                        </div>
-                    )
-                })}
-
-            {addedVT.map((vt) => {
-                    const {Id} = vt
-
-                    return(<Xarrow
-                            key={Id}
-                            start={"VT_START_" + Id}
-                            end={"VT_END_" + Id}
-                            strokeWidth={2}
-                            headSize={4}
-                            startAnchor="auto"
-                            endAnchor="auto"
-                            color={"green"}
-                            path={"straight"}
-                        />)
-                })*/}
+                
 
            
         </div>
