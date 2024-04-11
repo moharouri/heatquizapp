@@ -62,12 +62,48 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         })
     }
 
+
+    const getOrientedVTs = () => {
+        let boxes = {
+
+        }
+
+
+        for(let vt of addedVT){
+            const boxesIds = Object.keys(boxes).map(a => Number(a))
+
+            const {ObjectBody} = vt
+
+            if(boxesIds.includes(ObjectBody.Id)){
+                console.log(boxesIds, ObjectBody.Id)
+
+                boxes[ObjectBody.Id].list.push(vt)
+            }
+            else{
+                boxes[ObjectBody.Id] = ({})
+                
+                boxes[ObjectBody.Id].body = ObjectBody
+                boxes[ObjectBody.Id].list = [vt]
+            }
+
+        }
+
+        return boxes
+    }
+
+    const orientedBoxes = getOrientedVTs()
+    const orientedBoxesKeys = Object.keys(orientedBoxes)
+
+    const fakeOrientedBoxesList = orientedBoxesKeys.map(k => orientedBoxes[k].body).filter(a => a.fake)
+
     const handleSnipping = (e) => {
         let point = computePointInCanvas(e)
 
         let _snippedBox = null
 
-        const boxes = ObjectBodies.map((b) => {
+        const boxes = [...fakeOrientedBoxesList, ...ObjectBodies].map((b) => {
+
+
             const dimensions = calculateCPdimensions (Base_ImageURL_Width, Base_ImageURL_Height, newImageWidth, newImageHeight, b)
             return({
                 ...b,
@@ -161,33 +197,6 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         }
     }
 
-
-    const getOrientedVTs = () => {
-        let boxes = {
-
-        }
-
-        const boxesIds = Object.keys(boxes)
-
-        for(let vt of addedVT){
-            const {ObjectBody} = vt
-
-            if(boxesIds.includes(ObjectBody.Id)){
-                boxes.list.push(vt)
-            }
-            else{
-                boxes[ObjectBody.Id] = ({})
-                
-                boxes[ObjectBody.Id].body = ObjectBody
-                boxes[ObjectBody.Id].list = [vt]
-            }
-        }
-
-        return boxes
-    }
-
-    const orientedBoxes = getOrientedVTs()
-    const orientedBoxesKeys = Object.keys(orientedBoxes)
     const widthHeight = window.innerWidth*0.035
 
       return(
@@ -240,11 +249,11 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                            <div>
                                 <div
                                     key={Id}
-                                    style={{position:'absolute', width: Width, height: Height, left: leftOffset + X + Width/2, top: topOffset + Y + Height/2, border:'1px solid red'}}
+                                    style={{position:'absolute', width: 0, height: 0, left: leftOffset + X + Width/2, top: topOffset + Y + Height/2}}
                                 >
                                     <div
                                     id={"B_START_" + Id}
-                                    style={{left:Width/2, top: Height/2, position:'relative', width: 1, height:1}}
+                                    style={{left:Width/2, top: Height/2, position:'relative', width: 0, height:0}}
                                     >
 
                                     </div>
