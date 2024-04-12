@@ -3,7 +3,7 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Button, Col, Divider, Dropdown, List, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined, QuestionCircleOutlined, PictureOutlined, FullscreenOutlined  } from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, QuestionCircleOutlined, PictureOutlined, FullscreenOutlined, PlusOutlined  } from '@ant-design/icons';
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { UpdateVTCodeLatex } from "./UpdateVTCodeLatex";
 import { UpdateVTLatexText } from "./UpdateVTLatexText";
@@ -14,6 +14,7 @@ import { UpdateOBColor } from "./UpdateOBColor";
 import { calculateCPdimensions } from "./Functions";
 import { EditQuestionLatex } from "./EditQuestionLatex";
 import { EditQuestionArrowLength } from "./EditQuestionArrowLength";
+import { AddVectorTerm } from "./AddVectorTerm";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
@@ -24,6 +25,7 @@ export function FBDQuestionEditView({reloadQuestion}){
     const imageRef2 = React.createRef()
 
     const [showEditImage, setShowEditImage] = useState(false)
+    
     const [showEditExplanation, setShowEditExplanation] = useState(false)
     const [showEditArrowLength, setShowEditArrowLength] = useState(false)
 
@@ -52,6 +54,8 @@ export function FBDQuestionEditView({reloadQuestion}){
 
     const [showEditOBColor, setShowEditOBColor] = useState(false)
     const [selectedOB, setSelectedOB] = useState(null)
+
+    const [showAddVT, setShowAddVT] = useState(false)
 
     useEffect(() => {
         let _offset = 0
@@ -281,6 +285,23 @@ export function FBDQuestionEditView({reloadQuestion}){
         const smallImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*smallImageWidth
         return(
             <div>
+                <Tooltip
+                    color="white"
+                    title={<p>Add new vector term</p>}
+                >
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowAddVT(true)
+                        }}
+
+                        icon={<PlusOutlined style={{color:'green'}}/>}
+                    >
+                        Add
+                    </Button>
+                </Tooltip>
+                <br/>
+                <br/>
                 <List 
                     dataSource={VTs}
 
@@ -592,6 +613,14 @@ export function FBDQuestionEditView({reloadQuestion}){
             <EditQuestionArrowLength 
                 open={showEditArrowLength}
                 onClose={() => setShowEditArrowLength(false)}
+                question={question}
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <AddVectorTerm 
+                open={showAddVT}
+                onClose={() => setShowAddVT(false)}
+
                 question={question}
                 reloadQuestion = {() => reloadQuestion()}
             />

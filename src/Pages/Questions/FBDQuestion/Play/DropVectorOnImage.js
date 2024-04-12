@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useState } from "react"
-import { FixURL } from "../../../../services/Auxillary"
+import { FixURL, getUniqueValues } from "../../../../services/Auxillary"
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent"
 import Xarrow from "react-xarrows";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
@@ -75,7 +75,6 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
             const {ObjectBody} = vt
 
             if(boxesIds.includes(ObjectBody.Id)){
-                console.log(boxesIds, ObjectBody.Id)
 
                 boxes[ObjectBody.Id].list.push(vt)
             }
@@ -219,21 +218,21 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
 
             
             if(currentKeys.includes(_angle)){
-                matrix[_angle].push({...vt, Direction: +1})
+                matrix[_angle].push({...vt, positiveDirection: true})
             }   
             else if(currentKeys.includes(oppositeAngle)){
-                matrix[oppositeAngle].push({...vt, Direction: -1})
+                matrix[oppositeAngle].push({...vt, positiveDirection: false})
             }
             else{
                 matrix[_angle] = []
-                matrix[_angle].push({...vt, Direction: +1})
+                matrix[_angle].push({...vt, positiveDirection: true})
             }
         }
 
         return matrix
     }
 
-      return(
+    return(
         <div>
              <canvas
                     style = {{
@@ -275,6 +274,8 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                 </div>}
 
                 {orientedBoxesKeys.map((bk) => {
+                    const {ArrowLength} = question
+
                     const b = orientedBoxes[bk]
                     const {body, list} = b
                     const {Id, X, Y, Width, Height} = body
@@ -285,7 +286,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                            <div>
                                 <div
                                     key={Id}
-                                    style={{position:'absolute', width: Width, height: Height, border:'1px solid red', left: leftOffset + X + Width/2, top: topOffset + Y + Height/2}}
+                                    style={{position:'absolute', left: leftOffset + X + Width/2, top: topOffset + Y + Height/2}}
                                 >
                                     <div
                                     id={"B_START_" + Id}
@@ -298,24 +299,16 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                                 {orderedListKeys.map((k, ki) => {
                                     const Angle = k
 
-                                    const arrowRad = 50
+                                    const arrowRad = ArrowLength || 50
                
                                     const radAngle = Math.PI * (Angle/180)
                 
                                     const extraX = Math.cos(radAngle) * arrowRad
                                     const extraY = Math.sin(-radAngle) * arrowRad
                                     
-                                    console.log(Width, Height, X, Y, leftOffset, extraX, extraY)
-
-                                    const left = leftOffset + X + Width*2 + extraX
+                                    const left = leftOffset + X + Width + extraX
                                     const top = topOffset + Y + Height + extraY 
-                                    console.log("------")
-                                    console.log(left)
-                                    console.log(top)
-                                    console.log(Math.pow(extraX, 2) + Math.pow(extraY, 2))
-                                    console.log(Math.sqrt(Math.pow(extraX, 2) + Math.pow(extraY, 2)))
-                                    console.log("******")
-
+                               
                                     return(
                                         <div
                                             key={ki}
@@ -326,8 +319,49 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                                     )
                                 })}
 
+                                {/* LaTeX */}
+                                {orderedListKeys.map((k, ki) => {
+                                    const Angle = k
+
+                                    const arrowRad = ArrowLength || 70
+               
+                                    const radAngle = Math.PI * (Angle/180)
+                
+                                    const extraX = Math.cos(radAngle) * arrowRad
+                                    const extraY = Math.sin(-radAngle) * arrowRad
+                                    
+                                    const left = leftOffset + X + Width + extraX
+                                    const top = topOffset + Y + Height + extraY 
+                                    
+                                    const latexReduced = orderedList[k].reduce((r, c, ci) => {
+                                        
+                                        r = r + (ci ? (c.positiveDirection ? '+' : '-') : '') + c.Latex
+
+                                        return r
+                                    }, '')
+
+                                   
+
+                                    return(
+                                        <div
+                                            key={ki}
+                                            style={{position:'absolute', left: left, top: top}}
+                                        >
+                                            <LatexRenderer latex={"$$" + latexReduced + "$$"}/>
+                                        </div>
+                                    )
+                                })}
+
                                 {orderedListKeys.map((k) => {
                                     const Angle = k
+
+                                    let arrowColor = 'green'
+
+                                    let arrowColorArray = getUniqueValues(orderedList[k].map((a) => a.ArrowColor))
+
+                                    if(arrowColorArray.length === 1){
+                                        arrowColor = arrowColorArray[0]
+                                    }
 
                                     return(<Xarrow
                                             key={Id}
@@ -337,7 +371,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                                             headSize={4}
                                             startAnchor="auto"
                                             endAnchor="auto"
-                                            color={"green"}
+                                            color={arrowColor}
                                             path={"straight"}
                                     />)
                                 })}

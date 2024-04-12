@@ -135,16 +135,6 @@ export function UpdateVTAssociation({open, onClose, vtTerm, question, reloadQues
                     }}
                 />
             </div>
-        <br/>
-        <Button 
-            size="small"
-            type="primary"
-            onClick={() => {
-
-            }}
-        >
-            Update
-        </Button>
     </Drawer>
     )
 }

@@ -351,7 +351,7 @@ export function AddFBDQuestion(){
                                 <LatexRenderer latex={LatexText || ""}/>
                                 <br/>
                                 <p className="default-gray">Answers</p>
-                                <p className="hq-clickable hoverable-plus"
+                                <p className="hq-clickable hoverable-plus highlighted"
                                     onClick={() => {
                                         setShowAddVTAnswers(true)
                                         setSelectedVTIndex(vti)

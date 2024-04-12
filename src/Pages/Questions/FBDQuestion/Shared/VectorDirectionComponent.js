@@ -1,7 +1,9 @@
-import { Space } from "antd";
+import { Input, Space } from "antd";
 import React, { useEffect, useState } from "react";
 
-export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAngle, angleStep}){
+import './VectorDirectionComponent.css'
+
+export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAngle, onUpdateAngleSafe, angleStep, hasTextEditor}){
 
     const [ctx, setCtx] = useState(null)
 
@@ -30,6 +32,13 @@ export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAng
     useEffect(() => {
         if(ctx){
             draw()
+        }
+
+        console.log(angle)
+        console.log(onUpdateAngleSafe)
+
+        if(onUpdateAngleSafe){
+            onUpdateAngleSafe(angle)
         }
     }, [ctx, angle])
 
@@ -190,7 +199,28 @@ export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAng
                 onClick = {onClick}
                 onMouseMove = {onMove}
             />
-            <p className="default-gray default-small">{angle}°</p>
+            {hasTextEditor ? 
+            <Input 
+                type="number"
+                value={angle}
+                onChange={(v) => {
+                    const value = Number(v.target.value)
+
+                    if(!value) return;
+
+                    if(!Number.isInteger(value)) return;
+
+                    if(value < -360 || value > 360) return;
+
+                    setAngle(value)
+                    onUpdateAngle(angle)
+                }}
+
+                className="angle-clock-input"
+
+                suffix="°"
+            />
+            :<p className="default-gray default-small">{angle}°</p>}
         </Space>
     )
 }

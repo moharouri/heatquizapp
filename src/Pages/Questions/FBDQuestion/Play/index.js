@@ -139,6 +139,16 @@ export function FBDQuestionPlay({Id}){
 
                                                         setAddedVT(vts)
                                                     }}
+
+
+                                                    onUpdateAngleSafe = {(a) => {
+                                                        let vts = [...addedVT]
+                                                        vts[existingSelection.index].Angle = a
+
+                                                        setAddedVT(vts)
+                                                    }}
+
+                                                    hasTextEditor = {true}
                                                 />}
                                                 &nbsp;
                                                 &nbsp;
