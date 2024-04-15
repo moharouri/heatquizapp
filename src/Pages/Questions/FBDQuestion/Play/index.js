@@ -69,8 +69,8 @@ export function FBDQuestionPlay({Id}){
                             
                             box = ({
                                 Id: Date.now(),
-                                X: x - FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT,
-                                Y: y - FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT,
+                                X: x - FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT/2,
+                                Y: y - FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT/2,
                                 
                                 Width: FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT,
                                 Height: FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT,
