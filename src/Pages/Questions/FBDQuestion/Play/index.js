@@ -11,6 +11,7 @@ import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { DropVectorOnImage } from "./DropVectorOnImage";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT } from "./Constants";
+import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
 
 export function FBDQuestionPlay({Id}){
 
@@ -109,7 +110,7 @@ export function FBDQuestionPlay({Id}){
                                 const isSelected = selectedVTDrop && selectedVTDrop.Id === Id
 
                                 const existingSelection = addedVT.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === Id)[0]
-
+                                const Clockwise = existingSelection && existingSelection.Clockwise
                                 return(
                                         <div key ={Id} >
 
@@ -151,7 +152,16 @@ export function FBDQuestionPlay({Id}){
 
                                                     hasTextEditor = {true}
                                                 />
-                                                : <p>Rotate</p>
+                                                : 
+                                                <MomentDirectionComponent
+                                                    clockwise={Clockwise}
+                                                    onFlip={() => {
+                                                        let vts = [...addedVT]
+                                                        vts[existingSelection.index].Clockwise = !vts[existingSelection.index].Clockwise 
+
+                                                        setAddedVT(vts)
+                                                    }}
+                                                />
                                                 )}
                                                 &nbsp;
                                                 &nbsp;
@@ -321,6 +331,8 @@ export function FBDQuestionPlay({Id}){
             </div>
         )
     }
+    
+    console.log(addedVT)
 
     return(
         <div>
