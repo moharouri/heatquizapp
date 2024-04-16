@@ -194,9 +194,11 @@ export function FBDQuestionPlay({Id}){
         const answerValidity = validateKeyboardAnswer(Answer)
 
         return(
-            <div className="hq-full-width">
-                <p className="default-gray">Define</p>
-                <LatexRenderer latex={"$$" + Latex + "$$"} />
+            <div className="fbd-question-term-answer-zone-base">
+                <Space direction="vertical" align="start">
+                    <p className="default-gray">Define</p>
+                    <LatexRenderer latex={"$$" + Latex + "$$"} />
+                </Space>
                 <br/>
                 <div className="fbd-question-term-answer-zone">
                     {reducedLatex && 
@@ -332,8 +334,6 @@ export function FBDQuestionPlay({Id}){
         )
     }
     
-    console.log(addedVT)
-
     return(
         <div>
             {isLoadingFBDQuestionPlay && <Skeleton />}
