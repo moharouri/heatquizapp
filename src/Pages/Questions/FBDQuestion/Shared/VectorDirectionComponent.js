@@ -206,8 +206,6 @@ export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAng
                 onChange={(v) => {
                     const value = Number(v.target.value)
 
-                    if(!value) return;
-
                     if(!Number.isInteger(value)) return;
 
                     if(value < -360 || value > 360) return;

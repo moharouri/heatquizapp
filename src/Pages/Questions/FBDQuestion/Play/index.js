@@ -104,7 +104,7 @@ export function FBDQuestionPlay({Id}){
                         <List 
                             dataSource={vectors}
                             renderItem={(v, vi) => {
-                                const {Id, Latex} = v
+                                const {Id, Latex, Linear} = v
 
                                 const isSelected = selectedVTDrop && selectedVTDrop.Id === Id
 
@@ -129,6 +129,7 @@ export function FBDQuestionPlay({Id}){
                                                 &nbsp;
 
                                                 {existingSelection && 
+                                                (Linear ? 
                                                 <VectorDirectionComponent 
                                                     angleStep={5}
                                                     currentAngle={existingSelection.Angle}
@@ -149,7 +150,9 @@ export function FBDQuestionPlay({Id}){
                                                     }}
 
                                                     hasTextEditor = {true}
-                                                />}
+                                                />
+                                                : <p>Rotate</p>
+                                                )}
                                                 &nbsp;
                                                 &nbsp;
                                                 {existingSelection && 

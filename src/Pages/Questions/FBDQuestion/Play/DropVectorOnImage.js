@@ -165,12 +165,20 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     }
 
     const onMouseClick = (e) => {
-        if(selectedVT){
+        if(!selectedVT) return;
+        const {Linear} = selectedVT
+
+        let point = computePointInCanvas(e)
+
+        if(Linear){
             setShowSelectAngle(true)
-            let point = computePointInCanvas(e)
 
             setAngleX(point.x)
             setAngleY(point.y)
+        }
+        else{
+            setShowSelectAngle(false)
+            onDropVT({...selectedVT, Clockwise: true}, 0, point.x, point.y, snippedBox)
         }
     }
 
@@ -214,7 +222,9 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         //Positive only reference
         let matrix = {}
 
-        for(let vt of list){            
+        for(let vt of list){    
+            if(!vt.Linear) continue;
+            
             const currentKeys = Object.keys(matrix)
 
             const {Angle, BodyObjectId} = vt
@@ -243,6 +253,26 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         }
 
         return matrix
+    }
+
+    const getMomentsLatex = (list) => {
+        let latex = ""
+        let clockwiseCount = list.filter(a => !a.Linear).reduce((r, c) => r = (r || c.Clockwise), false)
+
+        for(let vt of list){    
+            if(vt.Linear) continue;
+            
+            const {Clockwise,} = vt 
+            
+            if(clockwiseCount){
+                latex = latex + (Clockwise ? "+ " : '- ') + vt.Latex
+            }
+            else{
+                latex = latex + (!Clockwise ? "+ " : '- ') + vt.Latex
+            }
+        }
+
+        return ({latex, clockwiseCount})
     }
 
     return(
@@ -297,8 +327,8 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                     const {width, height, left, top} = dimensions
 
                     const orderedList = getOrderedList(list)
-                    console.log(orderedList)
-                    console.log(orientedBoxes)
+                    const {latex:momentsLatex, clockwiseCount: clockwise} = getMomentsLatex(list)
+
                     const orderedListKeys = Object.keys(orderedList)
 
                     return(     
@@ -311,9 +341,30 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
                                     id={"B_START_" + Id}
                                     style={{left:width/2, top: height/2, position:'relative', width: 0, height:0}}
                                     >
-
                                     </div>
                                 </div>
+
+                                {momentsLatex 
+                                &&
+                                <div
+                                    key={Id}
+                                    style={{position:'absolute', left: leftOffset + left , top: topOffset + top}}
+                                >
+                                    <div style={{left:width/2, top: height/2, position:'relative'}} >
+                                        <LatexRenderer latex={momentsLatex} />
+                                    </div>
+                                </div>}
+
+                                {momentsLatex 
+                                &&
+                                <div
+                                    key={Id}
+                                    style={{position:'absolute', left: leftOffset + left , top: topOffset + top}}
+                                >
+                                    <div style={{left:width/2 - 10, top: height/2 - 10, position:'relative'}} >
+                                       <p className="default-green default-larger">{clockwise ? "↻" : "↺"}</p>
+                                    </div>
+                                </div>}
 
                                 {orderedListKeys.map((k, ki) => {
                                     const data = orderedList[k]
