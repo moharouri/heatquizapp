@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Col, List, Row, Skeleton, Space, Steps } from "antd";
+import { Col, List, Row, Skeleton, Space, Steps, message } from "antd";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { FixURL } from "../../../../services/Auxillary";
 import { Keyboard } from "../../../../Components/Keyboard";
 
 import './index.css'
@@ -23,6 +22,8 @@ export function FBDQuestionPlay({Id}){
     const [selectedVTDrop, setSelectedVTDrop] = useState(null)
     const [selectedVT, setSelectedVT] = useState(null)
 
+    const [api, contextHolder] = message.useMessage()
+
     const loadData = () => {
         getFBDQuestionPlay(Id)
 
@@ -32,15 +33,45 @@ export function FBDQuestionPlay({Id}){
         loadData()
     }, [Id])
 
+    const getAllVectors = () => {
+        const {ObjectBodies} = FBDQuestionPlay
+        const vectors = ObjectBodies.flatMap(a => a.VectorTerms)
+
+        return vectors
+    }
+
+    const getAllAnswerableVectors = () => {
+        const vectors = addedVT.filter(a => a.Answers.length)
+        return vectors
+    }
+
     const onChange = (t) => {
+        const allVectors = getAllVectors()
+        const allAnswerableVectors = getAllAnswerableVectors()
+
+        if(addedVT.length !== allVectors.length){
+            api.destroy()
+            api.warning("Please add all vectors")
+
+            return;
+        }
+
+        if(t === 1){
+            if(allAnswerableVectors.length){
+                setSelectedVT(allAnswerableVectors[0])
+            }
+            else{
+                 setSelectedVT(null)
+            }
+        }
+
         setCurrentTab(t)
     }   
 
     const renderAddTerms = () => {
-        const {QuestionText, ObjectBodies} = FBDQuestionPlay
+        const {QuestionText} = FBDQuestionPlay
 
-        const vectors = ObjectBodies.flatMap(a => a.VectorTerms)
-
+        const vectors = getAllVectors()
 
         return(
             <div 
@@ -228,13 +259,11 @@ export function FBDQuestionPlay({Id}){
     }
 
     const renderDefinitions = () => {
-        const {QuestionText, Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, ObjectBodies} = FBDQuestionPlay
+        const {QuestionText} = FBDQuestionPlay
 
+        
+        const answerableVTs = getAllAnswerableVectors()
 
-        const newImageWidth = window.innerWidth * 0.25
-        const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
-
-     
         return(
             <div 
                 className="hq-full-width"
@@ -242,24 +271,19 @@ export function FBDQuestionPlay({Id}){
                 <LatexRenderer latex={QuestionText} />
                 <br/>
                 <Space size={"large"} align="start">
-                    <div 
-                        style = {{
-                            height:newImageHeight,
-                            width: newImageWidth,
-                            backgroundImage: `url(${FixURL(Base_ImageURL)})`,
-                            backgroundPosition:'center',
-                            backgroundRepeat:'no-repeat',
-                            backgroundSize:'contain',
-                            border:'1px solid gainsboro'
-                        }}
-                    >                
-                    </div>
+                    <DropVectorOnImage 
+                        question={FBDQuestionPlay} 
+                                            
+                        onDropVT = {(vt, a, x, y, sBox) => {}}
+
+                        addedVT={addedVT}
+                    />
 
                     <div>
                         <Row
                             gutter={[8, 8]}
                         >
-                        {addedVT.map((v, vi) => {
+                        {answerableVTs.map((v, vi) => {
                             const {Id, Latex, Answer} = v
 
                             const isSelected = selectedVT && selectedVT.Id === Id
@@ -300,8 +324,13 @@ export function FBDQuestionPlay({Id}){
     const renderContent = () => {
         const map = {
             0: () => renderAddTerms(),
-            1: () => renderDefinitions(),
 
+        }
+
+        const hasAnswerableVTs = getAllAnswerableVectors().length
+
+        if(hasAnswerableVTs){
+            map[1] = () => renderDefinitions()
         }
 
         return map[currentTab]()
@@ -336,6 +365,7 @@ export function FBDQuestionPlay({Id}){
     
     return(
         <div>
+            {contextHolder}
             {isLoadingFBDQuestionPlay && <Skeleton />}
 
             {(!isLoadingFBDQuestionPlay && errorGetFBDQuestionPlay) && 
