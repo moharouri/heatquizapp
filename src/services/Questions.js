@@ -162,6 +162,14 @@ export function editEnergyBalanceLatexRequest(b){
     return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditQuestionText', b)
 }
 
+export function editEnergyBalanceImageRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddEditQuestionBackgroundImage', b)
+}
+
+export function addEnergyBalanceControlVolumeRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddControlVolume', b)
+}
+
 export function editEnergyBalanceControlVolumeStatusRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeAsCorrect', b)
 }

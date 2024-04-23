@@ -29,3 +29,14 @@
     height: 19vw;
     object-fit: contain;
 }
+
+.eb-question-add-image-container{
+    width: 40vw;
+    height: 20vw;
+}
+
+.eb-question-add-image-inside{
+    width: 39vw;
+    height: 19vw;
+    object-fit: contain;
+}

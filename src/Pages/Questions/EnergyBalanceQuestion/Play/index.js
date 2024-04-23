@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import {Col, List, Row, Skeleton, Space, Steps, Tooltip } from "antd";
+import {Col, Divider, List, Row, Skeleton, Space, Steps, Tooltip, message } from "antd";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { FixURL } from "../../../../services/Auxillary";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "./Constants";
 import Xarrow from "react-xarrows";
-import { CloseCircleFilled } from '@ant-design/icons';
+import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 
 import './Play.css'
 import { Keyboard } from "../../../../Components/Keyboard";
-import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 
 export function EnergyBalanceQuestionPlay({Id}){
 
@@ -34,16 +34,25 @@ export function EnergyBalanceQuestionPlay({Id}){
         West: [],
         Center: []
     })
+
+    const [termsValidation, setTermsValidation] = useState({})
     
     const [selectedTerm, setSelectedTerm] = useState(null)
 
     const [selectedTermDefine, setSelectedTermDefine] = useState(null)
+    const [selectedTermDefineIndex, setSelectedTermDefineIndex] = useState(0)
     
     const [newListBC, setNewListBC] = useState([])
+    const [newListBCValidation, setNewListBCValidation] = useState([])
     const [selectedIndexBC, setSelectedIndexBC] = useState(0)
     
     const [newListIC, setNewListIC] = useState([])
     const [selectedIndexIC, setSelectedIndexIC] = useState(0)
+    const [newListICValidation, setNewListICValidation] = useState([])
+
+    const [energyBalanceIsCorrect, setEnergyBalanceIsCorrect] = useState(false)
+
+    const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
         getEnergyBalanceQuestionPlay(Id)
@@ -310,7 +319,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                         <div 
                         onClick={() => flipTermSign(t, currentDirection, includedTerm.IsSource)}
                         className={"hq-clickable " + (includedTerm.IsSource ? "eb-question-term-direction-inactive" : "eb-question-term-direction-neutral")}>
-                            <span className="eb-question-term-word">Steady flow </span>
+                            <span className="eb-question-term-word">Unsteady flow </span>
                         </div>
                     </div>
                     :
@@ -367,6 +376,69 @@ export function EnergyBalanceQuestionPlay({Id}){
         }
     
         return text
+    }
+
+    const getEnergyBalanceEquationFinal = () => {    
+        let text = ""
+    
+        const heatSources = termsContainer[CENTER_DIRECTION].filter((t) => t.IsSource)
+    
+        const unsteady_flow_terms = termsContainer[CENTER_DIRECTION].filter((t) => !t.IsSource)
+    
+        const steady_flow_terms = [...termsContainer[NORTH_DIRECTION], ...termsContainer[SOUTH_DIRECTION], ...termsContainer[EAST_DIRECTION], ...termsContainer[WEST_DIRECTION]]
+    
+        if(!unsteady_flow_terms.length){
+            text = '0 = '
+        }
+        else{
+            for(let term of unsteady_flow_terms){
+                text += '+' + term.Latex
+            }
+    
+            text += " = "
+        }
+    
+        if(!steady_flow_terms.length && !heatSources.length){
+            text += '0'
+        }
+        else{
+            for(let term of steady_flow_terms){
+                text +=  (term.Inflow ? '+' : '-') + term.Latex 
+            }
+    
+            for(let term of heatSources){
+                text += '+' + term.Latex
+            }
+        }
+    
+        return text
+    }
+
+    const getCorrectEnergyBalanceEquation = () => {   
+        const {EnergyBalanceTerms} = energyBalanceQuestionPlay
+
+        const ebts = EnergyBalanceTerms.filter((t) => !t.IsDummy)
+        const text = "0 = " + ebts.reduce((a,b) => a += "+" + b.Latex + " ", '')
+        return text
+    }
+
+    const checkEnergyBalanceEquation = () => {   
+        const {EnergyBalanceTerms} = energyBalanceQuestionPlay
+
+        const mandatoryEBTsIds = EnergyBalanceTerms.filter((t) => !t.IsDummy).map(a => a.Id)
+        
+        const addedTerms = getAddedTerms()
+        const addedTermsIds = getAddedTerms().map(a => a.Id)
+
+        const anyMandatoryNotAdded = mandatoryEBTsIds.filter(id => !addedTermsIds.includes(id)).length
+
+        if(anyMandatoryNotAdded) return false;
+
+        const anyAddedIsDummy = addedTerms.filter(a => a.IsDummy).length
+
+        if(anyAddedIsDummy) return false;
+
+        return true
     }
 
     const renderEnergyBalanceEquation = () => {
@@ -837,10 +909,10 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
-    const renderImageWithControlVolume = () => {
+    const renderImageWithControlVolume = (hideEB) => {
         const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, QuestionText} = energyBalanceQuestionPlay
      
-        const newImageWidth = window.innerWidth * 0.4
+        const newImageWidth = (window.innerWidth * 0.4)
         const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
 
         let cvDimesions = calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height,newImageWidth, newImageHeight, selectedCV)
@@ -877,16 +949,16 @@ export function EnergyBalanceQuestionPlay({Id}){
                     {renderWestArrows(cvDimesions)}
 
                  </div>
-                 <div>
+                 {/*<div>
                     <small 
                         onClick={() => setTermsFocused(!termsFocused)}
                         className="default-gray hq-clickable"
                     >
                         {termsFocused ? "Unfocus terms" : "Focus terms"}
                     </small>
-                 </div>
+                 </div>*/}
                  <br/>
-                 {renderEnergyBalanceEquation()}
+                 {!hideEB && renderEnergyBalanceEquation()}
             </div>
         )
     }
@@ -973,6 +1045,81 @@ export function EnergyBalanceQuestionPlay({Id}){
         return addedTerms
     }
 
+    const getAddedTermsFinal = () => {
+        let pointsTotal = 0
+        let pointsCorrectTotal = 0
+
+        const {EnergyBalanceTerms} = energyBalanceQuestionPlay
+
+        let addedTerms = []
+
+        for(let d of [NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION]){
+            addedTerms = [...addedTerms, ...(termsContainer[d]).map((r) => ({...r, North: false, South: false, East: false, West: false, Center: false, [d]: true}))]
+        }
+
+        const allMandatoryTerms = EnergyBalanceTerms.filter((t) => !t.IsDummy)
+
+        const mandatoryTermsNotIncluded = allMandatoryTerms
+        .filter(t => !t.IsDummy && !addedTerms.map(x => x.Id).includes(t.Id))
+
+        pointsTotal = pointsTotal + mandatoryTermsNotIncluded.reduce((r, c) => r += (1 + c.Questions.length), 0) /* 1: for direction */ 
+
+        const mandatoryTermsIncluded = allMandatoryTerms
+        .filter(t => !t.IsDummy && addedTerms.map(x => x.Id).includes(t.Id))
+        .map(t => {
+            const existingAddedTerm = addedTerms.filter(a => a.Id === t.Id)[0]
+
+            //Check direction
+            let directionCorrect = false
+            for(let d of [NORTH_DIRECTION, SOUTH_DIRECTION, EAST_DIRECTION, WEST_DIRECTION, CENTER_DIRECTION]){
+                if(t[d] && existingAddedTerm[d]){
+                    directionCorrect = true
+
+                    break;
+                }
+            }
+
+            //Check solution
+            const solutionsValidity = existingAddedTerm.Questions.map((q, qi) => {
+                const status = checkKeyboardAnswerIsCorrect(q.AddedAnswer, t.Questions[qi].Answers)
+
+                return status
+            })
+
+
+            return ({
+                ...t, 
+                Questions: existingAddedTerm.Questions,
+                directionCorrect,
+                solutionsValidity
+            })
+        })
+
+        pointsTotal = pointsTotal + mandatoryTermsIncluded.reduce((r, c) => r += (1 + c.Questions.length), 0) /* 1: for direction */ 
+        pointsCorrectTotal = pointsCorrectTotal + mandatoryTermsIncluded.reduce((r, c) => {
+            const {directionCorrect, solutionsValidity} = c
+
+            r = r + (directionCorrect ? 1 : 0)
+
+            r = r + solutionsValidity.filter(a => a).length
+
+            return r
+        }, 0)
+
+        const dummyTerms = addedTerms.filter(t => t.IsDummy)
+
+        pointsCorrectTotal =  pointsCorrectTotal - dummyTerms.length
+
+        return({
+            dummyTerms,
+            mandatoryTermsIncluded,
+            mandatoryTermsNotIncluded,
+
+            pointsTotal,
+            pointsCorrectTotal
+        })
+    }   
+
     const addAnswerToTermQuestion = (l) => {
         let originalTerm = null
         let originalDirection = null
@@ -993,19 +1140,99 @@ export function EnergyBalanceQuestionPlay({Id}){
 
         let _terms = ({...termsContainer})
 
-        _terms[originalDirection][originalIndex].Questions = [{..._terms[originalDirection][originalIndex].Questions[0], AddedAnswer: l}]
+        _terms[originalDirection][originalIndex].Questions[selectedTermDefineIndex] = {..._terms[originalDirection][originalIndex].Questions[selectedTermDefineIndex], AddedAnswer: l}
 
         setTermsContainer(_terms)
 
     }
 
     const renderDefineSpecificTerm = () => {
-        console.log(termsContainer)
 
         const {Latex, LatexText, Questions} = selectedTermDefine
 
         if(Questions.length > 1){
-            return(<div>test</div>)
+            const question = Questions[selectedTermDefineIndex]
+
+            const {Keyboard: keyboard, LatexCode} = question
+
+            console.log(question)
+            
+            const list = question.AddedAnswer
+
+            const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+            const answerValidity = validateKeyboardAnswer(list)
+            return(
+            <div>
+                <Row className="hq-full-width">
+                        {Questions.map((q, qi) => {
+                            const {LatexCode: qCode, Id: qId} = q
+
+                            const isSelectedDefine = selectedTermDefineIndex === qi
+
+                            const answerValidity = validateKeyboardAnswer(q.AddedAnswer)
+
+                            const answerIsValid = (answerValidity === null)
+
+                            let keyColor = ""
+
+                            if(answerIsValid){
+                                keyColor = "eb-question-term-selected-answered"
+                            }
+
+                            if(isSelectedDefine){
+                                keyColor = "eb-question-term-selected-define"
+                            }
+
+                            return(
+                                <Col
+                                    key={qId}
+                                    className={"keyboard-key-item " + (keyColor)}
+
+                                    onClick={() => {
+                                        setSelectedTermDefineIndex(qi)
+                                    }}
+                                >
+                                    <LatexRenderer latex={"$$" + qCode + "$$"} />
+                                </Col>
+                            )
+                        })}
+                    </Row>
+
+                    <Space size={"large"} align="start">
+                        <Space direction="vertical" align="start">
+                            <p className="default-gray">Define:</p>
+
+                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                            <LatexRenderer latex={"$$" + LatexCode + "$$"}/>
+                        </Space>
+
+                        {LatexText &&
+                        <Space direction="vertical" align="start">
+                            <p className="default-gray">Help</p>
+                            <p className="default-gray">{LatexText}</p>
+                        </Space>}
+                    </Space>
+
+                    <br/>
+                    <div className="eb-question-term-answer-zone">
+                        {reducedLatex && 
+                        <LatexRenderer 
+                            latex={"$$"+reducedLatex+"$$"}
+                        />}
+                    </div>
+                    <small className="default-red">{answerValidity || ""}</small>
+                    <br/>
+                    <br/>
+                    <Keyboard 
+                        Id={keyboard.Id}
+
+                        List={list}
+
+                        onEnterKey={(l) => addAnswerToTermQuestion(l)}
+                    />
+            </div>
+            )
         }
 
         else{
@@ -1099,6 +1326,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                                         }
 
                                         setSelectedTermDefine(t)
+                                        setSelectedTermDefineIndex(0)
                                     }}
                                 >
                                     <LatexRenderer latex={"$$" + Latex + "$$"} />
@@ -1325,6 +1553,437 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
+    const getBCScore = () => {
+        const pos = newListBCValidation.filter(a => a).length
+        const neg = newListBCValidation.filter(a => !a).length
+
+        let finalscore = (pos - neg)
+        finalscore = (finalscore < 0) ? 0 : finalscore
+
+        return finalscore
+    }
+
+    const getICScore = () => {
+        const pos = newListICValidation.filter(a => a).length
+        const neg = newListICValidation.filter(a => !a).length
+
+        let finalscore = (pos - neg)
+        finalscore = (finalscore < 0) ? 0 : finalscore
+
+        return finalscore
+    }
+
+    const renderItemBox = (t) => {
+        const {Id, North: isNorthSelected, East: isEastSelected, West: isWestSelected, South: isSouthSelected, Center: isCenterSelected} = t
+
+        const totalWidthHeight = 0.03*window.innerWidth
+        const shapesGap = 0.1*totalWidthHeight
+        const width1 = 0.125 * totalWidthHeight
+        const width2 = totalWidthHeight - 2 * shapesGap - 2 * width1
+
+        let selectedColor = 'rgba(2, 117, 216, 0.5)'
+
+        const notSelectedStyle = {backgroundColor:'#f1f4f8', border:'1px solid #e6e6e6',}
+        const selectedStyle = {backgroundColor:selectedColor, border:'1px solid #0275d8',} 
+
+        return(
+            <Space 
+            key={Id}
+            direction="vertical">
+                <div style={{flexDirection:'row', display:'flex', width: totalWidthHeight, height:totalWidthHeight}}>
+                
+                    <div 
+                        style={{width:width1, height: width2, marginRight:shapesGap, marginTop: (shapesGap + width1), ...(isEastSelected ? selectedStyle : notSelectedStyle)}}
+                    >
+                        {/* East */}
+                    </div>
+
+                    <div style={{width:width2, height: totalWidthHeight, marginRight:shapesGap}}>
+                        <div 
+                            style={{width:width2, height: width1, marginBottom:shapesGap, ...(isNorthSelected ? selectedStyle : notSelectedStyle)}}
+                        >
+                            {/* North */}
+                        </div>
+
+                        <div
+                            style={{width:width2, height: width2, marginBottom:shapesGap, ...(isCenterSelected ? selectedStyle : notSelectedStyle)}}
+                        >
+                            {/* Center */}
+                        </div>
+
+                        <div 
+                            style={{width:width2, height: width1, ...(isSouthSelected ? selectedStyle : notSelectedStyle)}}
+                        >
+                            {/* South */}
+                        </div>
+                    </div>
+
+                    <div 
+                        style={{width:width1, height: width2, marginTop: (shapesGap + width1), ...(isWestSelected ? selectedStyle : notSelectedStyle)}}
+                    >
+                        {/* West */}
+                    </div>
+                </div>
+            </Space>
+        )
+
+    }
+
+    const renderFinalPage = () => {
+        const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
+
+        const BCScore = getBCScore() + "/" + BoundaryConditionLines.length
+        const ICScore = getICScore() + "/" + InitialConditionLines.length
+
+        const equation = getEnergyBalanceEquationFinal()
+        const correctEB = getCorrectEnergyBalanceEquation()
+        
+        const {pointsTotal, pointsCorrectTotal, dummyTerms, mandatoryTermsIncluded, mandatoryTermsNotIncluded} = termsValidation
+
+        const TermsScore = pointsCorrectTotal + "/" + pointsTotal
+
+        return(
+            <Space align="start" size={'large'}>
+                <div>
+                    {renderImageWithControlVolume(true)}
+                </div>
+                <div style={{width: 0.55*window.innerWidth}}>
+                {BoundaryConditionLines.length && 
+                        <div className="hq-full-width">
+                        <Divider orientation="left">
+                                <Space size={'large'}>
+                                    <span className="default-gray hq-normal-font-weight">Boundary conditions</span> <span className="default-title hq-normal-font-weight">{BCScore}</span>
+                                </Space>
+                               
+                            </Divider>
+                            <Space size={'large'} align="start">
+                                <div>
+                                    <p className="default-green">Correct terms</p>
+                                    {BoundaryConditionLines.map((a, ai) => {
+                                        const {Id} = a
+
+                                        const answerReduced = a.AnswerElements
+                                        .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                        .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+                                        
+                                        return(
+                                            <div
+                                                key={Id}
+                                            >
+                                                <Space>
+                                                    <p className="default-gray">{ai+1}</p>
+
+                                                    <LatexRenderer latex={"$$" + answerReduced + "$$"} />
+                                                </Space>
+                                            </div>    
+                                        )
+                                    })}
+                                </div>
+
+                                <Col xs={6} />
+
+                                <div>
+                                    <p className="default-title">Your solution</p>
+                                    {newListBC.map((a, ai) => {
+                                        const status = newListBCValidation[ai]
+                                        const {List} = a
+
+                                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+                                        return(
+                                            <div
+                                                key={ai}
+                                            >
+                                                <Space>
+                                                    <p className="default-gray">{ai+1}</p>
+
+                                                    <LatexRenderer latex={"$$" + reducedLatex + "$$"} />
+
+                                                    {status ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
+
+                                                    {status ? <i className="default-green">+1</i> : <i className="default-red">-1</i>}
+                                                </Space>
+                                            </div>    
+                                        )
+                                    })}
+                                </div>
+                            </Space>
+                        </div>}
+
+                        {InitialConditionLines.length && 
+                            <div className="hq-full-width">
+                        <Divider orientation="left">
+                                <Space size={'large'}>
+                                    <span className="default-gray hq-normal-font-weight">Initial conditions</span> <span className="default-title hq-normal-font-weight">{ICScore}</span>
+                                </Space>
+                            </Divider>
+                            <Space size={'large'} align="start">
+                                <div>
+                                    <p className="default-green">Correct terms</p>
+                                    {InitialConditionLines.map((a, ai) => {
+                                        const {Id} = a
+
+                                        const answerReduced = a.AnswerElements
+                                        .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                        .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+                                        
+                                        return(
+                                            <div
+                                                key={Id}
+                                            >
+                                                <Space>
+                                                    <p className="default-gray">{ai+1}</p>
+
+                                                    <LatexRenderer latex={"$$" + answerReduced + "$$"} />
+                                                </Space>
+                                            </div>    
+                                        )
+                                    })}
+                                </div>
+
+                                <Col xs={6} />
+
+                                <div>
+                                    <p className="default-title">Your solution</p>
+                                    {newListIC.map((a, ai) => {
+                                        const status = newListICValidation[ai]
+
+                                        const {List} = a
+
+                                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+                                        
+                                        return(
+                                            <div
+                                                key={ai}
+                                            >
+                                                <Space>
+                                                    <p className="default-gray">{ai+1}</p>
+
+                                                    <LatexRenderer latex={"$$" + reducedLatex + "$$"} />
+
+                                                    {status ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
+
+                                                    {status ? <i className="default-green">+1</i> : <i className="default-red">-1</i>}
+                                                </Space>
+                                            </div>    
+                                        )
+                                    })}
+                                </div>
+
+                            </Space>
+                        </div>}
+
+                        <Divider orientation="left">
+                            <Space size={'large'}>
+                                <span className="default-gray hq-normal-font-weight">
+                                    Energy balance
+                                </span>
+                                <span className="default-title hq-normal-font-weight">{energyBalanceIsCorrect ? "1/1" : "0/1"}</span>
+                            </Space>
+                        </Divider>
+                        <Space size={'large'}>
+                            <div>
+                                <p className="default-green">Correct energy balance</p>
+                                <Space>
+                                    <LatexRenderer latex={"$$" + correctEB + "$$"}/>
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>This only one possible combination, term signs can be positive (+) or negative (-)</p>}
+                                    >
+                                        <ExclamationCircleOutlined className="default-title hq-clickable"/>
+                                    </Tooltip>
+                                </Space>
+                            </div>
+                            <Col xs={24} />
+                            <div>
+                                <p className="default-title">Your solution</p>
+                                <LatexRenderer latex={"$$" + equation + "$$"}/>
+                            </div>
+                        </Space>
+
+                        <Divider orientation="left">
+                            <Space size={'large'}>
+                                <span className="default-gray hq-normal-font-weight">
+                                    Energy terms
+                                </span>
+                                <span className="default-title hq-normal-font-weight">{TermsScore}</span>
+                            </Space>
+                        </Divider>
+                        <Row gutter={36} className="hq-full-width">
+                        {mandatoryTermsNotIncluded.map((t, ti) => {
+                            const {Id, Latex, Questions} = t
+
+                            return(
+                                <Col key={Id} style={{height:'100%'}}>
+                                    <div className="hq-element-container">
+                                    <Space>
+                                        <p className="default-gray">{ti+1}</p>
+                                        {renderItemBox(t)}
+                                        <LatexRenderer latex={"$$" + Latex + "$$"} /> 
+                                        <Tooltip
+                                            color="white"
+                                            title={<p>Term not included</p>}
+                                        >
+                                            <i className="default-red hq-clickable">-1</i>
+                                        </Tooltip>
+                                    </Space>
+
+                                    <br/>
+                                    {Questions.map((q) => { 
+                                        const {Id, LatexCode, Answers} = q
+
+                                        return(
+                                            <div
+                                                key={Id}
+                                            >
+                                                <Space>
+                                                    <LatexRenderer latex={"$$" + LatexCode  + "$$"} />
+                                                    <Tooltip
+                                                        color="white"
+                                                        title={<p>Definition not provided</p>}
+                                                    >
+                                                        <i className="default-red hq-clickable">-1</i>
+                                                    </Tooltip>
+                                                </Space>
+                                                {Answers.map((a, ai) => {
+
+                                                const answerReduced = a.AnswerElements
+                                                .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                                .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                                                return(
+                                                    <div
+                                                        key={ai}
+                                                        style={{width:'fit-content'}}
+                                                    >
+                                                        <LatexRenderer latex={"$$" + answerReduced + "$$"}/>
+                                                    </div>
+                                                )
+                                                })}
+
+                                                <br/>
+                                            </div>
+                                        )
+
+                                    })}
+                                    <small className="default-red">You failed to add this term</small>
+                                </div>
+                                </Col>
+                            )
+                        })}
+
+                        {mandatoryTermsIncluded.map((t, ti) => {
+                            const {Id, Latex, Questions, directionCorrect, solutionsValidity} = t
+
+                            return(
+                                <Col key={Id} style={{height:'100%'}}>
+                                    <div className="hq-element-container">
+                                    <Space size={'large'}>
+                                        <p className="default-gray">{mandatoryTermsNotIncluded.length + ti + 1}</p>
+                                        
+                                        <Space>
+                                            {renderItemBox(t)}
+                                            {directionCorrect ? 
+                                            <Tooltip
+                                                color="white"
+                                                title={<p>You assigned direction correctly</p>}
+                                            >
+                                                <i className="default-green hq-clickable">+1</i>
+                                            </Tooltip>
+                                             : 
+                                            <Tooltip
+                                                color="white"
+                                                title={<p>You assigned direction incorrectly, correct direction is shown here</p>}
+                                            >
+                                                <i className="default-red hq-clickable">-1</i>
+                                            </Tooltip>}
+                                        </Space>
+                                        
+                                        <Space>
+                                            <LatexRenderer latex={"$$" + Latex + "$$"} /> 
+                                            <Tooltip
+                                                color="white"
+                                                title={<p>Term included</p>}
+                                            >
+                                                <i className="default-green hq-clickable">+1</i>
+                                            </Tooltip>
+                                        </Space>
+                                    </Space>
+
+                                    <br/>
+                                    {Questions.map((q, qi) => { 
+                                        const {Id, LatexCode, Answers, AddedAnswer} = q
+
+                                        const reducedLatex = AddedAnswer.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+                                        const answerValidity = solutionsValidity[qi]
+
+                                        return(
+                                            <div
+                                                key={Id}
+                                            >
+                                                <Space direction="vertical" align="start">
+                                                    <Space>
+                                                        <LatexRenderer latex={"$$" + LatexCode  + "$$"} />
+                                                        {answerValidity ?
+                                                        <Tooltip
+                                                            color="white"
+                                                            title={<p>Definition correct</p>}
+                                                        >
+                                                            <i className="default-green hq-clickable">+1</i>
+                                                        </Tooltip>
+                                                        : 
+                                                        <Tooltip
+                                                            color="white"
+                                                            title={<p>Definition incorrect</p>}
+                                                        >
+                                                            <i className="default-red hq-clickable">-1</i>
+                                                        </Tooltip>}
+                                                    </Space>
+                                                    <Space align="end">
+                                                        <div>
+                                                            {Answers.map((a, ai) => {
+
+                                                                const answerReduced = a.AnswerElements
+                                                                .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                                                .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                                                                return(
+                                                                    <div
+                                                                        key={ai}
+                                                                        style={{width:'fit-content'}}
+                                                                    >
+                                                                        <LatexRenderer latex={"$$" + answerReduced + "$$"}/>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                            <p className="default-green">Correct solution</p>
+                                                        </div>
+                                                        <Col xs = {16} />
+                                                        <div>
+                                                            <LatexRenderer latex={"$$" + reducedLatex + "$$"}/>
+                                                            <p className="default-title">Your solution</p>
+                                                        </div>
+
+                                                    </Space>
+                                                </Space>
+
+                                                <Divider/>
+                                            </div>
+                                        )
+
+                                    })}
+                                </div>
+                                </Col>
+                            )
+                        })}
+                        </Row>
+                    </div>
+           
+            </Space>
+        )
+    }
+
     const renderContent = () => {
         const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
@@ -1332,6 +1991,7 @@ export function EnergyBalanceQuestionPlay({Id}){
             0: () => renderSelectControlVolume(),
             1: () => renderEnergyBalanceTerms(),
             2: () => renderDefineSelectedTerms(),
+            5: () => renderFinalPage()
 
         }
 
@@ -1346,27 +2006,115 @@ export function EnergyBalanceQuestionPlay({Id}){
         return map[currentTab]()
     }
 
+    const validateFinalPage = () => {
+        const {BoundryConditionKeyboardId, InitialConditionKeyboardId} = energyBalanceQuestionPlay
+
+        const addedTerms = getAddedTerms()
+
+        if(!selectedCV) {
+            return "Please select a control volume"
+        }
+
+        if(!addedTerms.length){
+            return "Please add terms to the energy balance"
+        }
+        
+        const definitionsNotValid = addedTerms.filter(a => a.Questions.filter(q => validateKeyboardAnswer(q.AddedAnswer)).length)
+
+        if(definitionsNotValid.length){
+            return "Some term definitions are not correct"
+        }   
+
+        if(BoundryConditionKeyboardId && !newListBC.length){
+            return "Please add boundary conditions"
+        }
+
+        const BCdefinitionsNotValid = newListBC.filter(a => validateKeyboardAnswer(a, true)).length
+
+        if(BCdefinitionsNotValid){
+            return "Some boundary condition definitions are not correct"
+        } 
+
+        if(InitialConditionKeyboardId && !newListIC.length){
+            return "Please add initial conditions"
+        }
+
+        const ICdefinitionsNotValid = newListIC.filter(a => validateKeyboardAnswer(a, true)).length     
+
+        if(ICdefinitionsNotValid){
+            return "Some initial condition definitions are not correct"
+        } 
+
+        return null
+    }
     
 
     const onChange = (t) => {
+        const validation = validateFinalPage()
+
+        if(t === 5 && validation){
+            api.destroy()
+            api.warning(validation)
+        }
+
+        const addedTerms = getAddedTerms()
+
         if(currentTab === 0 && !selectedCV){
             return
         }
 
         if(currentTab === 1 && t !== 0){
-            const addedTerms = getAddedTerms()
 
             if(!addedTerms.length) return;
+
+            setSelectedTermDefine(addedTerms[0])
+            setSelectedTermDefineIndex(0)
         }
 
         if(t === 3 && !selectedCV){
             return
         }
 
+        if(t === 5){
+            if(validation){
+                return
+            }
+
+            const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
+
+            const BCValidation = newListBC.map((a) => {
+
+                const {answerStatus} = checkKeyboardAnswerIsCorrect(a, BoundaryConditionLines, true)
+                return answerStatus
+            })
+
+            const ICValidation = newListIC.map((a) => {
+
+                const {answerStatus} = checkKeyboardAnswerIsCorrect(a, InitialConditionLines, true)
+
+                console.log(a, answerStatus)
+
+                return answerStatus
+            })
+
+            setNewListBCValidation(BCValidation)
+            setNewListICValidation(ICValidation)
+
+            const EBIsCorrect = checkEnergyBalanceEquation()
+
+            setEnergyBalanceIsCorrect(EBIsCorrect)
+
+            const termsCheck = getAddedTermsFinal()
+
+            setTermsValidation(termsCheck)
+        }
+
         setCurrentTab(t)
     }
 
     const renderQuestion = () => {
+        const summaryValidation = validateFinalPage()
+
         const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
         const items = [{
@@ -1387,7 +2135,7 @@ export function EnergyBalanceQuestionPlay({Id}){
             items.push(
                 {
                     key:'Boundary conditions',
-                    title: <p className={currentTab === 4 ? "default-title highlighted" : "default-gray"}>Boundary conditions</p>
+                    title: <p className={currentTab === 3 ? "default-title highlighted" : "default-gray"}>Boundary conditions</p>
                 })
         }
 
@@ -1395,10 +2143,16 @@ export function EnergyBalanceQuestionPlay({Id}){
             items.push(
                 {
                     key:'Initial conditions',
-                    title: <p className={currentTab === 5 ? "default-title highlighted" : "default-gray"}>Initial conditions</p>
+                    title: <p className={currentTab === 4 ? "default-title highlighted" : "default-gray"}>Initial conditions</p>
                 })
         }
 
+        items.push(
+            {
+                key:'Summary',
+                title: <p className={currentTab === 5 ? "default-title highlighted" : "default-gray"}>Summary - Check answer</p>,
+                icon: !summaryValidation ? <SmileTwoTone /> : <FrownTwoTone />
+            })
 
         return(
             <div>
@@ -1418,6 +2172,7 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     return(
         <div>
+            {contextHolder}
             {isLoadingEnergyBalanceQuestionPlay && <Skeleton />}
 
             {errorGetEnergyBalanceQuestionPlay && !isLoadingEnergyBalanceQuestionPlay && 

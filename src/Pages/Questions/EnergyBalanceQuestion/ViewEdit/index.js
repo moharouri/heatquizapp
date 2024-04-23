@@ -3,7 +3,7 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Button, Col, Divider, Dropdown, List, Popconfirm, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL, handleResponse } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined, CloseCircleFilled, EditOutlined} from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined, CloseCircleFilled, EditOutlined, PictureOutlined} from '@ant-design/icons';
 import './index.css'
 import { UpdateControlVolumeImage } from "./UpdateControlVolumeImage";
 import { UpdateEBTermCodeLatex } from "./UpdateEBTermCodeLatex";
@@ -15,6 +15,8 @@ import { AddEbTerm } from "./AddEbTerm";
 import { SetKeyboardBCIC } from "./SetKeyboardBCIC";
 import { AddBCICTerms } from "./AddBCICTerms";
 import { UpdateQuestionLatex } from "./UpdateQuestionLatex";
+import { UpdateQuestionImage } from "./UpdateQuestionImage";
+import { AddControlVolume } from "./AddControlVolume";
 
 export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
@@ -50,7 +52,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
     const [newParts, setNewParts] = useState([])
 
+    const [showEditQuestionImage, setShowEditQuestionImage] = useState(false)
     const [showEditGeneralLatex, setShowEditGeneralLatex] = useState(false)
+
+    const [showAddControlVolume, setShowAddControlVolume] = useState(false)
 
     const [showEditCVImage, setShowEditCVImage] = useState(false)
     const [selectedCV, setSelectedCV] = useState(null)
@@ -99,19 +104,8 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
             cursor:'crosshair'
         })
 
-        const itemStyle = ({
-            alignItems:'center',
-            justifyContent:'center',
-            display:'flex',
-            flexDirection:'column',
-            position: 'absolute',
-            border:'1px solid rgb(245, 245, 245)',
-            cursor:'pointer'
-           
-        })
-
         return(
-            <div>
+            <Space align="start">
                 <img
                 style = {{
                     ...backgroundImageStyle,
@@ -196,8 +190,18 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 }}
                 />
                
-            
-            </div>
+                <Tooltip
+                    color="white"
+                    title={<p>Edit image</p>}
+                >
+                    <PictureOutlined 
+                        className="hq-clickable"
+                        onClick={() => {
+                            setShowEditQuestionImage(true)
+                        }}
+                    />
+                </Tooltip>
+            </Space>
         )
     }
 
@@ -218,6 +222,24 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
         return(
             <div>
+                <Tooltip
+                    color="white"
+                    title={<p>Add new control volume</p>}
+                >
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowAddControlVolume(true)
+                        }}
+
+                        icon={<PlusOutlined style={{color:'green'}}/>}
+                    >
+                        Add
+                    </Button>
+                </Tooltip>
+
+                <br/>
+                <br/>
                 <List 
                     dataSource={ControlVolumes.sort((a, b) => a.Id - b.Id)}
 
@@ -966,6 +988,22 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
             <UpdateQuestionLatex 
                 open={showEditGeneralLatex}
                 onClose={() => setShowEditGeneralLatex(false)}
+
+                question={question}
+                reloadQuestion={() => reloadQuestion()}
+            />
+
+            <UpdateQuestionImage 
+                open={showEditQuestionImage}
+                onClose={() => setShowEditQuestionImage(false)}
+
+                question={question}
+                reloadQuestion={() => reloadQuestion()}
+            />
+
+            <AddControlVolume 
+                open={showAddControlVolume}
+                onClose={() => setShowAddControlVolume(false)} 
 
                 question={question}
                 reloadQuestion={() => reloadQuestion()}
