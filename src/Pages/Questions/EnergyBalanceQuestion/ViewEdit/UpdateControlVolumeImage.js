@@ -90,7 +90,7 @@ export function UpdateControlVolumeImage({open, onClose, controlVolume, reloadQu
                     style = {{
                         height:smallImageHeight,
                         width: smallImageWidth,
-                        backgroundImage: `url(${FixURL(Base_ImageURL)})`,
+                        backgroundImage: `url(${FixURL(controlVolume.ImageURL || Base_ImageURL)})`,
                         backgroundPosition:'center',
                         backgroundRepeat:'no-repeat',
                         backgroundSize:'contain',
