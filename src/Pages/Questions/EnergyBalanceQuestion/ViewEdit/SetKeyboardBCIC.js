@@ -21,8 +21,11 @@ export function SetKeyboardBCIC({open, onClose, question, reloadQuestion, IsBC})
     return(
         <Drawer
         title={
-            <Space size={'large'}>
+            <Space size={'large'} align="start">
+                <div>
                 <p>Set keyboard for {IsBC ? "Boundary conditions" : "Initial conditions"}</p>
+                <small className="default-gray">Updating the keyboard will lead to existing conditions getting deleted.</small>
+                </div>
 
                 <Button
                     size="small"
