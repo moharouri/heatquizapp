@@ -73,7 +73,7 @@ export function EnergyBalanceQuestionPlay({Id}){
 
 
     const renderSelectControlVolume = () => {
-        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, ControlVolumes} = energyBalanceQuestionPlay
+        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, ControlVolumes, QuestionText} = energyBalanceQuestionPlay
      
         const newImageWidth = window.innerWidth * 0.40
         const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
@@ -90,6 +90,11 @@ export function EnergyBalanceQuestionPlay({Id}){
         return(
             <Space align="start">
                 <div>
+                {QuestionText && 
+                <div>
+                    <LatexRenderer latex={QuestionText}/>
+                    <br/>
+                </div>}
                 <div 
                     style = {{
                         height:newImageHeight,
@@ -831,7 +836,7 @@ export function EnergyBalanceQuestionPlay({Id}){
     }
 
     const renderImageWithControlVolume = () => {
-        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL} = energyBalanceQuestionPlay
+        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, QuestionText} = energyBalanceQuestionPlay
      
         const newImageWidth = window.innerWidth * 0.4
         const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
@@ -840,6 +845,11 @@ export function EnergyBalanceQuestionPlay({Id}){
 
         return(
             <div>
+                {QuestionText && 
+                <div>
+                    <LatexRenderer latex={QuestionText}/>
+                    <br/>
+                </div>}
                 <div 
                     style = {{
                         height:newImageHeight,

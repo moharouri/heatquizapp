@@ -3,7 +3,7 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Button, Col, Divider, Dropdown, List, Popconfirm, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL, handleResponse } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined, CloseCircleFilled } from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, PlusOutlined, CloseCircleFilled, EditOutlined} from '@ant-design/icons';
 import './index.css'
 import { UpdateControlVolumeImage } from "./UpdateControlVolumeImage";
 import { UpdateEBTermCodeLatex } from "./UpdateEBTermCodeLatex";
@@ -14,12 +14,15 @@ import { AddEbTermQuestion } from "./AddEbTermQuestion";
 import { AddEbTerm } from "./AddEbTerm";
 import { SetKeyboardBCIC } from "./SetKeyboardBCIC";
 import { AddBCICTerms } from "./AddBCICTerms";
+import { UpdateQuestionLatex } from "./UpdateQuestionLatex";
 
 export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
     const {energyBalanceQuestionPlay: question,
         editEnergyBalanceControlVolumeStatus,
         removeEnergyBalanceControlVolume,
+
+        removeEnergyBalanceEBT,
 
         editEnergyBalanceEBT_Direction,
         removeEnergyBalanceEBT_Question,
@@ -46,6 +49,8 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     const [leftOffset, setLeftOffset] = useState(0)
 
     const [newParts, setNewParts] = useState([])
+
+    const [showEditGeneralLatex, setShowEditGeneralLatex] = useState(false)
 
     const [showEditCVImage, setShowEditCVImage] = useState(false)
     const [selectedCV, setSelectedCV] = useState(null)
@@ -469,7 +474,23 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'delete_eb_term',
-                                                label: 'Delete',
+                                                label: <Popconfirm
+                                                title="Remove energy balance term"
+                                                description="Are you sure to delete this energy balance term?"
+                                                        onConfirm={() => {
+                                                            let data = new FormData()
+                                                            data.append('Id', t.Id)
+                                                            removeEnergyBalanceEBT(data)
+                                                            .then(r => handleResponse(r, api, 'Removed', 1, () => reloadQuestion()))
+                                                        }}
+                                                onCancel={() => {}}
+                                                okText="Yes"
+                                                cancelText="No"
+                                                placement="right"
+                                            >
+                                            
+                                                Delete
+                                            </Popconfirm>,
                                                 onClick: () => {}
                                             }],
                                             title:'Actions'
@@ -793,7 +814,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     }
 
     const renderContent = () => {
-        const {Question} = question
+        const {QuestionText} = question
         const tabs = [
             {
                 key:1,
@@ -818,12 +839,24 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 <Space
                 direction="vertical"
                 align="start" size={'large'}>
-                    <p className="default-gray">Question</p>
+                    <Space>
+                        <p className="default-gray">Question body</p>
 
-                    <LatexRenderer 
-                        latex={Question || ""}
-                    />
-                </Space>    
+                        <Tooltip
+                            color="white"
+                            title={<p>Edit question body</p>}
+                        >
+                            <EditOutlined 
+                                onClick={() => {
+                                    setShowEditGeneralLatex(true)
+                                }}
+                            />
+                        </Tooltip>
+                        </Space>
+                        <LatexRenderer 
+                            latex={QuestionText || ""}
+                        />
+                    </Space>    
 
                 <br/>
                 <br/>
@@ -907,6 +940,9 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
             <AddEbTerm 
                 open={showAddTerm}
                 onClose={() => setShowAddTerm(false)}
+
+                question={question}
+                reloadQuestion={() => reloadQuestion()}
             />
 
             <SetKeyboardBCIC 
@@ -922,6 +958,14 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 onClose={() => setShowAddConditions(false)}
                 IsBC={showAddConditions_IsBC}
                 usedKeyboard={showAddConditions_SelectedKeyboard}
+
+                question={question}
+                reloadQuestion={() => reloadQuestion()}
+            />
+
+            <UpdateQuestionLatex 
+                open={showEditGeneralLatex}
+                onClose={() => setShowEditGeneralLatex(false)}
 
                 question={question}
                 reloadQuestion={() => reloadQuestion()}

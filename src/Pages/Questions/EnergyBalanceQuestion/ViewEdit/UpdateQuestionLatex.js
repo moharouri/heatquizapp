@@ -1,35 +1,36 @@
-import { Button, Drawer, Input, Space, message } from "antd";
+import { Button, Drawer, Space, message } from "antd";
 import React from "react";
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import { useState } from "react";
 import { useEffect } from "react";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import TextArea from "antd/es/input/TextArea";
 
 import './index.css'
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { handleResponse } from "../../../../services/Auxillary";
 
-export function EditQuestionArrowLength({open, onClose, question, reloadQuestion}){
+export function UpdateQuestionLatex({open, onClose, question, reloadQuestion}){
 
     if(!open) return <div/>;
 
-    const {isLoadingEditFBDArrowLength, editFBDArrowLength,} = useQuestions()
+    const {isLoadingEditEnergyBalanceLatex, editEnergyBalanceLatex,} = useQuestions()
 
-    const [newLength, setNewLength] = useState(1)
+    const [newLatex, setNewLatex] = useState('')
 
-    const {ArrowLength} = question
+    const {QuestionText} = question
 
     const [api, contextHolder] = message.useMessage()
 
     useEffect(() => {
         if(open){
-            setNewLength(ArrowLength || 1)
+            setNewLatex(QuestionText || '')
         }
     }, [open])
 
     return(
         <Drawer
-        title="Edit Question Arrow Length"
+        title="Edit question LaTeX"
         width={'50%'}
         onClose={onClose}
         open={open}
@@ -39,7 +40,7 @@ export function EditQuestionArrowLength({open, onClose, question, reloadQuestion
 
         footer={
             <div>
-            <p className="default-title">{question.Code}</p>
+            <p className="question-code">{question.Code}</p>
             <Space size={'large'} align="start">
                 <div>
                     <img
@@ -62,19 +63,16 @@ export function EditQuestionArrowLength({open, onClose, question, reloadQuestion
             size={'large'}
             className="hq-full-width"
         >
-            <Input 
-                type="number"
-                value={newLength}
-                onChange={(v) => {
-                    const value = v.target.value
+            <div>
+                <TextArea 
+                    value={newLatex}
+                    rows={4} 
+                    onChange={(v) => setNewLatex(v.target.value)}
+                />
+                <small className="default-gray">You can remove the question body by updating with a blank text</small>
+            </div>
 
-                    if(value < 1) return;
-
-                    setNewLength(value)
-                }}
-
-                suffix="px"
-            />
+            <LatexRenderer latex={newLatex} />
         </Space>
 
         <br/>
@@ -84,26 +82,20 @@ export function EditQuestionArrowLength({open, onClose, question, reloadQuestion
             size="small"
             type="primary"
             onClick={() => {
-                if(newLength < 1){
-                    api.destroy()
-                    api.warning('Please add valid arrow length')
+                const VM = ({
+                    Id: question.Id,
+                    QuestionText: newLatex
+                })
 
-                    return
-                }
-
-                let data = new FormData()
-                data.append('QuestionId', question.Id)
-                data.append('Length', newLength)
-
-                editFBDArrowLength(data)
-                .then((r) => handleResponse(r, api, 'Updated successfully', 1, () => {
+                editEnergyBalanceLatex(VM)
+                .then(r => handleResponse(r, api, 'Updated successfully', 1, () => {
                     onClose()
                     reloadQuestion()
                 }))
                 
             }}
 
-            loading={isLoadingEditFBDArrowLength}
+            loading={isLoadingEditEnergyBalanceLatex}
         >
             Update
         </Button>

@@ -6,10 +6,15 @@ import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WES
 import TextArea from "antd/es/input/TextArea";
 import { AssignAnswersToQuestion } from "../Add/AssignAnswersToQuestion";
 import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
-export function AddEbTerm({open, onClose}) {
+export function AddEbTerm({open, onClose, question, reloadQuestion}) {
 
     if(!open) return <div/>;
+
+    const {isLoadingAddEnergyBalanceEBT, addEnergyBalanceEBT,} = useQuestions()
+
     const [newCode, setNewCode] = useState('')
     const [newLatex, setNewLatex] = useState('')
     const [newLatexText, setNewLatexText] = useState('')
@@ -304,8 +309,52 @@ export function AddEbTerm({open, onClose}) {
             <Button 
                 size="small"
                 type="primary"
-                onClick={() => {
 
+                loading={isLoadingAddEnergyBalanceEBT}
+
+                onClick={() => {
+                    if(validation){
+                        api.destroy()
+                        api.warning(validation)
+                        return
+                    }
+
+                    const data = new FormData()
+
+                    data.append('QuestionId', question.Id)
+
+                    data.append('Code', newCode)
+                    data.append('Latex', newLatex)
+                    data.append('LatexTest', newLatexText)
+                            
+                    data.append("West", West)
+                    data.append("East", East)
+                    data.append("North", North)
+                    data.append("South", South)
+                    data.append("Center", Center)
+                    data.append("IsDummy", !(West || East || North || South || Center))
+
+                    let qs_vm = questions.map((q) => ({
+                                LatexCode: q.Latex,
+                                Inflow: q.Inflow,
+                                KeyboardId: q.Keyboard.Id,
+                                Answers: q.Answers.map((a) => ({
+                                    AnswerElements: a.List.map((e,i) => (
+                                        {
+                                            NumericKeyId: e.NumericKeyId,
+                                            ImageId: e.VariableImageId,
+                                            Value:e.char,
+                                            Id: i,
+                                            Order:i
+                                        }))}
+                                        ))
+                            }))
+                    data.append('Questions', JSON.stringify(qs_vm))
+
+                    addEnergyBalanceEBT(data).then((r) => handleResponse(r, api, 'Added successfully', 1, () => {
+                        onClose()
+                        reloadQuestion()
+                    }))
                 }}
             >
                     Add

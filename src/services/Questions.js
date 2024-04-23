@@ -158,6 +158,10 @@ export function editClickableQuestionImageRequest(b){
 }
 
 //Energy balance question
+export function editEnergyBalanceLatexRequest(b){
+    return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditQuestionText', b)
+}
+
 export function editEnergyBalanceControlVolumeStatusRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeAsCorrect', b)
 }
@@ -180,6 +184,14 @@ export function editEnergyBalanceEBT_Direction_Request(b){
 
 export function addEnergyBalanceEBT_Question_Request(b){
     return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddEBTermQuestion', b)
+}
+
+export function addEnergyBalanceEBT_Request(b){
+    return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddEBTerm', b)
+}
+
+export function removeEnergyBalanceEBT_Request(b){
+    return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/DeleteEBTerm', b)
 }
 
 export function removeEnergyBalanceEBT_Question_Request(b){
