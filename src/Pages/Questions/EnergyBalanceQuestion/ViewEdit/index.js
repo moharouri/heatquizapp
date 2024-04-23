@@ -222,7 +222,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                     dataSource={ControlVolumes.sort((a, b) => a.Id - b.Id)}
 
                     renderItem={(cv, cvi) => {
-                        const {Id, Correct} = cv
+                        const {Id, Correct, ImageURL} = cv
                         const cvDimesions =  calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height,smallImageWidth, smallImageHeight, cv)
 
                         return(
@@ -242,7 +242,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                         style = {{
                                             height:smallImageHeight,
                                             width: smallImageWidth,
-                                            backgroundImage: `url(${FixURL(Base_ImageURL)})`,
+                                            backgroundImage: `url(${FixURL(ImageURL || Base_ImageURL)})`,
                                             backgroundPosition:'center',
                                             backgroundRepeat:'no-repeat',
                                             backgroundSize:'contain',

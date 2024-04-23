@@ -25,6 +25,8 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     const [selectedCV, setSelectedCV] = useState(null)
 
+    const [termsFocused, setTermsFocused] = useState(false)
+
     const [termsContainer, setTermsContainer] = useState({
         North: [],
         South: [],
@@ -99,7 +101,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                     style = {{
                         height:newImageHeight,
                         width: newImageWidth,
-                        backgroundImage: `url(${FixURL(Base_ImageURL)})`,
+                        backgroundImage: `url(${FixURL((selectedCV && selectedCV.ImageURL) ||  Base_ImageURL)})`,
                         backgroundPosition:'center',
                         backgroundRepeat:'no-repeat',
                         backgroundSize:'contain',
@@ -854,11 +856,12 @@ export function EnergyBalanceQuestionPlay({Id}){
                     style = {{
                         height:newImageHeight,
                         width: newImageWidth,
-                        backgroundImage: `url(${FixURL(Base_ImageURL)})`,
+                        backgroundImage: `url(${FixURL((selectedCV && selectedCV.ImageURL) || Base_ImageURL)})`,
                         backgroundPosition:'center',
                         backgroundRepeat:'no-repeat',
                         backgroundSize:'contain',
-                        border:'1px solid gainsboro'
+                        border:'1px solid gainsboro',
+                        opacity: termsFocused ? '40%' : '100%'
                     }}
                 >
 
@@ -874,6 +877,15 @@ export function EnergyBalanceQuestionPlay({Id}){
                     {renderWestArrows(cvDimesions)}
 
                  </div>
+                 <div>
+                    <small 
+                        onClick={() => setTermsFocused(!termsFocused)}
+                        className="default-gray hq-clickable"
+                    >
+                        {termsFocused ? "Unfocus terms" : "Focus terms"}
+                    </small>
+                 </div>
+                 <br/>
                  {renderEnergyBalanceEquation()}
             </div>
         )
