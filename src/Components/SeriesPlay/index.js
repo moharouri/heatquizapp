@@ -5,7 +5,7 @@ import { red, green } from '@ant-design/colors';
 import { getRandomSeriesElements } from "./Functions";
 import { convertSecondsToHHMMSS, goToQuestionViewEdit, goToSeriesViewEdit } from "../../services/Auxillary";
 
-import { CLICKABLE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
+import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
 import { ClickableQuestionPlay } from "../../Pages/Questions/ClickableQuestion/Play";
 import { KeyboardQuestionPlay } from "../../Pages/Questions/KeyboardQuestion/Play";
 import { MultipleChoiceQuestion } from "../../Pages/Questions/MultipleChoiceQuestion/Play";
@@ -22,6 +22,8 @@ import { ViewSolutionComponent } from "../ViewSolutionComponent";
 import { ErrorComponent } from "../ErrorComponent";
 import { ImageModal } from "../ImageModal";
 import { DisplayClickableQuestionAnswers } from "./DisplayClickableQuestionAnswers";
+import { EnergyBalanceQuestionPlay } from "../../Pages/Questions/EnergyBalanceQuestion/Play";
+import { CurrentQuestionTypeNotSupported } from "./CurrentQuestionTypeNotSupported";
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
@@ -375,9 +377,23 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
 
                 mapKey={mapKey}
             />,
+            [ENERGY_BALANCE_QUESTION_PARAMETER]: () => 
+            <EnergyBalanceQuestionPlay 
+                Id={Id}
+                onUpdateSeriesPlayElements = {updateSeriesPlayElements}
+                
+                nextAction = {() => goNext()}
+
+                mapKey={mapKey}
+            />,
         }
+
+        const playQuestionRender = selectionList[Type]
+
+        if(playQuestionRender) return playQuestionRender()
+        else return <CurrentQuestionTypeNotSupported />
+
         
-        return selectionList[Type]() 
     }
 
     const renderMultipleChoiceQuestionFinalPage = (index) => {
@@ -535,6 +551,36 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
 
     }
 
+    const renderEnergyBalanceQuestionFinalPage = (index) => {
+        const element = playedElements[index]
+
+        const {Question} = element
+        const {Code, Base_ImageURL, QuestionText} = Question
+
+        return(
+            <Space 
+                size={'large'}
+            >
+                <ImageModal
+                    URL={Base_ImageURL}
+                >
+                    <img 
+                        src={Base_ImageURL}
+                        alt={Code}
+                        className="series-play-final-page-item-img"
+                    />
+                </ImageModal>
+
+                {QuestionText && <div>
+                    <LatexRenderer 
+                        latex={QuestionText}
+                    />
+                </div>}
+            </Space>
+            )
+
+    }
+
     const elementActionList = (index) => [
     {
         key: 'play_question',
@@ -621,13 +667,17 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
     const renderFinalPage = () => {
 
         const answersDisplayIndexer = (type, index) => {
-
-            return ({
+            const comp = ({
                 [MULTIPLE_CHOICE_QUESTION_PARAMETER]: (index) => renderMultipleChoiceQuestionFinalPage(index),
                 [KEYBOARD_QUESTION_PARAMETER]: (index) =>  renderKeyboardQuestionFinalPage(index),
                 [CLICKABLE_QUESTION_PARAMETER]: (index) =>  renderClickableQuestionFinalPage(index),
+                [ENERGY_BALANCE_QUESTION_PARAMETER]: (index) => renderEnergyBalanceQuestionFinalPage(index)
     
-            })[type](index)
+            })[type]
+
+            if(comp) return comp(index)
+            else return <CurrentQuestionTypeNotSupported />
+             
         }
         
         let StatsMap = {}

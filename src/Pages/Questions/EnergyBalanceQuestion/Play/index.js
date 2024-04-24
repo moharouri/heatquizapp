@@ -11,10 +11,16 @@ import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone, Excla
 import './Play.css'
 import { Keyboard } from "../../../../Components/Keyboard";
 import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { NextButton } from "../../../../Components/NextButton";
+import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
+import { useAuth } from "../../../../contexts/AuthContext";
 
-export function EnergyBalanceQuestionPlay({Id}){
+export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextAction, mapKey}){
 
-    const { energyBalanceQuestionPlay, errorGetEnergyBalanceQuestionPlay, isLoadingEnergyBalanceQuestionPlay, getEnergyBalanceQuestionPlay} = useQuestions()
+    const { energyBalanceQuestionPlay, errorGetEnergyBalanceQuestionPlay, isLoadingEnergyBalanceQuestionPlay, getEnergyBalanceQuestionPlay,
+        postQuestionStatistic} = useQuestions()
+
+    const {currentPlayerKey} = useAuth()
 
     const boxRef = React.createRef()
 
@@ -24,6 +30,8 @@ export function EnergyBalanceQuestionPlay({Id}){
     const [currentTab, setCurrentTab] = useState(0)
 
     const [selectedCV, setSelectedCV] = useState(null)
+
+    const [CVValidation, setCVValidation] = useState({})
 
     const [termsFocused, setTermsFocused] = useState(false)
 
@@ -52,11 +60,101 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     const [energyBalanceIsCorrect, setEnergyBalanceIsCorrect] = useState(false)
 
+    const [checkAnswer, setCheckAnswer] = useState(false)
+    const [finalScore, setFinalScore] = useState('')
+
+    const [startTime, setStartTime] = useState(0)
+
     const [api, contextHolder] = message.useMessage()
 
+    const initializeQuestion = () => {
+        setBoxLocationX(0)
+        setBoxLocationY(0)
+
+        setCurrentTab(0)
+
+        setSelectedCV(null)
+
+        setCVValidation({})
+
+        setTermsContainer({
+            North: [],
+            South: [],
+            East: [],
+            West: [],
+            Center: []
+        })
+
+        setTermsValidation({})
+
+        setSelectedTerm(null)
+        setSelectedTermDefine(null)
+        setSelectedTermDefineIndex(0)
+
+        setNewListBC([])
+        setNewListBCValidation([])
+        setSelectedIndexBC(0)
+
+        setNewListIC([])
+        setSelectedIndexIC(0)
+        setNewListICValidation([])
+
+        setEnergyBalanceIsCorrect(false)
+
+        setCheckAnswer(false)
+
+        setFinalScore(false)
+    }
+
     useEffect(() => {
-        getEnergyBalanceQuestionPlay(Id)
+        if(!deadLoad) getEnergyBalanceQuestionPlay(Id)
+
+        initializeQuestion()
     }, [Id])
+
+    useEffect(() => {
+        if(energyBalanceQuestionPlay){
+            setStartTime(Date.now())
+        }
+     }, [energyBalanceQuestionPlay])
+
+    useEffect(() => {
+        if(checkAnswer){
+            const _finalScore = getFinalScore()
+
+            setFinalScore(_finalScore)
+        }
+    }, [checkAnswer])
+
+    useEffect(() => {
+        if(checkAnswer){
+            const isCorrect = (finalScore === 1)
+
+            if(onUpdateSeriesPlayElements){
+
+                const finalStatus = ({
+                    Correct: isCorrect,
+                    Score: finalScore,
+                    Answers: [],
+                    Time: Date.now() - startTime,
+                    Question: energyBalanceQuestionPlay
+                })
+    
+                onUpdateSeriesPlayElements(finalStatus)
+            }
+    
+            const statsVM = ({
+                QuestionId: energyBalanceQuestionPlay.Id,
+                Player: currentPlayerKey,
+                Correct: isCorrect,
+                TotalTime: Math.trunc(0.001 * (Date.now() - startTime)),
+                Key: mapKey,
+                Score: finalScore
+            })
+    
+            postQuestionStatistic(statsVM)
+        }
+    }, [finalScore])
 
 
     useEffect(() => {
@@ -99,12 +197,15 @@ export function EnergyBalanceQuestionPlay({Id}){
         }
 
         return(
-            <Space align="start">
+            <Space align="start" size={'large'}>
                 <div>
                 {QuestionText && 
-                <div>
-                    <LatexRenderer latex={QuestionText}/>
-                    <br/>
+                <div
+                    className="eb-question-question-body"
+                >
+                    <div style = {{width: newImageWidth*0.95}}>
+                        <LatexRenderer latex={QuestionText}/>
+                    </div>
                 </div>}
                 <div 
                     style = {{
@@ -125,11 +226,13 @@ export function EnergyBalanceQuestionPlay({Id}){
                     }
 
                     </div>
+                    
                 </div>
-
+                &nbsp;
+                &nbsp;
                 <List 
                     dataSource={ControlVolumes}
-
+                    style={{overflowY:'scroll', height: window.innerHeight * 0.70}}
                     renderItem={(c) => {
                         const {Id, ImageURL} = c
 
@@ -909,8 +1012,33 @@ export function EnergyBalanceQuestionPlay({Id}){
         )
     }
 
+    const getFinalScore = () => {
+        let finalTotal = 0
+        let finalPosTotal = 0
+
+        //Control volume 
+        finalTotal += 1
+        finalPosTotal += CVValidation ? 1 : 0
+
+        const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
+
+        finalTotal += BoundaryConditionLines.length + InitialConditionLines.length
+
+        const BCScore = getBCScore() 
+        const ICScore = getICScore() 
+
+        finalPosTotal += BCScore + ICScore
+
+        const {pointsTotal, pointsCorrectTotal} = termsValidation
+
+        finalTotal +=  pointsTotal
+        finalPosTotal += pointsCorrectTotal
+
+        return (finalPosTotal + "/" + finalTotal)
+    }
+
     const renderImageWithControlVolume = (hideEB) => {
-        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, QuestionText} = energyBalanceQuestionPlay
+        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, QuestionText, PDFURL} = energyBalanceQuestionPlay
      
         const newImageWidth = (window.innerWidth * 0.4)
         const newImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*newImageWidth
@@ -920,9 +1048,12 @@ export function EnergyBalanceQuestionPlay({Id}){
         return(
             <div>
                 {QuestionText && 
-                <div>
-                    <LatexRenderer latex={QuestionText}/>
-                    <br/>
+                <div
+                    className="eb-question-question-body"
+                >
+                    <div style = {{width: newImageWidth*0.95}}>
+                        <LatexRenderer latex={QuestionText}/>
+                    </div>
                 </div>}
                 <div 
                     style = {{
@@ -947,18 +1078,33 @@ export function EnergyBalanceQuestionPlay({Id}){
                     {renderSouthArrows(cvDimesions)}
                     {renderEastArrows(cvDimesions)}
                     {renderWestArrows(cvDimesions)}
-
                  </div>
-                 {/*<div>
-                    <small 
-                        onClick={() => setTermsFocused(!termsFocused)}
-                        className="default-gray hq-clickable"
-                    >
-                        {termsFocused ? "Unfocus terms" : "Focus terms"}
-                    </small>
-                 </div>*/}
+               
                  <br/>
                  {!hideEB && renderEnergyBalanceEquation()}
+
+                 {checkAnswer && 
+                    <Space align="start">
+                        <Space
+                            className="eb-question-question-final-score"
+                            direction="vertical"
+                            align="center"
+                        >
+                            <p className="default-title">{finalScore}</p>
+                            <p className="default-gray default-small">final score</p>
+                        </Space>
+                        {PDFURL && 
+                        <ViewSolutionComponent 
+                            question={energyBalanceQuestionPlay}
+                            correct={finalScore === 1}
+                        />}
+
+                    {nextAction && 
+                    <NextButton 
+                        nextAction={() => nextAction()}
+                      />}
+                    </Space>
+                 }
             </div>
         )
     }
@@ -977,7 +1123,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                         <p> Please add <strong>energy balance terms</strong> from the list. An energy balance can be established with a subset of terms or all of them. </p>
                         <List 
                         dataSource={EnergyBalanceTerms}
-
+                        style={{overflowY:'scroll', height: window.innerHeight * 0.70, width:0.5*window.innerWidth}}
                         renderItem={(t, ti) => {
                             const {Id, Latex} = t
                             const isSelectedDrop = selectedTerm && selectedTerm.Id === t.Id
@@ -1062,7 +1208,7 @@ export function EnergyBalanceQuestionPlay({Id}){
         const mandatoryTermsNotIncluded = allMandatoryTerms
         .filter(t => !t.IsDummy && !addedTerms.map(x => x.Id).includes(t.Id))
 
-        pointsTotal = pointsTotal + mandatoryTermsNotIncluded.reduce((r, c) => r += (1 + c.Questions.length), 0) /* 1: for direction */ 
+        pointsTotal = pointsTotal + mandatoryTermsNotIncluded.reduce((r, c) => r += (2 + c.Questions.length), 0) /* 2: for direction & adding term*/ 
 
         const mandatoryTermsIncluded = allMandatoryTerms
         .filter(t => !t.IsDummy && addedTerms.map(x => x.Id).includes(t.Id))
@@ -1081,9 +1227,9 @@ export function EnergyBalanceQuestionPlay({Id}){
 
             //Check solution
             const solutionsValidity = existingAddedTerm.Questions.map((q, qi) => {
-                const status = checkKeyboardAnswerIsCorrect(q.AddedAnswer, t.Questions[qi].Answers)
+                const {answerStatus} = checkKeyboardAnswerIsCorrect(q.AddedAnswer, t.Questions[qi].Answers)
 
-                return status
+                return answerStatus
             })
 
 
@@ -1095,13 +1241,15 @@ export function EnergyBalanceQuestionPlay({Id}){
             })
         })
 
-        pointsTotal = pointsTotal + mandatoryTermsIncluded.reduce((r, c) => r += (1 + c.Questions.length), 0) /* 1: for direction */ 
+        pointsTotal = pointsTotal + mandatoryTermsIncluded.reduce((r, c) => r += (2 + c.Questions.length), 0) /* 2: for direction & adding term */ 
         pointsCorrectTotal = pointsCorrectTotal + mandatoryTermsIncluded.reduce((r, c) => {
             const {directionCorrect, solutionsValidity} = c
 
-            r = r + (directionCorrect ? 1 : 0)
+            r = r + 1 //adding term
 
-            r = r + solutionsValidity.filter(a => a).length
+            r = r + (directionCorrect ? 1 : 0) // direction
+
+            r = r + solutionsValidity.filter(a => a).length // correct definitions
 
             return r
         }, 0)
@@ -1109,6 +1257,8 @@ export function EnergyBalanceQuestionPlay({Id}){
         const dummyTerms = addedTerms.filter(t => t.IsDummy)
 
         pointsCorrectTotal =  pointsCorrectTotal - dummyTerms.length
+
+        pointsCorrectTotal = pointsCorrectTotal < 0 ? 0 : pointsCorrectTotal
 
         return({
             dummyTerms,
@@ -1629,6 +1779,56 @@ export function EnergyBalanceQuestionPlay({Id}){
 
     }
 
+    const renderCorrectControlVolume = () => {
+        const {Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL, ControlVolumes, } = energyBalanceQuestionPlay
+
+        const correctCV = ControlVolumes.filter(a => a.Correct)[0]
+        
+        const {ImageURL} = correctCV
+
+        const smallImageWidth = window.innerWidth * 0.20
+        const smallImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*smallImageWidth
+
+        const dimensions = calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height,smallImageWidth, smallImageHeight, correctCV)
+
+        return(
+            <Space>
+                <div 
+                    className="hoverable eb-question-control-volume"
+                    key={Id}
+                    style = {{
+                        height:smallImageHeight,
+                        width: smallImageWidth,
+                        backgroundImage: `url(${FixURL(ImageURL || Base_ImageURL)})`,
+                        backgroundPosition:'center',
+                        backgroundRepeat:'no-repeat',
+                        backgroundSize:'contain',
+                    }}
+
+                    >
+                        <div style={{...dimensions, position:'relative', border:'1px dashed green'}}>
+                            <div style={{width:'100%', height:'100%', backgroundColor:'green', opacity:'40%'}}></div>
+                        </div>
+                    </div>
+
+                    {CVValidation ? 
+                        <Tooltip
+                            color="white"
+                            title={<p>Control volume selected correctly</p>}
+                        >
+                            <i className="default-green hq-clickable">+1</i>
+                        </Tooltip>
+                        : 
+                        <Tooltip
+                            color="white"
+                            title={<p>Control volume selected correctly</p>}
+                        >
+                            <i className="default-red hq-clickable">-1</i>
+                        </Tooltip>}
+            </Space>
+        )
+    }
+
     const renderFinalPage = () => {
         const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
@@ -1647,8 +1847,14 @@ export function EnergyBalanceQuestionPlay({Id}){
                 <div>
                     {renderImageWithControlVolume(true)}
                 </div>
-                <div style={{width: 0.55*window.innerWidth}}>
-                {BoundaryConditionLines.length && 
+                <div style={{width: 0.55*window.innerWidth, overflowY:'scroll', height: window.innerHeight * 0.70}}>
+                <Divider orientation="left">
+                    <Space size={'large'}>
+                        <span className="default-gray hq-normal-font-weight">Control volume</span> <span className="default-title hq-normal-font-weight">{CVValidation ? "1/1" : "0/0"}</span>
+                    </Space>
+                </Divider>
+                {renderCorrectControlVolume()}
+                {BoundaryConditionLines.length ? 
                         <div className="hq-full-width">
                         <Divider orientation="left">
                                 <Space size={'large'}>
@@ -1708,11 +1914,11 @@ export function EnergyBalanceQuestionPlay({Id}){
                                     })}
                                 </div>
                             </Space>
-                        </div>}
+                        </div> : <div/>}
 
-                        {InitialConditionLines.length && 
+                        {InitialConditionLines.length ? 
                             <div className="hq-full-width">
-                        <Divider orientation="left">
+                            <Divider orientation="left">
                                 <Space size={'large'}>
                                     <span className="default-gray hq-normal-font-weight">Initial conditions</span> <span className="default-title hq-normal-font-weight">{ICScore}</span>
                                 </Space>
@@ -1771,7 +1977,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                                 </div>
 
                             </Space>
-                        </div>}
+                        </div> : <div/>}
 
                         <Divider orientation="left">
                             <Space size={'large'}>
@@ -1809,12 +2015,12 @@ export function EnergyBalanceQuestionPlay({Id}){
                                 <span className="default-title hq-normal-font-weight">{TermsScore}</span>
                             </Space>
                         </Divider>
-                        <Row gutter={36} className="hq-full-width">
                         {mandatoryTermsNotIncluded.map((t, ti) => {
                             const {Id, Latex, Questions} = t
 
                             return(
-                                <Col key={Id} style={{height:'100%'}}>
+                                <div key={Id}>
+                                    
                                     <div className="hq-element-container">
                                     <Space>
                                         <p className="default-gray">{ti+1}</p>
@@ -1824,7 +2030,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                                             color="white"
                                             title={<p>Term not included</p>}
                                         >
-                                            <i className="default-red hq-clickable">-1</i>
+                                            <i className="default-red hq-clickable">-2</i>
                                         </Tooltip>
                                     </Space>
 
@@ -1866,17 +2072,19 @@ export function EnergyBalanceQuestionPlay({Id}){
                                         )
 
                                     })}
-                                    <small className="default-red">You failed to add this term</small>
+
+                                <small className="default-red eb-question-red-background">You failed to add this term</small>
                                 </div>
-                                </Col>
+
+                                </div>
                             )
                         })}
 
                         {mandatoryTermsIncluded.map((t, ti) => {
                             const {Id, Latex, Questions, directionCorrect, solutionsValidity} = t
-
+                            
                             return(
-                                <Col key={Id} style={{height:'100%'}}>
+                                <div key={Id}>
                                     <div className="hq-element-container">
                                     <Space size={'large'}>
                                         <p className="default-gray">{mandatoryTermsNotIncluded.length + ti + 1}</p>
@@ -1925,20 +2133,7 @@ export function EnergyBalanceQuestionPlay({Id}){
                                                 <Space direction="vertical" align="start">
                                                     <Space>
                                                         <LatexRenderer latex={"$$" + LatexCode  + "$$"} />
-                                                        {answerValidity ?
-                                                        <Tooltip
-                                                            color="white"
-                                                            title={<p>Definition correct</p>}
-                                                        >
-                                                            <i className="default-green hq-clickable">+1</i>
-                                                        </Tooltip>
-                                                        : 
-                                                        <Tooltip
-                                                            color="white"
-                                                            title={<p>Definition incorrect</p>}
-                                                        >
-                                                            <i className="default-red hq-clickable">-1</i>
-                                                        </Tooltip>}
+                                                        
                                                     </Space>
                                                     <Space align="end">
                                                         <div>
@@ -1959,9 +2154,30 @@ export function EnergyBalanceQuestionPlay({Id}){
                                                             })}
                                                             <p className="default-green">Correct solution</p>
                                                         </div>
-                                                        <Col xs = {16} />
+                                                        &nbsp;
+                                                        &nbsp;
+                                                        &nbsp;
                                                         <div>
+                                                            <Space>
                                                             <LatexRenderer latex={"$$" + reducedLatex + "$$"}/>
+                                                            {answerValidity ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
+                                                            
+                                                            {answerValidity ?
+                                                            <Tooltip
+                                                                    color="white"
+                                                                    title={<p>Definition correct</p>}
+                                                                >
+                                                                    <i className="default-green hq-clickable">+1</i>
+                                                                </Tooltip>
+                                                                : 
+                                                                <Tooltip
+                                                                    color="white"
+                                                                    title={<p>Definition incorrect</p>}
+                                                                >
+                                                                    <i className="default-red hq-clickable">-1</i>
+                                                            </Tooltip>}
+
+                                                            </Space>
                                                             <p className="default-title">Your solution</p>
                                                         </div>
 
@@ -1974,10 +2190,33 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                                     })}
                                 </div>
-                                </Col>
+                                </div>
                             )
                         })}
-                        </Row>
+
+                        {dummyTerms.map((t, ti) => {
+                            const {Id, Latex} = t
+
+                            return(
+                                <div key={Id}>
+                                    <div className="hq-element-container">
+
+                                    <Space>
+                                        <p className="default-gray">{mandatoryTermsNotIncluded.length + mandatoryTermsIncluded.length + ti+1}</p>
+                                        <LatexRenderer latex={"$$" + Latex + "$$"} /> 
+                                        <Tooltip
+                                            color="white"
+                                            title={<p>Dummy term included</p>}
+                                        >
+                                            <i className="default-red hq-clickable">-1</i>
+                                        </Tooltip>
+                                    </Space>
+                                    <br/>
+                                    <small className="default-red eb-question-red-background">You add this <u>dummy</u> term to energy balance</small>
+                                    </div>
+                                </div>
+                            )
+                        })}
                     </div>
            
             </Space>
@@ -1987,11 +2226,14 @@ export function EnergyBalanceQuestionPlay({Id}){
     const renderContent = () => {
         const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
+        const finalPageIndex = getFinalPageIndex() 
+        const ICPageIndex = getICPageIndex()
+
         const map = {
             0: () => renderSelectControlVolume(),
             1: () => renderEnergyBalanceTerms(),
             2: () => renderDefineSelectedTerms(),
-            5: () => renderFinalPage()
+            [finalPageIndex]: () => renderFinalPage()
 
         }
 
@@ -2000,14 +2242,14 @@ export function EnergyBalanceQuestionPlay({Id}){
         }
 
         if(InitialConditionLines.length){
-            map[4] = (() => renderInitialConditions())
+            map[ICPageIndex] = (() => renderInitialConditions())
         }
 
         return map[currentTab]()
     }
 
     const validateFinalPage = () => {
-        const {BoundryConditionKeyboardId, InitialConditionKeyboardId} = energyBalanceQuestionPlay
+        const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
         const addedTerms = getAddedTerms()
 
@@ -2025,7 +2267,7 @@ export function EnergyBalanceQuestionPlay({Id}){
             return "Some term definitions are not correct"
         }   
 
-        if(BoundryConditionKeyboardId && !newListBC.length){
+        if(BoundaryConditionLines.length && !newListBC.length){
             return "Please add boundary conditions"
         }
 
@@ -2035,7 +2277,7 @@ export function EnergyBalanceQuestionPlay({Id}){
             return "Some boundary condition definitions are not correct"
         } 
 
-        if(InitialConditionKeyboardId && !newListIC.length){
+        if(InitialConditionLines.length && !newListIC.length){
             return "Please add initial conditions"
         }
 
@@ -2047,38 +2289,70 @@ export function EnergyBalanceQuestionPlay({Id}){
 
         return null
     }
+
+    const getFinalPageIndex = () => {
+        const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
+
+        let finalPageIndex = 3 
+
+        if(BoundaryConditionLines.length) finalPageIndex = finalPageIndex + 1; 
+        if(InitialConditionLines.length) finalPageIndex = finalPageIndex + 1; 
+
+        return finalPageIndex
+    }
+
+    const getICPageIndex = () => {
+        const {BoundaryConditionLines} = energyBalanceQuestionPlay
+
+        let ICPageIndex = 3 
+
+        if(BoundaryConditionLines.length) ICPageIndex = ICPageIndex + 1; 
+
+        return ICPageIndex
+    }
     
 
     const onChange = (t) => {
+
+        if(checkAnswer) return;
+
+        let finalPageIndex = getFinalPageIndex() 
+
         const validation = validateFinalPage()
 
-        if(t === 5 && validation){
+        if(t === finalPageIndex && validation){
             api.destroy()
             api.warning(validation)
         }
 
         const addedTerms = getAddedTerms()
 
-        if(currentTab === 0 && !selectedCV){
+        if(t !== 0 && !selectedCV){
+            
+            api.destroy()
+            api.warning("Please select a control volume")
             return
         }
 
-        if(currentTab === 1 && t !== 0){
-
-            if(!addedTerms.length) return;
+        if(t === 2){
+            if(!addedTerms.length){
+                api.destroy()
+                api.warning("Please add terms to energy balance")
+                return;
+            }
 
             setSelectedTermDefine(addedTerms[0])
             setSelectedTermDefineIndex(0)
         }
 
-        if(t === 3 && !selectedCV){
-            return
-        }
-
-        if(t === 5){
+        if(t === finalPageIndex){
             if(validation){
                 return
             }
+
+            const CVCorrect = (selectedCV && selectedCV.Correct)
+
+            setCVValidation(CVCorrect)
 
             const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
 
@@ -2092,7 +2366,6 @@ export function EnergyBalanceQuestionPlay({Id}){
 
                 const {answerStatus} = checkKeyboardAnswerIsCorrect(a, InitialConditionLines, true)
 
-                console.log(a, answerStatus)
 
                 return answerStatus
             })
@@ -2107,6 +2380,10 @@ export function EnergyBalanceQuestionPlay({Id}){
             const termsCheck = getAddedTermsFinal()
 
             setTermsValidation(termsCheck)
+
+            setCheckAnswer(true)
+
+            
         }
 
         setCurrentTab(t)
@@ -2116,6 +2393,9 @@ export function EnergyBalanceQuestionPlay({Id}){
         const summaryValidation = validateFinalPage()
 
         const {BoundaryConditionLines, InitialConditionLines} = energyBalanceQuestionPlay
+
+        const finalPageIndex = getFinalPageIndex() 
+        const ICPageIndex = getICPageIndex()
 
         const items = [{
             key:'CV',
@@ -2143,14 +2423,14 @@ export function EnergyBalanceQuestionPlay({Id}){
             items.push(
                 {
                     key:'Initial conditions',
-                    title: <p className={currentTab === 4 ? "default-title highlighted" : "default-gray"}>Initial conditions</p>
+                    title: <p className={currentTab === ICPageIndex ? "default-title highlighted" : "default-gray"}>Initial conditions</p>
                 })
         }
 
         items.push(
             {
                 key:'Summary',
-                title: <p className={currentTab === 5 ? "default-title highlighted" : "default-gray"}>Summary - Check answer</p>,
+                title: <p className={currentTab === finalPageIndex ? "default-title highlighted" : "default-gray"}>Summary - Check answer</p>,
                 icon: !summaryValidation ? <SmileTwoTone /> : <FrownTwoTone />
             })
 

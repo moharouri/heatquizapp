@@ -8,6 +8,7 @@ import { KeyboardQuestionPlay } from "../KeyboardQuestion/Play";
 import { EnergyBalanceQuestionPlay } from "../EnergyBalanceQuestion/Play";
 import { FBDQuestionPlay } from "../FBDQuestion/Play";
 import { DiagramQuestionPlay } from "../DiagramQuestion/Play";
+import { CurrentQuestionTypeNotSupported } from "../../../Components/SeriesPlay/CurrentQuestionTypeNotSupported";
 
 export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
 
@@ -22,8 +23,12 @@ export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
             [FBD_QUESTION_PARAMETER]: () => <FBDQuestionPlay Id={Id} showSolution={true} deadLoad={deadLoad}/>,
             [DIAGRAM_QUESTION_PARAMETER]: () => <DiagramQuestionPlay Id={Id} showSolution={true} deadLoad={deadLoad}/>,
         }
+
+        const comp = selectionList[Type]
+
+        if(comp) return comp()
+        else return <CurrentQuestionTypeNotSupported />
         
-        return selectionList[Type]()
     }
 
     const selectMagnificationValue = (Type) => {
@@ -36,7 +41,7 @@ export function QuestionPlayPocket({open, onClose, Id, Type, deadLoad}){
             [DIAGRAM_QUESTION_PARAMETER]: '100%',
         }
         
-        return selectionList[Type]
+        return (selectionList[Type]  || "100%")
     }
 
     const maginificationValue = selectMagnificationValue(Type)

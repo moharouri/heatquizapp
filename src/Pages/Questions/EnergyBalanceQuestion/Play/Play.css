@@ -48,3 +48,24 @@
 .eb-question-bc-ic-line{
    margin-bottom: 2vh;
 }
+
+.eb-question-red-background{
+    background-color: rgba(255, 0, 0, 0.05);
+    border: 1px solid rgba(255, 0, 0, 0.15);
+    padding: 0.25vmin;
+ }
+
+ .eb-question-question-final-score{
+    background-color: rgba(0, 140, 255, 0.05);
+    border: 1px solid rgba(0, 140, 255, 0.15);
+    padding: 0.15vmin;
+    margin-bottom: 1vh;
+ }
+ 
+.eb-question-question-body{
+    background-color: rgba(0, 140, 255, 0.05);
+    border: 1px solid rgba(0, 140, 255, 0.15);
+    padding: 0.15vmin;
+    margin-bottom: 1vh;
+ }
+ 

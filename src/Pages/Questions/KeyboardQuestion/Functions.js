@@ -4,7 +4,10 @@ const Algebrite = require('algebrite')
 
 //Function check if the answer is the correct answer
 export const checkKeyboardAnswerIsCorrect = (answer, possibleAnswers, isEnergyBalance) => {
+    console.log(answer)
     let currentAnswer = answer.List.reduce((b,a) => b += a.char, '')
+    console.log(currentAnswer)
+    console.log(possibleAnswers)
 
     let _possibleAnswers = possibleAnswers
     .sort((a,b) => a.Id > b.Id ? 1 : -1)
@@ -22,14 +25,18 @@ export const checkKeyboardAnswerIsCorrect = (answer, possibleAnswers, isEnergyBa
             let KAnswer_Before = KAnswer.substring(0, KAnswer_Equal_Index)
             let KAnswer_After = KAnswer.substring(KAnswer_Equal_Index + 1, KAnswer.length)
                         
-            let CEquivalent_Answer = CAnswer_Before + "-(" + CAnswer_After + ")"
-            let KEquivalent_Answer = KAnswer_Before + "-(" + KAnswer_After  + ")"
+            let CEquivalent_Answer = "(" + CAnswer_Before + ")" + "-(" + CAnswer_After + ")"
+            let KEquivalent_Answer = "(" + KAnswer_Before + ")" + "-(" + KAnswer_After  + ")"
                         
             correct = (SafeSimplify(`(${KEquivalent_Answer})-(${CEquivalent_Answer})`)) === '0'
 
+            console.log(KEquivalent_Answer, CEquivalent_Answer, "correct1 =" + correct, SafeSimplify(`(${KEquivalent_Answer})-(${CEquivalent_Answer})`))
 
             if(!correct){
-                correct = (SafeSimplify(`(${KEquivalent_Answer})+(${KEquivalent_Answer})`)) === '0'
+                correct = (SafeSimplify(`(${KEquivalent_Answer})+(${CEquivalent_Answer})`)) === '0'
+
+                console.log(KEquivalent_Answer, CEquivalent_Answer, "correct2 =" + correct, SafeSimplify(`(${KEquivalent_Answer})+(${CEquivalent_Answer})`))
+
             }
         }
         else{
