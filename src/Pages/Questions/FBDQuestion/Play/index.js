@@ -4,9 +4,10 @@ import { Col, List, Row, Skeleton, Space, Steps, message } from "antd";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { Keyboard } from "../../../../Components/Keyboard";
+import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone } from '@ant-design/icons';
 
 import './index.css'
-import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { DropVectorOnImage } from "./DropVectorOnImage";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT } from "./Constants";
@@ -18,9 +19,18 @@ export function FBDQuestionPlay({Id}){
 
     const [currentTab, setCurrentTab] = useState(0)
 
-    const [addedVT, setAddedVT] = useState([])
+    const [addedVTs, setAddedVTs] = useState([])
+    const [addedVTsValidation, setAddedVTsValidation] = useState([])
+
+    const [allVectors, setAllVectores] = useState([])
+    const [allAnswerableVectors, setAllAnswerableVectors] = useState([])
+    const [allAddedAnswerableVectors, setAllAddedAnswerableVectores] = useState([])
+
+
     const [selectedVTDrop, setSelectedVTDrop] = useState(null)
     const [selectedVT, setSelectedVT] = useState(null)
+
+    const [checkAnswer, setCheckAnswer] = useState(false)
 
     const [api, contextHolder] = message.useMessage()
 
@@ -31,25 +41,123 @@ export function FBDQuestionPlay({Id}){
 
     useEffect(() => {
         loadData()
+
+        setAddedVTsValidation([])
     }, [Id])
 
-    const getAllVectors = () => {
-        const {ObjectBodies} = FBDQuestionPlay
-        const vectors = ObjectBodies.flatMap(a => a.VectorTerms)
+    useEffect(() => {
+        if(checkAnswer){
 
-        return vectors
+        }
+    }, [checkAnswer])
+
+    useEffect(() => {
+        if(FBDQuestionPlay){
+            const {ObjectBodies} = FBDQuestionPlay
+            const vectors = ObjectBodies.flatMap(a => a.VectorTerms)
+
+            setAllVectores(vectors)
+
+            const answerableVTs = vectors.filter(a => a.Answers.length)
+
+            setAllAnswerableVectors(answerableVTs)
+
+        }
+    }, [FBDQuestionPlay])
+
+    useEffect(() => {
+        const vectors = addedVTs.filter(a => a.Answers.length)
+
+        setAllAddedAnswerableVectores(vectors)
+    }, [addedVTs])
+
+
+    const validateAddedVTsFinalScores = () => {
+        const validations = addedVTs.map((t) => {
+            console.log(t)
+            const originalTerm = allVectors.filter(x => x.Id === t.Id)[0]
+
+            const {Angle: originalAngle, Clockwise: originalAngleClockwise} = t
+
+            const {BodyObjectId, ObjectBody, Angle, Linear, Clockwise, Answer, Answers} = t
+
+            //Check association
+             const correctAssociation = (BodyObjectId === ObjectBody.Id)
+
+            //Check direction
+            let correctDirection = false
+            let flipAnswer = false
+            if(Linear){
+                let _angle = Angle
+
+                if(_angle < 0) _angle = _angle + 360
+    
+    
+                let oppositeAngle = _angle + 180
+                oppositeAngle = (oppositeAngle % 360)
+
+                correctDirection = (Angle === originalAngle) ||  (_angle === originalAngle) || (oppositeAngle === originalAngle)
+
+                flipAnswer = (oppositeAngle === originalAngle)
+
+            }
+            else{
+                correctDirection = true
+                flipAnswer = (originalAngleClockwise && !Clockwise)
+            }
+
+            //Check correct answer 
+            let correctAnswer = true
+            if(Answers.length){
+                let _answers = [...Answers]
+
+                if(flipAnswer){
+                    
+                }
+
+                const {answerStatus} = checkKeyboardAnswerIsCorrect(Answer, Answers)
+
+                correctAnswer = answerStatus
+            }
+
+
+            return({
+                correctAssociation,
+                correctDirection,
+                correctAnswer,
+                flipAnswer
+            })
+        })
     }
 
-    const getAllAnswerableVectors = () => {
-        const vectors = addedVT.filter(a => a.Answers.length)
-        return vectors
+    const validateFinalPage = () => {
+        const hasAnswerableVTs = allAnswerableVectors.length
+
+        if(addedVTs.length !== allVectors.length){
+            return "Please add all vectors"
+        }
+
+        if(hasAnswerableVTs){
+            const definitionsNotValid = addedVTs.filter(a => validateKeyboardAnswer(a.Answer)).length
+            
+            if(definitionsNotValid){
+                return "Some term definitions are not correct"
+            }   
+        }
+
+        return null
+
     }
 
     const onChange = (t) => {
-        const allVectors = getAllVectors()
-        const allAnswerableVectors = getAllAnswerableVectors()
 
-        if(addedVT.length !== allVectors.length){
+        //if(checkAnswer) return;
+
+        const summaryValidation = validateFinalPage()
+        const finalIndex = getFinalPageIndex()
+
+
+        if(t === 1 && (addedVTs.length !== allVectors.length)){
             api.destroy()
             api.warning("Please add all vectors")
 
@@ -57,27 +165,56 @@ export function FBDQuestionPlay({Id}){
         }
 
         if(t === 1){
-            if(allAnswerableVectors.length){
-                setSelectedVT(allAnswerableVectors[0])
+            if(allAddedAnswerableVectors.length){
+                setSelectedVT(allAddedAnswerableVectors[0])
             }
             else{
                  setSelectedVT(null)
             }
         }
 
+        if(t === finalIndex){
+            if(summaryValidation){
+                api.destroy()
+                api.warning(summaryValidation)
+    
+                return
+            }
+            
+
+            const validations = validateAddedVTsFinalScores()
+            setCheckAnswer(true)
+        }
+
+        
+
         setCurrentTab(t)
     }   
 
-    const renderAddTerms = () => {
+    const renderQuestionBody = () => {
         const {QuestionText} = FBDQuestionPlay
 
-        const vectors = getAllVectors()
+        return(
+            <div>
+                {QuestionText && 
+                    <div
+                        className="eb-question-question-body"
+                    >
+                        <div>
+                            <LatexRenderer latex={QuestionText}/>
+                        </div>
+                    </div>}
+            </div>
+        )
+    }
+
+    const renderAddTerms = () => {
 
         return(
             <div 
                 className="hq-full-width"
             >   
-                <LatexRenderer latex={QuestionText} />
+                {renderQuestionBody()}
                 <br/>
                 <Space size={"large"} align="start">
                     <DropVectorOnImage 
@@ -87,9 +224,9 @@ export function FBDQuestionPlay({Id}){
                     selectedVT={selectedVTDrop}
                     
                     onDropVT = {(vt, a, x, y, sBox) => {
-                        const isDropped = selectedVTDrop && vectors.filter(a => a.Id === selectedVTDrop.Id)
+                        const isDropped = selectedVTDrop && allVectors.filter(a => a.Id === selectedVTDrop.Id)
 
-                        let vts = [...addedVT]
+                        let vts = [...addedVTs]
 
                         if(isDropped){
                             vts = vts.filter(a => a.Id !== selectedVTDrop.Id)
@@ -125,22 +262,22 @@ export function FBDQuestionPlay({Id}){
                             ObjectBody:box
                         })
 
-                        setAddedVT(vts)
+                        setAddedVTs(vts)
                         setSelectedVTDrop(null)
                     }}
 
-                    addedVT={addedVT}
+                    addedVTs={addedVTs}
                     />
 
                     <div className="hq-full-width">
                         <List 
-                            dataSource={vectors}
+                            dataSource={allVectors}
                             renderItem={(v, vi) => {
                                 const {Id, Latex, Linear} = v
 
                                 const isSelected = selectedVTDrop && selectedVTDrop.Id === Id
 
-                                const existingSelection = addedVT.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === Id)[0]
+                                const existingSelection = addedVTs.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === Id)[0]
                                 const Clockwise = existingSelection && existingSelection.Clockwise
                                 return(
                                         <div key ={Id} >
@@ -167,18 +304,18 @@ export function FBDQuestionPlay({Id}){
                                                     currentAngle={existingSelection.Angle}
                                                     widthHeight={0.03*window.innerWidth}
                                                     onUpdateAngle={(a) => {
-                                                        let vts = [...addedVT]
+                                                        let vts = [...addedVTs]
                                                         vts[existingSelection.index].Angle = a
 
-                                                        setAddedVT(vts)
+                                                        setAddedVTs(vts)
                                                     }}
 
 
                                                     onUpdateAngleSafe = {(a) => {
-                                                        let vts = [...addedVT]
+                                                        let vts = [...addedVTs]
                                                         vts[existingSelection.index].Angle = a
 
-                                                        setAddedVT(vts)
+                                                        setAddedVTs(vts)
                                                     }}
 
                                                     hasTextEditor = {true}
@@ -187,10 +324,10 @@ export function FBDQuestionPlay({Id}){
                                                 <MomentDirectionComponent
                                                     clockwise={Clockwise}
                                                     onFlip={() => {
-                                                        let vts = [...addedVT]
+                                                        let vts = [...addedVTs]
                                                         vts[existingSelection.index].Clockwise = !vts[existingSelection.index].Clockwise 
 
-                                                        setAddedVT(vts)
+                                                        setAddedVTs(vts)
                                                     }}
                                                 />
                                                 )}
@@ -199,9 +336,9 @@ export function FBDQuestionPlay({Id}){
                                                 {existingSelection && 
                                                 <p 
                                                 onClick={() => {
-                                                    let vts = [...addedVT]
+                                                    let vts = [...addedVTs]
                                                     vts = vts.filter(a => a.Id !== v.Id)
-                                                    setAddedVT(vts)
+                                                    setAddedVTs(vts)
                                                 }}
                                                 className="default-gray default-small hq-clickable">Remove</p>}
                                             </Space>
@@ -244,13 +381,13 @@ export function FBDQuestionPlay({Id}){
                     Id={keyboard.Id}
                     List={Answer}
                     onEnterKey={(l) => {
-                        const vtIndex = addedVT.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === selectedVT.Id)[0].index
+                        const vtIndex = addedVTs.map((a, ai) => ({...a, index: ai})).filter(a => a.Id === selectedVT.Id)[0].index
 
-                        let terms = [...addedVT]
+                        let terms = [...addedVTs]
 
                         terms[vtIndex].Answer = l
 
-                        setAddedVT(terms)
+                        setAddedVTs(terms)
 
                     }}
                 />
@@ -258,17 +395,12 @@ export function FBDQuestionPlay({Id}){
         )
     }
 
-    const renderDefinitions = () => {
-        const {QuestionText} = FBDQuestionPlay
-
-        
-        const answerableVTs = getAllAnswerableVectors()
-
+    const renderDefinitions = () => {        
         return(
             <div 
                 className="hq-full-width"
             >   
-                <LatexRenderer latex={QuestionText} />
+                {renderQuestionBody()}
                 <br/>
                 <Space size={"large"} align="start">
                     <DropVectorOnImage 
@@ -276,14 +408,14 @@ export function FBDQuestionPlay({Id}){
                                             
                         onDropVT = {(vt, a, x, y, sBox) => {}}
 
-                        addedVT={addedVT}
+                        addedVTs={addedVTs}
                     />
 
                     <div>
                         <Row
                             gutter={[8, 8]}
                         >
-                        {answerableVTs.map((v, vi) => {
+                        {allAddedAnswerableVectors.map((v, vi) => {
                             const {Id, Latex, Answer} = v
 
                             const isSelected = selectedVT && selectedVT.Id === Id
@@ -321,13 +453,33 @@ export function FBDQuestionPlay({Id}){
         )
     }
 
+    const renderFinalPage = () => {
+        return(
+            <div>
+                Final page
+            </div>
+        )
+    }
+
+    const getFinalPageIndex = () => {
+        let index =1 
+
+        const hasAnswerableVTs = allAnswerableVectors
+
+        if(hasAnswerableVTs) index = index + 1;
+
+        return index
+    }
+
     const renderContent = () => {
+        const finalIndex = getFinalPageIndex()
+
         const map = {
             0: () => renderAddTerms(),
-
+            [finalIndex]: () => renderFinalPage()
         }
 
-        const hasAnswerableVTs = getAllAnswerableVectors().length
+        const hasAnswerableVTs = allAnswerableVectors.length
 
         if(hasAnswerableVTs){
             map[1] = () => renderDefinitions()
@@ -337,15 +489,30 @@ export function FBDQuestionPlay({Id}){
     }
 
     const renderQuestion = () => {
+        const finalIndex = getFinalPageIndex()
+        const summaryValidation = validateFinalPage()
 
         const items = [{
             key:'Draw FBD',
             title: <p className={currentTab === 0 ? "default-title highlighted" : "default-gray"}>Draw FBD</p>
         },
-        {
-            key:'Definitions',
-            title: <p className={currentTab === 1 ? "default-title highlighted" : "default-gray"}>Definitions</p>
-        }]
+        ]
+
+        const hasAnswerableVTs = allAnswerableVectors.length
+
+        if(hasAnswerableVTs){
+            items[1] = {
+                key:'Definitions',
+                title: <p className={currentTab === 1 ? "default-title highlighted" : "default-gray"}>Definitions</p>
+            }
+        }
+
+        items.push({
+            key:'Summary',
+            title: <p className={currentTab === finalIndex ? "default-title highlighted" : "default-gray"}>Summary - Check answer</p>,
+            icon: !summaryValidation ? <SmileTwoTone /> : <FrownTwoTone />
+        })
+
 
         return(
             <div>

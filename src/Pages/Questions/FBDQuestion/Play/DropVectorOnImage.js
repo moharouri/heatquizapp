@@ -5,7 +5,7 @@ import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent"
 import Xarrow from "react-xarrows";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
-export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
+export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
 
     const canvasRef = React.createRef()
 
@@ -33,7 +33,6 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
             const _ctx = canvasRef.current.getContext('2d')
 
             const styles = canvasRef.current.getBoundingClientRect()
-
             const {top, left} = styles
 
             if(_ctx){
@@ -51,7 +50,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
 
     useEffect(() => {
         
-    }, [addedVT])
+    }, [addedVTs])
 
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0, fake) => {
         if(!fake){
@@ -80,7 +79,7 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
         }
 
 
-        for(let vt of addedVT){
+        for(let vt of addedVTs){
             const boxesIds = Object.keys(boxes).map(a => Number(a))
 
             const {ObjectBody} = vt
@@ -158,6 +157,9 @@ export function DropVectorOnImage({question, addedVT, selectedVT, onDropVT}){
     const onMouseMove = (e) => {
         const {point, _snippedBox} = handleSnipping(e)
 
+        console.log(e)
+        console.log(point)
+    
         setMouseX(point.x)
         setMouseY(point.y)
 

@@ -5,7 +5,7 @@ import { red, green } from '@ant-design/colors';
 import { getRandomSeriesElements } from "./Functions";
 import { convertSecondsToHHMMSS, goToQuestionViewEdit, goToSeriesViewEdit } from "../../services/Auxillary";
 
-import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
+import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
 import { ClickableQuestionPlay } from "../../Pages/Questions/ClickableQuestion/Play";
 import { KeyboardQuestionPlay } from "../../Pages/Questions/KeyboardQuestion/Play";
 import { MultipleChoiceQuestion } from "../../Pages/Questions/MultipleChoiceQuestion/Play";
@@ -24,6 +24,7 @@ import { ImageModal } from "../ImageModal";
 import { DisplayClickableQuestionAnswers } from "./DisplayClickableQuestionAnswers";
 import { EnergyBalanceQuestionPlay } from "../../Pages/Questions/EnergyBalanceQuestion/Play";
 import { CurrentQuestionTypeNotSupported } from "./CurrentQuestionTypeNotSupported";
+import { FBDQuestionPlay } from "../../Pages/Questions/FBDQuestion/Play";
 var timer
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
@@ -379,6 +380,16 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             />,
             [ENERGY_BALANCE_QUESTION_PARAMETER]: () => 
             <EnergyBalanceQuestionPlay 
+                Id={Id}
+                onUpdateSeriesPlayElements = {updateSeriesPlayElements}
+                
+                nextAction = {() => goNext()}
+
+                mapKey={mapKey}
+            />,
+
+            [FBD_QUESTION_PARAMETER]: () => 
+            <FBDQuestionPlay 
                 Id={Id}
                 onUpdateSeriesPlayElements = {updateSeriesPlayElements}
                 
