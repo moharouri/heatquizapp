@@ -2212,7 +2212,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                         </Tooltip>
                                     </Space>
                                     <br/>
-                                    <small className="default-red eb-question-red-background">You add this <u>dummy</u> term to energy balance</small>
+                                    <small className="default-red eb-question-red-background">You added this <u>dummy</u> term to energy balance</small>
                                     </div>
                                 </div>
                             )
