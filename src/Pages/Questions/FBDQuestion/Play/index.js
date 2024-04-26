@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Col, List, Row, Skeleton, Space, Steps, message } from "antd";
+import { Col, Divider, List, Row, Skeleton, Space, Steps, Tooltip, message } from "antd";
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { Keyboard } from "../../../../Components/Keyboard";
-import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone } from '@ant-design/icons';
+import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone,ExclamationCircleOutlined } from '@ant-design/icons';
 
 import './index.css'
 import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
@@ -12,8 +12,10 @@ import { DropVectorOnImage } from "./DropVectorOnImage";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT } from "./Constants";
 import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
+import { NextButton } from "../../../../Components/NextButton";
+import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 
-export function FBDQuestionPlay({Id}){
+export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextAction, mapKey}){
 
     const {FBDQuestionPlay, errorGetFBDQuestionPlay, isLoadingFBDQuestionPlay, getFBDQuestionPlay,} = useQuestions()
 
@@ -21,6 +23,7 @@ export function FBDQuestionPlay({Id}){
 
     const [addedVTs, setAddedVTs] = useState([])
     const [addedVTsValidation, setAddedVTsValidation] = useState([])
+    const [finalScore, setFinalScore] = useState(0)
 
     const [allVectors, setAllVectores] = useState([])
     const [allAnswerableVectors, setAllAnswerableVectors] = useState([])
@@ -72,12 +75,25 @@ export function FBDQuestionPlay({Id}){
     }, [addedVTs])
 
 
+    const flipAnswers = (answers) => {
+        let _answers = [...answers]
+        
+        _answers = _answers.map((a) => {
+            return({
+                ...a,
+                AnswerElements: [{Value:'-'}, {Value:'('}, ...a.AnswerElements, {Value:')'}]
+            })
+        })
+        return _answers
+    }
+
     const validateAddedVTsFinalScores = () => {
         const validations = addedVTs.map((t) => {
-            console.log(t)
+            const {Id} = t
+
             const originalTerm = allVectors.filter(x => x.Id === t.Id)[0]
 
-            const {Angle: originalAngle, Clockwise: originalAngleClockwise} = t
+            const {Angle: originalAngle, Clockwise: originalAngleClockwise} = originalTerm
 
             const {BodyObjectId, ObjectBody, Angle, Linear, Clockwise, Answer, Answers} = t
 
@@ -112,22 +128,67 @@ export function FBDQuestionPlay({Id}){
                 let _answers = [...Answers]
 
                 if(flipAnswer){
-                    
+                    _answers = flipAnswers(_answers)
                 }
 
-                const {answerStatus} = checkKeyboardAnswerIsCorrect(Answer, Answers)
+                const {answerStatus} = checkKeyboardAnswerIsCorrect(Answer, _answers)
 
                 correctAnswer = answerStatus
             }
 
 
             return({
+                Id,
                 correctAssociation,
                 correctDirection,
                 correctAnswer,
                 flipAnswer
             })
-        })
+        }).sort((a, b) => a.Id - b.Id)
+
+        setAddedVTsValidation(validations)
+
+        //Scores 
+        let totalPoints = allVectors.reduce((r, c) => {
+            //Association
+            r = r + 1
+
+            //Direction
+            r = r + 1
+
+            //Definition
+            r = r + (c.Answers.length ? 1 : 0)
+
+            return r
+        }, 0)
+
+        let posPoints = validations.reduce((r, c, ci) => {
+            const {
+                correctAssociation,
+                correctDirection,
+                correctAnswer,
+            } = c
+
+            const realC = allVectors[ci]
+
+            const {Answers} = realC
+
+            const hasToBeDefined = Answers.length
+
+            //Association
+            r = r + (correctAssociation ? 1 : 0)
+
+            //Direction
+            r = r + (correctDirection ? 1 : 0)
+
+            // Definition
+            r = r + ((hasToBeDefined && correctAnswer) ? 1 : 0)
+
+            return r
+        }, 0)
+
+
+        setFinalScore(posPoints + "/" + totalPoints)
     }
 
     const validateFinalPage = () => {
@@ -151,7 +212,7 @@ export function FBDQuestionPlay({Id}){
 
     const onChange = (t) => {
 
-        //if(checkAnswer) return;
+        if(checkAnswer) return;
 
         const summaryValidation = validateFinalPage()
         const finalIndex = getFinalPageIndex()
@@ -182,7 +243,7 @@ export function FBDQuestionPlay({Id}){
             }
             
 
-            const validations = validateAddedVTsFinalScores()
+            validateAddedVTsFinalScores()
             setCheckAnswer(true)
         }
 
@@ -453,11 +514,280 @@ export function FBDQuestionPlay({Id}){
         )
     }
 
+    const getDrawingScore = () => {
+        const drawingPoints = addedVTsValidation.reduce((r, c) => {
+
+            const {correctAssociation} = c
+
+            //Association
+            r = r + (correctAssociation ? 1 : 0)
+
+            return r
+        }, 0)
+
+        return (drawingPoints + "/" + allVectors.length)
+    }
+
+    const getDirectionDefinitionScore = () => {
+        const DDPoints = addedVTsValidation.reduce((r, c, ci) => {
+            const {correctDirection, correctAnswer} = c
+
+            const realC = allVectors[ci]
+
+            const {Answers} = realC
+
+            const hasToBeDefined = Answers.length
+            
+           //Direction
+           r = r + (correctDirection ? 1 : 0)
+
+           // Definition
+           r = r + ((hasToBeDefined && correctAnswer) ? 1 : 0)
+
+            return r
+        }, 0)
+
+        const totalPoints =  allVectors.reduce((r, c) => {
+            const {Answers} = c
+
+            //Direction
+            r = r + 1
+
+            //Definition
+            r = r + (Answers.length ? 1 : 0)
+
+            return r
+        }, 0)
+
+        return (DDPoints + "/" + (totalPoints))
+    }
+
     const renderFinalPage = () => {
+        const {PDFURL} = FBDQuestionPlay
+
+        const drawingScore = getDrawingScore()
+
+        const DDScores = getDirectionDefinitionScore()
+
         return(
-            <div>
-                Final page
-            </div>
+            <div 
+            className="hq-full-width"
+        >   
+            {renderQuestionBody()}
+            <br/>
+           
+            <Space size={"large"} align="start">
+                <div>
+                    {/*<DropVectorOnImage 
+                        question={FBDQuestionPlay} 
+                                            
+                        onDropVT = {(vt, a, x, y, sBox) => {}}
+
+                        addedVTs={allVectors}
+                    />*/}
+                    <DropVectorOnImage 
+                        question={FBDQuestionPlay} 
+                                            
+                        onDropVT = {(vt, a, x, y, sBox) => {}}
+
+                        addedVTs={addedVTs}
+                    />
+                    <p className="default-green">Correct drawing</p>
+
+                    <br/>
+                    {checkAnswer && 
+                    <Space align="start">
+                        <Space
+                            className="eb-question-question-final-score"
+                            direction="vertical"
+                            align="center"
+                        >
+                            <p className="default-title">{finalScore}</p>
+                            <p className="default-gray default-small">final score</p>
+                        </Space>
+                        {PDFURL && 
+                        <ViewSolutionComponent 
+                            question={FBDQuestionPlay}
+                            correct={finalScore === 1}
+                        />}
+
+                    {nextAction && 
+                    <NextButton 
+                        nextAction={() => nextAction()}
+                      />}
+                    </Space>
+                 }
+                </div>
+
+                <div>
+                    <DropVectorOnImage 
+                        question={FBDQuestionPlay} 
+                                            
+                        onDropVT = {(vt, a, x, y, sBox) => {}}
+
+                        addedVTs={addedVTs}
+                    />
+                    <p className="default-title">Your drawing</p>
+                </div>
+
+                <div style={{overflowY:'scroll', height: window.innerHeight * 0.60, width: 0.4*window.innerWidth}}>
+                    <Divider>
+                        <Space size={'large'}>
+                            <span className="default-gray hq-normal-font-weight">Vectors placement</span> 
+                            <span className="default-title hq-normal-font-weight">{drawingScore}</span>
+                        </Space>
+                    </Divider>
+
+                    {allVectors.map((v, vi) => {
+                        const {Id, Latex} = v
+                        const {correctAssociation} = addedVTsValidation[vi]
+                        return(
+                            <div
+                                key={Id}
+                            >
+                                <Space>
+                                    <p className="default-gray">{vi+1}</p>
+
+                                    <LatexRenderer latex={"$$" + Latex + "$$"}/>
+
+                                    {correctAssociation ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
+
+                                    {correctAssociation ? <i className="default-green">+1</i> : <i className="default-red">-1</i>}
+                                </Space>
+                            </div>
+                        )
+                    })}
+
+                    <Divider>
+                        <Space size={'large'}>
+                            <span className="default-gray hq-normal-font-weight">Direction & Definition</span> 
+                            <span className="default-title hq-normal-font-weight">{DDScores}</span>
+                        </Space>
+                    </Divider>
+
+                    {allVectors.map((v, vi) => {
+                        const {Id, Latex, Linear, Angle, Answers, Clockwise,} = v
+
+                        const addedVT = addedVTs.filter(t => t.Id === Id)[0]
+
+                        const {Answer} = addedVT
+
+                        const {correctDirection, correctAnswer, flipAnswer} = addedVTsValidation[vi]
+
+                        const reducedLatex = Answer.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+
+                        return(
+                            <div
+                                key={Id}
+                            >
+                            <div className="hq-element-container">
+                                <Space direction="vertical" size={'large'}>
+                                <Space align="start">
+                                    <Space>
+                                        <p className="default-gray">{vi+1}</p>
+
+                                        <LatexRenderer latex={"$$" + Latex + "$$"}/>  
+                                    </Space> 
+
+                                    &nbsp;
+                                    &nbsp; 
+                                    &nbsp;
+                                    &nbsp; 
+
+                                    <Space>
+                                        {Linear ? 
+                                            <VectorDirectionComponent 
+                                                angleStep={5}
+                                                currentAngle={Angle}
+                                                widthHeight={0.03*window.innerWidth}
+                                                onUpdateAngle={(a) => {}}
+                                        /> : <div/>}   
+                                        {correctDirection ? 
+                                            <Tooltip
+                                                    color="white"
+                                                    title={<p>You assigned direction correctly</p>}
+                                                >
+                                                    <i className="default-green hq-clickable">+1</i>
+                                                </Tooltip>
+                                                : 
+                                                <Tooltip
+                                                    color="white"
+                                                    title={<p>You assigned direction incorrectly, correct direction is shown here</p>}
+                                                >
+                                                    <i className="default-red hq-clickable">-1</i>
+                                            </Tooltip>} 
+
+                                        {flipAnswer && 
+                                        <Tooltip
+                                            color="white"
+                                            title={
+                                            <div>
+                                                <p>Direction is considered correct since it is opposite of the correct direction.</p>
+                                                <p> As a result, definition is also flipped.</p>
+                                            </div>}
+                                        >
+                                            <ExclamationCircleOutlined className="default-title hq-clickable"/>
+                                        </Tooltip>}
+                                    </Space>
+
+                                </Space>
+                                <Space align="end">
+                                    <div>
+                                        {Answers.map((a, ai) => {
+
+                                            let answerReduced = a.AnswerElements
+                                            .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                            .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                                            answerReduced = flipAnswer ? "-(" + answerReduced + ")" : answerReduced
+
+                                            return(
+                                                <div
+                                                    key={ai}
+                                                    style={{width:'fit-content'}}
+                                                >
+                                                    <LatexRenderer latex={"$$" + answerReduced + "$$"}/>
+                                                </div>
+                                                )
+                                            })}
+                                            <p className="default-green">Correct solution</p>
+                                        </div>
+                                        &nbsp;
+                                        &nbsp;
+                                        &nbsp;
+                                        <div>
+                                            <Space>
+                                                <LatexRenderer latex={"$$" + reducedLatex + "$$"}/>
+                                                {correctAnswer ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
+                                                            
+                                                {correctAnswer ?
+                                                    <Tooltip
+                                                        color="white"
+                                                        title={<p>Definition correct</p>}
+                                                    >
+                                                        <i className="default-green hq-clickable">+1</i>
+                                                    </Tooltip>
+                                                    : 
+                                                    <Tooltip
+                                                        color="white"
+                                                        title={<p>Definition incorrect</p>}
+                                                    >
+                                                    <i className="default-red hq-clickable">-1</i>
+                                                </Tooltip>}
+                                            </Space>
+                                            <p className="default-title">Your solution</p>
+                                        </div>
+                                    </Space>
+                                </Space>
+
+                                </div>
+                                <br/>
+                            </div>
+                        )
+                    })}
+                </div>
+            </Space>
+        </div>
         )
     }
 
