@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import './VectorDirectionComponent.css'
 
-export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAngle, onUpdateAngleSafe, angleStep, hasTextEditor}){
+export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAngle, onUpdateAngleSafe, angleStep, hasTextEditor, noUpdate}){
 
     const [ctx, setCtx] = useState(null)
 
@@ -34,9 +34,6 @@ export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAng
             draw()
         }
 
-        console.log(angle)
-        console.log(onUpdateAngleSafe)
-
         if(onUpdateAngleSafe){
             onUpdateAngleSafe(angle)
         }
@@ -54,6 +51,8 @@ export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAng
     }
 
     const onClick = () => {
+        if(noUpdate) return;
+
         if(!isRotating) {
             setIsRotating(true)
 
@@ -69,7 +68,9 @@ export function VectorDirectionComponent({widthHeight, currentAngle, onUpdateAng
     }
 
     const onMove = (e) => {
-            if(!isRotating) return;
+        if(noUpdate) return;
+
+        if(!isRotating) return;
 
             const point = computePointInCanvas(e);
 

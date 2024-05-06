@@ -263,7 +263,7 @@ export function FBDQuestionEditView({reloadQuestion}){
                     dataSource={VTs}
 
                     renderItem={(vt, vti) => {
-                        console.log(vt)
+
                         const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, BodyObjectId} = vt
 
                         const OB = ObjectBodies.filter(a => a.Id === BodyObjectId)[0]
