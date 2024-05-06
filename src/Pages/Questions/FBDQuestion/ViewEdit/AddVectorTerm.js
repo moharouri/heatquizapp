@@ -16,7 +16,7 @@ export function AddVectorTerm({open, onClose, question, reloadQuestion}) {
 
     if(!open) return <div/>;
 
-    const {} = useQuestions()
+    const { isLoadingAddFBDQuestionVT, addFBDQuestionVT,} = useQuestions()
 
     const [newLatex, setNewLatex] = useState('')
     const [newCode, setNewCode] = useState('')
@@ -294,7 +294,7 @@ export function AddVectorTerm({open, onClose, question, reloadQuestion}) {
                 size="small"
                 type="primary"
 
-                loading={false}
+                loading={isLoadingAddFBDQuestionVT}
 
                 onClick={() => {
                     if(!newCode.trim() || !newLatex.trim()){
@@ -334,8 +334,38 @@ export function AddVectorTerm({open, onClose, question, reloadQuestion}) {
                         return
                     }
 
-                    let data = new FormData()
+                    const data = new FormData()
 
+                    data.append('QuestionId', question.Id)
+
+                    data.append('Code', newCode)
+                    data.append('Latex', newLatex)
+                    data.append('ArrowColor', newColor)
+                    data.append('LatexText', newLatexText || "")
+
+                    data.append('SelectedObjectbodyId', selectedOB.Id)
+                    data.append('Linear', newType === FBD_VECTOR_LINEAR)
+                    data.append('Angle', newAngle)
+                    data.append('Clockwise', false)
+
+                    data.append('KeyboardId', selectedKeyboard.Id)
+
+
+                    data.append('Answers', JSON.stringify(newList.map((a) => ({
+                        AnswerElements: a.List.map((e,i) => (
+                            {
+                                NumericKeyId: e.NumericKeyId,
+                                ImageId: e.VariableImageId,
+                                Value:e.char,
+                                Id: i,
+                                Order:i
+                            }))}
+                        ))))
+
+                    addFBDQuestionVT(data).then(r =>handleResponse(r, api, 'Added successfully',1 , () => {
+                        reloadQuestion()
+                        onClose()
+                    }))
                 }}
             >
                 Add

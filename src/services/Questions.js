@@ -264,7 +264,17 @@ export function editFBDVectorTermAssociationRequest(b){
     return EDIT_REQUEST_FILE_API('FreebodyDiagramQuestion/EditVTAssociation', b)
 }
 
+export function editFBDQuestionImageRequest(b){
+    return EDIT_REQUEST_FILE_API('FreebodyDiagramQuestion/AddEditQuestionBackgroundImage', b)
+}
 
+export function addFBDQuestionOBRequest(b){
+    return ADD_REQUEST_BODY_API('FreebodyDiagramQuestion/AddObjectBody', b)
+}
+
+export function addFBDQuestionVTRequest(b){
+    return ADD_REQUEST_FILE_API('FreebodyDiagramQuestion/AddVectorTerm', b)
+}
 
 
 
