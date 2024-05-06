@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Col, Divider, Dropdown, List, Row, Space, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, Dropdown, List, Popconfirm, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { FixURL } from "../../../../services/Auxillary";
+import { FixURL, handleResponse } from "../../../../services/Auxillary";
 import { ControlOutlined, InsertRowAboveOutlined, QuestionCircleOutlined, PictureOutlined, FullscreenOutlined, PlusOutlined, EditOutlined  } from '@ant-design/icons';
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { UpdateVTCodeLatex } from "./UpdateVTCodeLatex";
@@ -20,7 +20,10 @@ import { AddBodyObject } from "./AddBodyObject";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
-    const {FBDQuestionPlay: question} = useQuestions()
+    const {FBDQuestionPlay: question,
+        removeFBDQuestionOB,
+        removeFBDQuestionVT
+    } = useQuestions()
 
 
     const imageRef = React.createRef()
@@ -214,8 +217,24 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'delete_ob',
-                                                label: 'Delete',
-                                                onClick: () => {}
+                                                label: 
+                                                <Popconfirm
+                                                title="Remove Object Body"
+                                                description="Are you sure to delete this object?"
+                                                        onConfirm={() => {
+                                                            let data = new FormData()
+                                                            data.append('Id', o.Id)
+                                                            removeFBDQuestionOB(data)
+                                                            .then(r => handleResponse(r, api, 'Removed', 1, () => reloadQuestion()))
+                                                        }}
+                                                onCancel={() => {}}
+                                                okText="Yes"
+                                                cancelText="No"
+                                                placement="right"
+                                            >
+                                            
+                                                Delete
+                                            </Popconfirm>,
                                             }],
                                             title:'Actions'
                                         }}
@@ -370,8 +389,24 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'delete',
-                                                label: 'Delete',
-                                                onClick: () => {}
+                                                label: 
+                                                <Popconfirm
+                                                title="Remove Vector Term"
+                                                description="Are you sure to delete this term?"
+                                                        onConfirm={() => {
+                                                            let data = new FormData()
+                                                            data.append('Id', vt.Id)
+                                                            removeFBDQuestionVT(data)
+                                                            .then(r => handleResponse(r, api, 'Removed', 1, () => reloadQuestion()))
+                                                        }}
+                                                onCancel={() => {}}
+                                                okText="Yes"
+                                                cancelText="No"
+                                                placement="right"
+                                            >
+                                            
+                                                Delete
+                                            </Popconfirm>
                                             }],
                                                         title:'Actions'
                                         }}
