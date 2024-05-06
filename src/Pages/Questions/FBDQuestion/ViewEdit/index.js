@@ -3,7 +3,7 @@ import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { Button, Col, Divider, Dropdown, List, Popconfirm, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FixURL, handleResponse } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined, QuestionCircleOutlined, PictureOutlined, FullscreenOutlined, PlusOutlined, EditOutlined  } from '@ant-design/icons';
+import { ControlOutlined, InsertRowAboveOutlined, PictureOutlined, PlusOutlined, EditOutlined  } from '@ant-design/icons';
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { UpdateVTCodeLatex } from "./UpdateVTCodeLatex";
 import { UpdateVTLatexText } from "./UpdateVTLatexText";
@@ -17,6 +17,7 @@ import { EditQuestionArrowLength } from "./EditQuestionArrowLength";
 import { AddVectorTerm } from "./AddVectorTerm";
 import { UpdateQuestionImage } from "./UpdateQuestionImage";
 import { AddBodyObject } from "./AddBodyObject";
+import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
@@ -283,7 +284,7 @@ export function FBDQuestionEditView({reloadQuestion}){
 
                     renderItem={(vt, vti) => {
 
-                        const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, BodyObjectId} = vt
+                        const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, Clockwise, BodyObjectId} = vt
 
                         const OB = ObjectBodies.filter(a => a.Id === BodyObjectId)[0]
 
@@ -311,10 +312,13 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             angleStep={5}
                                             currentAngle={Angle}
                                             widthHeight={0.03*window.innerWidth}
-                                            onUpdateAngle={(a) => {
-                                                
-                                            }}
-                                        /> : <div/>}
+                                            onUpdateAngle={(a) => {}}
+                                            noUpdate={true}
+                                        /> :
+                                        <MomentDirectionComponent
+                                            clockwise={Clockwise}
+                                            onFlip={() => {}}
+                                        />}
                                         &nbsp;
                                         &nbsp;
                                         <div 
