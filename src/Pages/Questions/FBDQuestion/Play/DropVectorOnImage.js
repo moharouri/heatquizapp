@@ -156,9 +156,6 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
    
     const onMouseMove = (e) => {
         const {point, _snippedBox} = handleSnipping(e)
-
-        console.log(e)
-        console.log(point)
     
         setMouseX(point.x)
         setMouseY(point.y)

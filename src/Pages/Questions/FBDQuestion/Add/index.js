@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
 import { Button, Col, ColorPicker, Divider, Input, List, Row, Select, Space, Steps, Tabs, Tooltip, message } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled, DragOutlined, InsertRowAboveOutlined} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, ExclamationCircleOutlined, CloseCircleFilled, DragOutlined, InsertRowAboveOutlined, SmileTwoTone, FrownTwoTone} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FBD_VECTOR_LINEAR, FBD_VECTOR_ROTATIONAL } from "../Shared/Constants";
 import './index.css'
 import { AssignAnswersToVectorTerm } from "./AssignAnswersToVectorTerm";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
+import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
+import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { UploadPDF } from "../../../../Components/UploadPDF";
 
 const { TextArea } = Input;
 
@@ -53,6 +56,9 @@ export function AddFBDQuestion(){
     const [showAddVTAnswers, setShowAddVTAnswers] = useState(false)
     const [selectedVT, setSelectedVT] = useState(null)
     const [selectedVTIndex, setSelectedVTIndex] = useState(0)
+
+    const [newPDF, setNewPDF] = useState(null)
+    const [newPDFURL, setNewPDFURL] = useState(null)
 
 
     const renderAddImage = () => {
@@ -432,7 +438,16 @@ export function AddFBDQuestion(){
                                     }}
                                 />
 
-                                : <div/>}
+                                : <MomentDirectionComponent
+                                    clockwise={Clockwise}
+                                    onFlip={() => {
+                                        let _terms = [...VTs]
+
+                                        _terms[vti].Clockwise = !_terms[vti].Clockwise
+
+                                        setVTs(_terms)
+                                    }}
+                                />}
                             </Space>
                             <p className="default-gray">Association</p>
                             <Select 
@@ -755,6 +770,122 @@ export function AddFBDQuestion(){
         )
     }
 
+    const addQuestionClick = () => {
+
+        if(!canAdd){
+            api.destroy()
+            api.warning("Please fill all required data")
+            return
+        }
+
+        const imageWidth = 0.35*window.innerWidth
+        const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)       
+        
+
+        //Meta data
+        const data = new FormData()
+        data.append('Code', questionInfo.Code)
+        data.append('SubtopicId', questionInfo.selectedSubtopic.Id)
+        data.append('LODId', questionInfo.selectedLOD.Id)
+
+        //Question text
+        data.append('QuestionText', questionBody)
+        data.append('ArrowLength', arrowLength)
+
+        //Picture
+        data.append('Picture', newImage)
+        data.append('Width', Number.parseInt(imageWidth))
+        data.append('Height', Number.parseInt(imageHeight))
+
+        //Supplementary materials
+        data.append('PDF', newPDF)
+
+        //Object bodies
+        const OBs_VM = (newParts.map((cp) => ({
+
+                X: Math.trunc(cp.x),
+                Y: Math.trunc(cp.y),
+
+                Width: Math.trunc(cp.width),
+                Height: Math.trunc(cp.height),
+
+                Color: cp.Color,
+
+                VectorTerms: VTs
+                .filter((t) => t.ObjectBody.Id === cp.Id)
+                .map((t,ti) => ({
+                    Code: t.Code,
+                    LaTex: t.LaTeXCode,
+                    LaTexText: t.LaTeXText, 
+                    ArrowColor: t.Color,
+
+                    KeyboardId: t.Keyboard.Id,
+
+                    Linear: t.Type.Type == FBD_VECTOR_LINEAR,
+                    Angle: t.Angle,
+                    Clockwise: t.Clockwise,
+
+                    Answers: t.Answers.map((a) => ({
+                        AnswerElements: a.List.map((e,i) => (
+                            {
+                                NumericKeyId: e.NumericKeyId,
+                                ImageId: e.VariableImageId,
+                                Value:e.char,
+                                Id: i,
+                                Order:i
+                            }))}
+                        )) 
+                }))
+                
+        })))
+
+        data.append('ObjectBodies',JSON.stringify(OBs_VM))
+
+        this.props.AddQuestion(data)
+    }
+
+    const renderFinalPage = () => {
+        return(
+            <div>
+               <Space direction="vertical">
+                {!canAdd && <p className="default-red">Please fill all required data</p>}
+                <br/>
+                {canAdd && 
+                    <Space size={'large'} align="start">
+                        <div>
+                            <p> Question solution (optional)</p>
+                            <UploadPDF
+                                pdfURL={newPDFURL}
+
+                                className="add-question-upload-pdf"
+                                pdfClassName="add-question-upload-pdf-internal"
+
+                                onSetPDF={(url, pdf) => {
+                                    setNewPDFURL(url)
+                                    setNewPDF(pdf)
+                                }}
+                            />
+                        </div>
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        <Button
+                            type="primary"
+                            size="small" 
+                            onClick={addQuestionClick}
+                            loading={false}
+                        >
+                            Add question
+                        </Button>
+                    </Space>
+                }
+            </Space>
+            </div>
+        )
+    }
+
     const selectContent = () => {
         const map = {
             0: () => 
@@ -764,6 +895,8 @@ export function AddFBDQuestion(){
             />,
             1: () => renderAddImage(),
             2: () => renderQuestionContent(),
+            3: () => renderFinalPage(),
+
         }
 
         return map[currentTab]()
@@ -776,8 +909,31 @@ export function AddFBDQuestion(){
         return null
     }
 
+    const validateQuestionContent = () => {
+        if(!questionBody.trim()) return "Add question body"
+
+        if(!newParts.length) return "Please add at least one object body"
+
+        if(!VTs.length) return "Please add terms"
+
+        if(VTs.filter(a => !a.Code.trim()).length) return "Atleast one terms has no code"
+        if(VTs.filter(a => !a.Latex.trim()).length) return "Atleast one terms has no LaTeX code"
+
+        if(VTs.filter(a => !a.Keyboard).length) return "Atleast one terms has no a question with no Keyboard"
+        if(VTs.filter(a =>!a.Answers.length).length) return "Atleast one terms has no  answers"
+        if(VTs.filter(a =>a.Answers.filter(x => validateKeyboardAnswer(x)).length).length) return "Atleast one terms has invalid answer(s)"
+
+        if(VTs.filter(a => !a.ObjectBody).length) return "Atleast one terms has no association"
+
+
+        return null
+
+    }
+
     const selectImageValidation = validateAddImage()
-    const questionContentValidation = false
+    const questionContentValidation = validateQuestionContent()
+
+    const canAdd = !questionInfo.validation && (!selectImageValidation && !questionContentValidation)
 
     const onChange = (newStep) => {setCurrentTab(newStep)}
 
@@ -843,6 +999,10 @@ export function AddFBDQuestion(){
                                 )}
                            </Space>,
                             icon:<ProjectTwoTone />
+                        },
+                        {
+                            title: 'Final',
+                            icon: canAdd ? <SmileTwoTone /> : <FrownTwoTone />
                         }
                     ]}
             />

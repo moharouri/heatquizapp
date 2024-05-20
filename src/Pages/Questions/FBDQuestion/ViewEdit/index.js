@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
-import { Button, Col, Divider, Dropdown, List, Row, Space, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, Dropdown, List, Popconfirm, Row, Space, Tabs, Tooltip, message } from "antd";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { FixURL } from "../../../../services/Auxillary";
-import { ControlOutlined, InsertRowAboveOutlined, QuestionCircleOutlined, PictureOutlined, FullscreenOutlined, PlusOutlined  } from '@ant-design/icons';
+import { FixURL, handleResponse } from "../../../../services/Auxillary";
+import { ControlOutlined, InsertRowAboveOutlined, PictureOutlined, PlusOutlined, EditOutlined  } from '@ant-design/icons';
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { UpdateVTCodeLatex } from "./UpdateVTCodeLatex";
 import { UpdateVTLatexText } from "./UpdateVTLatexText";
@@ -15,30 +15,30 @@ import { calculateCPdimensions } from "./Functions";
 import { EditQuestionLatex } from "./EditQuestionLatex";
 import { EditQuestionArrowLength } from "./EditQuestionArrowLength";
 import { AddVectorTerm } from "./AddVectorTerm";
+import { UpdateQuestionImage } from "./UpdateQuestionImage";
+import { AddBodyObject } from "./AddBodyObject";
+import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
-    const {FBDQuestionPlay: question} = useQuestions()
+    const {FBDQuestionPlay: question,
+        removeFBDQuestionOB,
+        removeFBDQuestionVT
+    } = useQuestions()
 
 
     const imageRef = React.createRef()
     const imageRef2 = React.createRef()
 
-    const [showEditImage, setShowEditImage] = useState(false)
-    
-    const [showEditExplanation, setShowEditExplanation] = useState(false)
+    const [showEditQuestionImage, setShowEditQuestionImage] = useState(false)
+    const [showEditGeneralLatex, setShowEditGeneralLatex] = useState(false)
+
     const [showEditArrowLength, setShowEditArrowLength] = useState(false)
+
+    const [showAddOB, setShowAddOB] = useState(false)
 
     const [offset, setOffset] = useState(0)
     const [leftOffset, setLeftOffset] = useState(0)
-
-    const [newParts, setNewParts] = useState([])
-    
-    const [isAddingElement, setIsAddingElement] = useState(false)
-    const [isAddingElementSecond, setIsAddingElementSecond] = useState(false)
-
-    const [isMovingElement, setIsMovingElement] = useState(false)
-    const [movedElement, setMovedElement] = useState(false)
 
     const [api, contextHolder] = message.useMessage()
     const [currentTab, setCurrentTab] = useState(1)
@@ -81,19 +81,10 @@ export function FBDQuestionEditView({reloadQuestion}){
             cursor:'crosshair'
         })
 
-        const itemStyle = ({
-            alignItems:'center',
-            justifyContent:'center',
-            display:'flex',
-            flexDirection:'column',
-            position: 'absolute',
-            border:'1px solid rgb(245, 245, 245)',
-            cursor:'pointer'
-           
-        })
 
         return(
             <div>
+                <Space align="start">
                 <img
                 style = {{
                     ...backgroundImageStyle,
@@ -106,76 +97,7 @@ export function FBDQuestionEditView({reloadQuestion}){
 
                 ref={imageRef2}
 
-                onClick={(e) => {
-                    if(!(isAddingElement || isMovingElement)) return;
-
-                    e.persist()
-
-                    const {pageX, pageY} = e
-
-                    const imgRef2 = imageRef2.current
-                    const parentNode = imgRef2.parentNode.parentNode
-                    const styles = window.getComputedStyle(parentNode)
-                    const offset = Number(styles.getPropertyValue('padding-right').replace('px', ''))
-
-                    setLeftOffset(offset)
-
-                    const {top, left} = imgRef2.getBoundingClientRect()
-                                
-                    if(!isAddingElementSecond  && !isMovingElement){
-
-                        let newPart = ({
-                            x: pageX - left + offset,
-                            y: pageY - top,
-                            offsetX: offset,
-                            width: 1,
-                            height: 1,
-                        })
-
-
-                        setNewParts(prev => [...prev, newPart])
-                        setIsAddingElementSecond(true)
-
-                        return
-                    }
-
-                    if(isAddingElementSecond){
-                        let parts = [...newParts]
-                        
-                        const newX = pageX - left + offset
-                        const newY = pageY - top
-
-                        let Last =  parts[parts.length-1]
-                                
-                        Last.width = Math.abs(Last.x - newX)
-                        Last.height = Math.abs(Last.y - newY)
-        
-                        Last.x = Math.min(Last.x,newX)
-                        Last.y = Math.min(Last.y, newY)
-
-                        setNewParts(parts)
-
-                        setIsAddingElement(false)
-                        setIsAddingElementSecond(false)
-                        return
-                    }       
-                    
-                    if(isMovingElement){
-                        let parts = [...newParts]
-
-                        const newX = pageX - left + offset
-                        const newY = pageY - top
-                            
-                        parts[movedElement].x = newX
-                        parts[movedElement].y = newY
-
-                        setNewParts(parts)
-
-                        setIsMovingElement(false)
-                        setMovedElement(null)
-                        return
-                    }
-                }}
+             
                 />
                {ObjectBodies.map((o, oi) => {
                 const dimesions = calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height, Base_ImageURL_Width, Base_ImageURL_Height, o )
@@ -188,7 +110,18 @@ export function FBDQuestionEditView({reloadQuestion}){
                     </div>    
                 )
                })}
-
+                    <Tooltip
+                        color="white"
+                        title={<p>Edit image</p>}
+                    >
+                        <PictureOutlined 
+                            className="hq-clickable"
+                            onClick={() => {
+                                setShowEditQuestionImage(true)
+                            }}
+                        />
+                    </Tooltip>
+                </Space>
                 <br/>
                 <br/>
                 <Space
@@ -196,9 +129,19 @@ export function FBDQuestionEditView({reloadQuestion}){
                 >
                     <p className="default-gray">Arrow length</p>
                     <p className="default-title highlighted-silent">{ArrowLength} {' px'}</p>
+                    <Tooltip
+                            color="white"
+                            title={<p>Edit arrow length</p>}
+                        >
+                            <EditOutlined 
+                                onClick={() => {
+                                    setShowEditArrowLength(true)
+                                }}
+                            />
+                    </Tooltip>
                 </Space>
                
-               
+                
             </div>
         )
     }
@@ -211,6 +154,24 @@ export function FBDQuestionEditView({reloadQuestion}){
 
         return(
             <div>
+                <Tooltip
+                    color="white"
+                    title={<p>Add new object body</p>}
+                >
+                    <Button
+                        size="small"
+                        onClick={() => {
+                            setShowAddOB(true)
+                        }}
+
+                        icon={<PlusOutlined style={{color:'green'}}/>}
+                    >
+                        Add
+                    </Button>
+                </Tooltip>
+
+                <br/>
+                <br/>
                 <List 
                     dataSource={ObjectBodies}
                     renderItem={(o, oi) => {
@@ -257,8 +218,24 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'delete_ob',
-                                                label: 'Delete',
-                                                onClick: () => {}
+                                                label: 
+                                                <Popconfirm
+                                                title="Remove Object Body"
+                                                description="Are you sure to delete this object?"
+                                                        onConfirm={() => {
+                                                            let data = new FormData()
+                                                            data.append('Id', o.Id)
+                                                            removeFBDQuestionOB(data)
+                                                            .then(r => handleResponse(r, api, 'Removed', 1, () => reloadQuestion()))
+                                                        }}
+                                                onCancel={() => {}}
+                                                okText="Yes"
+                                                cancelText="No"
+                                                placement="right"
+                                            >
+                                            
+                                                Delete
+                                            </Popconfirm>,
                                             }],
                                             title:'Actions'
                                         }}
@@ -307,7 +284,7 @@ export function FBDQuestionEditView({reloadQuestion}){
 
                     renderItem={(vt, vti) => {
 
-                        const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, BodyObjectId} = vt
+                        const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, Clockwise, BodyObjectId} = vt
 
                         const OB = ObjectBodies.filter(a => a.Id === BodyObjectId)[0]
 
@@ -335,10 +312,13 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             angleStep={5}
                                             currentAngle={Angle}
                                             widthHeight={0.03*window.innerWidth}
-                                            onUpdateAngle={(a) => {
-                                                
-                                            }}
-                                        /> : <div/>}
+                                            onUpdateAngle={(a) => {}}
+                                            noUpdate={true}
+                                        /> :
+                                        <MomentDirectionComponent
+                                            clockwise={Clockwise}
+                                            onFlip={() => {}}
+                                        />}
                                         &nbsp;
                                         &nbsp;
                                         <div 
@@ -413,8 +393,24 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'delete',
-                                                label: 'Delete',
-                                                onClick: () => {}
+                                                label: 
+                                                <Popconfirm
+                                                title="Remove Vector Term"
+                                                description="Are you sure to delete this term?"
+                                                        onConfirm={() => {
+                                                            let data = new FormData()
+                                                            data.append('Id', vt.Id)
+                                                            removeFBDQuestionVT(data)
+                                                            .then(r => handleResponse(r, api, 'Removed', 1, () => reloadQuestion()))
+                                                        }}
+                                                onCancel={() => {}}
+                                                okText="Yes"
+                                                cancelText="No"
+                                                placement="right"
+                                            >
+                                            
+                                                Delete
+                                            </Popconfirm>
                                             }],
                                                         title:'Actions'
                                         }}
@@ -470,8 +466,27 @@ export function FBDQuestionEditView({reloadQuestion}){
 
         return(
             <div>
-                <p className="default-gray">Question</p>
-                <LatexRenderer latex={QuestionText || ""} />
+                <Space
+                direction="vertical"
+                align="start" size={'large'}>
+                    <Space>
+                        <p className="default-gray">Question body</p>
+
+                        <Tooltip
+                            color="white"
+                            title={<p>Edit question body</p>}
+                        >
+                            <EditOutlined 
+                                onClick={() => {
+                                    setShowEditGeneralLatex(true)
+                                }}
+                            />
+                        </Tooltip>
+                        </Space>
+                        <LatexRenderer 
+                            latex={QuestionText || ""}
+                        />
+                    </Space>
 
                 <br/>
                 <br/>
@@ -505,51 +520,7 @@ export function FBDQuestionEditView({reloadQuestion}){
                 >
                     {renderContent()}
                 </Col>
-                <Col xs={1} />
-                <Col
-                    xs={1}
-                >
-                    <Space
-                    align="end"
-                    direction="vertical">
-                       
-                        <Tooltip
-                            color="white"
-                            title={<p>Update image</p>}
-                            placement="left"
-                        >
-                            <Button
-                                onClick={() => setShowEditImage(true)}
-                            >
-                                 <PictureOutlined />
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            color="white"
-                            title={<p>Update/View question body</p>}
-                            placement="left"
-                        >
-                            <Button
-                                onClick={() => setShowEditExplanation(true)}
-                            >
-                                 <QuestionCircleOutlined />
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            color="white"
-                            title={<p>Update arrow length</p>}
-                            placement="left"
-                        >
-                            <Button
-                                onClick={() => setShowEditArrowLength(true)}
-                            >
-                                <FullscreenOutlined  />
-                            </Button>
-                        </Tooltip>
-                    </Space> 
-                </Col>
+                
             </Row>
 
             <UpdateVTCodeLatex 
@@ -604,8 +575,8 @@ export function FBDQuestionEditView({reloadQuestion}){
             />
 
             <EditQuestionLatex 
-                open={showEditExplanation}
-                onClose={() => setShowEditExplanation(false)}
+                open={showEditGeneralLatex}
+                onClose={() => setShowEditGeneralLatex(false)}
                 question={question}
                 reloadQuestion = {() => reloadQuestion()}
             />
@@ -620,6 +591,22 @@ export function FBDQuestionEditView({reloadQuestion}){
             <AddVectorTerm 
                 open={showAddVT}
                 onClose={() => setShowAddVT(false)}
+
+                question={question}
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <UpdateQuestionImage 
+                open={showEditQuestionImage}
+                onClose={() => setShowEditQuestionImage(false)}
+
+                question={question}
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <AddBodyObject 
+                open={showAddOB}
+                onClose={() => setShowAddOB(false)}
 
                 question={question}
                 reloadQuestion = {() => reloadQuestion()}
