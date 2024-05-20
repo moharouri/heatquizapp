@@ -701,6 +701,7 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
                                                 currentAngle={Angle}
                                                 widthHeight={0.03*window.innerWidth}
                                                 onUpdateAngle={(a) => {}}
+                                                noUpdate = {true}
                                         /> : <div/>}   
                                         {correctDirection ? 
                                             <Tooltip
