@@ -1049,6 +1049,21 @@ export function AddEnergyBalanceQuestion(){
     const canAdd = !questionInfo.validation && !selectImageValidation && !questionContentValidation
 
     const addQuestionClick = () => {
+        if(!canAdd){
+            api.destroy()
+            api.warning("Please fill all required data")
+            return
+        }
+
+        //Meta data
+        const data = new FormData()
+        data.append('Code', questionInfo.Code)
+        data.append('SubtopicId', questionInfo.selectedSubtopic.Id)
+        data.append('LODId', questionInfo.selectedLOD.Id)
+
+        //Supplementary materials
+        data.append('PDF', newPDF)
+
 
     }
 
