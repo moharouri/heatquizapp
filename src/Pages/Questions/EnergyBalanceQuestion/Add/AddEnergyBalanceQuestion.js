@@ -13,10 +13,13 @@ import { SelectKeyboard } from "../../KeyboardQuestion/Add/SelectKeyboard";
 import { AddAnswersToList } from "../Shared/AddAnswersToList";
 import { AssignAnswersToQuestion } from "./AssignAnswersToQuestion";
 import { UploadPDF } from "../../../../Components/UploadPDF";
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 const { TextArea } = Input;
 
 export function AddEnergyBalanceQuestion(){
 
+    const {isLoadingAddEnergyBalanceQuestion, addEnergyBalanceQuestion} = useQuestions()
     const [currentTab, setCurrentTab] = useState(0)
 
     const [questionInfo, setQuestionInfo] = useState({
@@ -484,7 +487,7 @@ export function AddEnergyBalanceQuestion(){
                                                                         _terms[ti].Questions[qi].Answers = 
                                                                         _terms[ti].Questions[qi].Answers.filter((a, ai) => ans_i !== ai)
 
-                                                                        setBCTerms(_terms)
+                                                                        setEbTerms(_terms)
                                                                     }}
                                                                 />
                                                             </Tooltip>
@@ -1065,6 +1068,8 @@ export function AddEnergyBalanceQuestion(){
         data.append('SubtopicId', questionInfo.selectedSubtopic.Id)
         data.append('LODId', questionInfo.selectedLOD.Id)
 
+        data.append('QuestionText', questionBody)
+
         //Supplementary materials
         data.append('PDF', newPDF)
 
@@ -1072,6 +1077,67 @@ export function AddEnergyBalanceQuestion(){
         data.append('Picture', newImage)
         data.append('Width', Number.parseInt(imageWidth))
         data.append('Height', Number.parseInt(imageHeight))
+
+        //CVs
+        const CVs_VM = (newParts.map((cp) => ({
+
+            X: Math.trunc(cp.x),
+            Y: Math.trunc(cp.y),
+
+            Width: Math.trunc(cp.width),
+            Height: Math.trunc(cp.height),
+            
+            Correct: cp.Correct
+        })))
+
+        data.append('ControlVolumes',JSON.stringify(CVs_VM))
+
+        //EBTs
+        const EBTerms_VM = (ebTerms.map((t) => ({
+            Code: t.Code,
+            LaTex: t.LaTeXCode,
+            LaTexText: t.LaTeXText, 
+
+            Questions: t.Questions.map((q) => ({
+                LatexCode: q.LaTeXCode,
+
+                Inflow: q.Inflow,
+                
+                KeyboardId: q.Keyboard.Id,
+                Answers: q.Answers.map((a) => ({
+                    AnswerElements: a.List.map((e,i) => (
+                        {
+                            NumericKeyId: e.NumericKeyId,
+                            ImageId: e.VariableImageId,
+                            Value:e.char,
+                            Id: i,
+                            Order:i
+                        }))}
+                        ))
+            })),
+            
+            West: t.West,
+            North: t.North,
+            East: t.East,
+            South: t.South,
+            Center: t.Center,
+            IsDummy: t.IsDummy,
+        })))
+        data.append('EnergyBalanceTerms',JSON.stringify(EBTerms_VM))
+
+        //BCs
+        data.append('BoundryConditionsKeyboardId', BCKeyboard.Id)
+        const BCs_VM = bcTerms
+        data.append('BoundaryConditions',JSON.stringify(BCs_VM))
+
+
+        //ICs
+        data.append('InitialConditionsKeyboardId', ICKeyboard.Id)
+        const ICs_VM = icTerms
+        data.append('InitialConditions',JSON.stringify(ICs_VM))
+
+        addEnergyBalanceQuestion(data)
+        .then(r => handleResponse(r, api, 'Question added successfully', 1))
     }
 
     const renderFinalPage = () => {
@@ -1104,7 +1170,7 @@ export function AddEnergyBalanceQuestion(){
                             type="primary"
                             size="small" 
                             onClick={addQuestionClick}
-                            loading={false}
+                            loading={isLoadingAddEnergyBalanceQuestion}
                         >
                             Add question
                         </Button>

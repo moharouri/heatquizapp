@@ -158,6 +158,10 @@ export function editClickableQuestionImageRequest(b){
 }
 
 //Energy balance question
+export function addEnergyBalanceQuestionRequest(b){
+    return ADD_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/AddQuestionSingleStep', b, true)
+}
+
 export function editEnergyBalanceLatexRequest(b){
     return EDIT_REQUEST_BODY_API('EnergyBalanceQuestionUpdated/EditQuestionText', b)
 }

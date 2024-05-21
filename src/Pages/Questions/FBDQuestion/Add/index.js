@@ -841,7 +841,6 @@ export function AddFBDQuestion(){
 
         data.append('ObjectBodies',JSON.stringify(OBs_VM))
 
-        this.props.AddQuestion(data)
     }
 
     const renderFinalPage = () => {
