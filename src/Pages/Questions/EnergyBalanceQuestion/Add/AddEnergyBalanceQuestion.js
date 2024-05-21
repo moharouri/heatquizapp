@@ -1055,6 +1055,10 @@ export function AddEnergyBalanceQuestion(){
             return
         }
 
+        const imageWidth = 0.35*window.innerWidth
+        const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)       
+        
+
         //Meta data
         const data = new FormData()
         data.append('Code', questionInfo.Code)
@@ -1064,7 +1068,10 @@ export function AddEnergyBalanceQuestion(){
         //Supplementary materials
         data.append('PDF', newPDF)
 
-
+        //Picture
+        data.append('Picture', newImage)
+        data.append('Width', Number.parseInt(imageWidth))
+        data.append('Height', Number.parseInt(imageHeight))
     }
 
     const renderFinalPage = () => {
