@@ -1087,7 +1087,7 @@ export function AddEnergyBalanceQuestion(){
             Width: Math.trunc(cp.width),
             Height: Math.trunc(cp.height),
             
-            Correct: cp.Correct
+            Correct: cp.correct
         })))
 
         data.append('ControlVolumes',JSON.stringify(CVs_VM))
@@ -1095,11 +1095,11 @@ export function AddEnergyBalanceQuestion(){
         //EBTs
         const EBTerms_VM = (ebTerms.map((t) => ({
             Code: t.Code,
-            LaTex: t.LaTeXCode,
-            LaTexText: t.LaTeXText, 
+            Latex: t.Latex,
+            LatexText: t.LatexText, 
 
             Questions: t.Questions.map((q) => ({
-                LatexCode: q.LaTeXCode,
+                LatexCode: q.Latex,
 
                 Inflow: q.Inflow,
                 
@@ -1126,15 +1126,20 @@ export function AddEnergyBalanceQuestion(){
         data.append('EnergyBalanceTerms',JSON.stringify(EBTerms_VM))
 
         //BCs
-        data.append('BoundryConditionsKeyboardId', BCKeyboard.Id)
-        const BCs_VM = bcTerms
-        data.append('BoundaryConditions',JSON.stringify(BCs_VM))
-
-
+        if(BCKeyboard){
+            data.append('BoundryConditionsKeyboardId', BCKeyboard.Id)
+            const BCs_VM = bcTerms
+            data.append('BoundaryConditions',JSON.stringify(BCs_VM))
+    
+        }
+   
         //ICs
-        data.append('InitialConditionsKeyboardId', ICKeyboard.Id)
-        const ICs_VM = icTerms
-        data.append('InitialConditions',JSON.stringify(ICs_VM))
+        if(ICKeyboard){
+            data.append('InitialConditionsKeyboardId', ICKeyboard.Id)
+            const ICs_VM = icTerms
+            data.append('InitialConditions',JSON.stringify(ICs_VM))
+    
+        }
 
         addEnergyBalanceQuestion(data)
         .then(r => handleResponse(r, api, 'Question added successfully', 1))
