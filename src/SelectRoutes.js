@@ -42,6 +42,7 @@ import { AddClickableQuestion } from "./Pages/Questions/ClickableQuestion/Add";
 import { AddEnergyBalanceQuestion } from "./Pages/Questions/EnergyBalanceQuestion/Add/AddEnergyBalanceQuestion";
 import { AddFBDQuestion } from "./Pages/Questions/FBDQuestion/Add";
 import { AddDiagramQuestion } from "./Pages/Questions/DiagramQuestion/Add";
+import { AddPVDiagramQiestion } from "./Pages/Questions/PVDiagramQuestion/Add";
 
 export function SelectRoutes(){
     const {roles, isStudent,} = useAuth()
@@ -115,6 +116,7 @@ export function SelectRoutes(){
                 <Route path="/add_eb_q" element={<AddEnergyBalanceQuestion />}/>
                 <Route path="/add_fbd_q" element={<AddFBDQuestion />}/>
                 <Route path="/add_d_q" element={<AddDiagramQuestion />}/>
+                <Route path="/add_pvd_q" element={<AddPVDiagramQiestion />}/>
 
                 <Route path="/keyboards_list" element={<KeyboardsList/>}/>
                 <Route path="/add_keyboard" element={<AddKeyboard/>}/>

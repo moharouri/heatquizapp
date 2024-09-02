@@ -27,6 +27,7 @@ export function AuthProvider ({children}){
         const isStudent = getIsStudent_LS()
         const {playerKey, username, user} = getAuthData()
 
+        return
         if(!isStudent){
             authenticateToken().then((res) => {                
                 const {data} = res
