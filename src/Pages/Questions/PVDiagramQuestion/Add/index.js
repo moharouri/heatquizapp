@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
-import { message, Space, Steps, Tooltip } from "antd";
-import {ScheduleTwoTone, ProjectTwoTone, FrownTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, PlusOutlined, SmileTwoTone} from '@ant-design/icons';
+import { Button, Col, message, Row, Space, Steps, Tabs, Tooltip } from "antd";
+import {ScheduleTwoTone, ProjectTwoTone, FrownTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, PlusOutlined, SmileTwoTone, ExclamationCircleOutlined} from '@ant-design/icons';
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
 
 import "./index.css"
 import { UploadImage } from "../../../../Components/UploadImage";
+import TextArea from "antd/es/input/TextArea";
+import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { AddPVDiagramQuestionInteractivePlot } from "../Shared/AddPVDiagramQuestionInteractivePlot";
 
 export function AddPVDiagramQiestion(){
 
@@ -20,10 +23,21 @@ export function AddPVDiagramQiestion(){
         validation: 'Please fill data'
     })
 
+    const imageRef = React.createRef()
+
     const [newImage, setNewImage] = useState(null)
     const [newImageURL, setNewImageURL] = useState(null)
 
+    const [newImageWidth, setNewImageWidth] = useState(0)
+    const [newImageHeight, setNewImageHeight] = useState(0)
+
     const [newPoints, setNewParts] = useState([])
+
+    const [currentSubtab, setCurrentSubtab] = useState(1)
+
+    const [questionBody, setQuestionBody] = useState("")
+
+    const [isAdding, setIsAdding] = useState(false)
 
     const renderAddImage = () => {
         return(
@@ -44,9 +58,154 @@ export function AddPVDiagramQiestion(){
         )
     }
 
-    const renderQuestionContent = () => {
+    const validateContent_QuestionInfo = () => {
+        if(!questionBody.trim()) return "Add question body"
+
+        return null
+    }
+
+    const renderAddQuestionBody = () => {
         return(
-            <div/>
+            <div className="hq-full-width">
+                <p className="default-gray">Question body</p>
+
+                <TextArea 
+                    value={questionBody}
+                    onChange={(v) => setQuestionBody(v.target.value)}
+                    className="hq-full-width"
+
+                />
+
+                <br/>
+                <LatexRenderer 
+                    latex={questionBody}
+                />
+            </div>
+        )
+    }
+
+    const renderPointsList = () => {
+        return(
+            <div>
+                <Space>
+                    <Button
+                        type="default"
+                        size="small"
+                        icon={<PlusOutlined className="default-green"/>}
+
+                        onClick={() => {
+                            setIsAdding(!isAdding)
+                        }}
+                    >
+                        New point
+                    </Button>
+                </Space>
+
+                <br/>
+                
+            </div>
+        )
+    }
+
+    const renderQuestionContent = () => {
+        if(!newImage) {
+            return (
+                <div>
+                    <p className="default-red">Please add an image</p>
+                </div>
+            )
+        }
+
+        const imageWidth = 0.35*window.innerWidth
+        const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
+
+
+        const validateInfo = validateContent_QuestionInfo()
+        const validatePoints = false
+
+        const tabs = [{
+            key:1,
+            label:
+            <Space> 
+                <p>Question text/info</p> 
+            
+                {validateInfo &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validateInfo}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
+
+            children: <div>{renderAddQuestionBody()} </div>
+        },
+        {
+            key:2,
+            label:
+            <Space> 
+                <p>Plot Points</p> 
+            
+                {validatePoints &&
+                <Tooltip
+                    color="white"
+                    title={<p>{validatePoints}</p>}
+                >
+                    <ExclamationCircleOutlined  style = {{color:'orange'}}/>
+                </Tooltip>} 
+            </Space>,
+            children: <div>{renderPointsList()}</div>
+        }]
+
+        return(
+            <div> 
+                <Row>
+                    <Col>
+                        <div>
+                        <img 
+                            alt="new-map"
+                            style={{width:imageWidth, height:imageHeight, position:'absolute'}}
+                            src={newImageURL}
+
+                            ref={imageRef}
+
+                            onClick={(e) => {
+                                if(!isAdding) return;
+
+                            }}
+
+                            onLoad={(img) => {
+
+                                img.persist()
+
+                                setNewImageWidth(img.target.naturalWidth)
+                                setNewImageHeight(img.target.naturalHeight)
+                            }}
+                        />
+                        <AddPVDiagramQuestionInteractivePlot 
+                            style={{width:imageWidth, height:imageHeight, cursor:'crosshair',/* position:'absolute', top:0, left:0,*/ border:'red solid 1px'}}
+                           
+                            isAdding = {isAdding}
+
+                            onAdd= {(p) => {
+
+                                setIsAdding(false)
+                            }}
+                        />  
+                        </div>
+                    </Col>
+                    <Col xs={2}/>
+                    <Col>
+                        <Tabs
+                            defaultActiveKey={1}
+                            items={tabs}
+                            onChange={(t) => setCurrentSubtab(t)}
+                            activeKey={currentSubtab}
+                            className="add-pv-d-question-tabs"
+                        />
+                    </Col>
+                </Row>
+            </div>
         )
     }
 
