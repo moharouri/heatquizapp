@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
 import { useState } from "react";
-import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message } from "antd";
+import { Button, Col, Divider, Input, List, Row, Space, Steps, Tabs, Tooltip, message, Select } from "antd";
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
-import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined,  ExclamationCircleOutlined , CloseCircleFilled, DragOutlined, InsertRowAboveOutlined, SmileTwoTone, FrownTwoTone} from '@ant-design/icons';
+import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, ProjectTwoTone, PlusOutlined, DeleteOutlined, ExclamationCircleOutlined , CloseCircleFilled, DragOutlined, InsertRowAboveOutlined, SmileTwoTone, FrownTwoTone} from '@ant-design/icons';
 import { UploadImage } from "../../../../Components/UploadImage";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
 import { UploadPDF } from "../../../../Components/UploadPDF";
+import { AddQuestionInteractivePlot } from "../Shared/AddQuestionInteractivePlot";
+
+import './index.css'
+
 const { TextArea } = Input;
 
 export function AddDiagramQuestion(){
@@ -28,27 +32,27 @@ export function AddDiagramQuestion(){
     const [newImageHeight, setNewImageHeight] = useState(0)
 
     const imageRef = React.createRef()
-    const [leftOffset, setLeftOffset] = useState(0)
 
     const [isAddingElement, setIsAddingElement] = useState(false)
     const [isAddingElementSecond, setIsAddingElementSecond] = useState(false)
 
-    const [isMovingElement, setIsMovingElement] = useState(false)
-    const [movedElement, setMovedElement] = useState(false)
-
     const [newParts, setNewParts] = useState([])
-    const [hoverElement, setHoverElement] = useState(null) 
+    const [selectedPartIndex, setSelectedPartIndex] = useState(null)
+
+    const [isAddingSection, setIsAddingSection] = useState(false)
 
     const [currentSubtab, setCurrentSubtab] = useState(1)
 
     const [questionBody, setQuestionBody] = useState("")
 
-    const [ebTerms, setEbTerms] = useState([])
-
     const [newPDF, setNewPDF] = useState(null)
     const [newPDFURL, setNewPDFURL] = useState(null)
 
     const [api, contextHolder] = message.useMessage()
+
+    useEffect(() => {
+        setIsAddingSection(false)
+    }, [])
 
     const renderAddImage = () => {
         return(
@@ -89,10 +93,213 @@ export function AddDiagramQuestion(){
         )
     }
 
+    const renderSelectedPlot = () => {
+        const selectedPart = newParts[selectedPartIndex]
+        
+        const {Code, Title, height, Width, OriginX, OriginY} = selectedPart
+        return(
+            <div
+                className="hq-full-width"
+            >
+                <Space
+                    size="middle"
+                    align="start"
+                    className="hq-full-width"
+                >
+                    <Input 
+                        className="hq-full-width add-d-q-plot-code-line"
+                        suffix={<p className="default-gray default-small">Code</p>}
+                        value = {Code}
+                        onChange={(v) => {
+                            let plots = [...newParts]
+
+                            plots[selectedPartIndex].Code = v.target.value.trim()
+
+                            setNewParts(plots)
+                        }}
+                    />
+                    <Button
+                        onClick={() => {
+                            let plots = [...newParts]
+
+                            plots = plots.filter((a,ai) => ai !== selectedPartIndex)
+
+                            setNewParts(plots)
+                            setSelectedPartIndex(plots.length ? 0 : null)
+
+                        }}
+                    >
+                        <DeleteOutlined
+                            className="default-red default-small"
+                        />
+                    </Button>
+                </Space>
+                <br/>
+                <br/>
+
+                <Input 
+                    className="hq-full-width"
+                    suffix={<p className="default-gray default-small">Title</p>}
+                    value = {Title}
+                    onChange={(v) => {
+                        let plots = [...newParts]
+
+                        plots[selectedPartIndex].Title = (v.target.value) || (plots[selectedPartIndex].Title[0])
+
+                        setNewParts(plots)
+                    }}
+                />
+                <br/>
+                <br/>
+                <br/>
+                <Space size="middle" align="start">
+                    <div className="add-d-q-plot-metrics-area">
+                        <small className="default-gray">Height</small>
+                        <Input 
+                            value={height}
+                            suffix={<p className="default-gray default-small">px</p>}
+
+                            type="number"
+
+                            min="0"
+
+                            onChange={(v) => {
+                                let plots = [...newParts]
+
+                                const value = Number(v.target.value.trim())
+
+                                if(!value) return;
+
+                                if(value < 0) return;
+                                
+                                plots[selectedPartIndex].height = value
+
+                                setNewParts(plots)
+                            }}
+                        />
+                    </div>
+                    <div className="add-d-q-plot-metrics-area">
+                        <small className="default-gray">Origin (x)</small>
+                        <Input 
+                            value={OriginX}
+                            suffix={<p className="default-gray default-small">%</p>}
+
+                            type="number"
+
+                            min="0"
+                            max="100"
+
+                            onChange={(v) => {
+                                let plots = [...newParts]
+
+                                const value = Number(v.target.value.trim())
+
+                                if(value < 0 || value > 100) return;
+                                
+                                plots[selectedPartIndex].OriginX = value
+
+                                setNewParts(plots)
+                            }}
+                        />
+                        <small className="default-gray">As percentage of width</small>
+
+                    </div>
+                    <div className="add-d-q-plot-metrics-area">
+                        <small className="default-gray">Origin (y)</small>
+                        <Input 
+                            value={OriginY}
+                            suffix={<p className="default-gray default-small">%</p>}
+
+                            type="number"
+
+                            min="0"
+                            max="100"
+
+                            onChange={(v) => {
+                                let plots = [...newParts]
+
+                                const value = Number(v.target.value.trim())
+
+                                if(value < 0 || value > 100) return;
+                                
+                                plots[selectedPartIndex].OriginY = value
+
+                                setNewParts(plots)
+                            }}
+                        />
+                        <small className="default-gray">As percentage of height</small>
+                    </div>
+                </Space>
+                <br/>
+                <br/>
+                <Space
+                    className="hq-full-width hq-opposite-arrangement"
+                >
+                    <u className="default-gray">
+                        Sections
+                    </u>
+
+                    <Button
+                        size="small"
+                        onClick={() => setIsAddingSection(!isAddingSection)}
+                    >
+                        <Space size="large" align="center">
+                            <PlusOutlined className="default-green"/>
+                            section
+                        </Space>
+                    </Button>
+                </Space>
+            </div>
+        )
+    }
+
     const renderPlots = () => {
+        const selectedPart = newParts[selectedPartIndex]
+
         return(
             <div>
-                
+                <Space
+                    className="hq-full-width"
+                    size="large"
+                    align="center"
+                >
+                    <Select
+                    onChange={(v, option) => {
+                        setSelectedPartIndex(v)
+                        setIsAddingSection(false)
+                    }}
+                    defaultValue={'please add a new plot'}
+                    value={(selectedPart || {}).Title || "Please add a new plot"}
+                    className='add-d-q-plots-bar'
+                    options={(newParts || []).map((d, di) => ({
+                        value: di,
+                        label: d.Title
+                        }))}
+                    />
+
+                    <Tooltip
+                        color="white"
+                        title={<p>Add new plot</p>}
+                    >
+                        <Button
+                            size="middle"
+                            type="default"
+
+                            onClick={() => {
+                                if(isAddingElement || isAddingElementSecond){
+                                    api.destroy()
+                                    api.warning("Please finish adding plot")
+                                    return
+                                }
+                                setIsAddingElement(true)
+                            }}
+                        >
+                            <PlusOutlined className="default-green"/>
+                        </Button>
+                    </Tooltip>
+                </Space>
+                <Divider/>
+                {selectedPart && renderSelectedPlot()}
             </div>
         )
     }
@@ -112,7 +319,7 @@ export function AddDiagramQuestion(){
             )
         }
 
-        const imageWidth = 0.35*window.innerWidth
+        const imageWidth = 0.45*window.innerWidth
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
 
 
@@ -157,39 +364,38 @@ export function AddDiagramQuestion(){
             <div className="hq-full-width">
                 <Row>
                     <Col>
-                        <div>
-                            <img 
-                            alt="new-map"
+                        <img 
+                            alt="q-image"
                             style={{width:imageWidth, height:imageHeight, cursor:'crosshair'}}
                             src={newImageURL}
 
                             ref={imageRef}
 
                             onClick={(e) => {
-                                if(!(isAddingElement || isMovingElement)) return;
+                                if(!imageRef.current) return;
+
+                                if(!(isAddingElement)) return;
 
                                 e.persist()
 
                                 const {pageX, pageY} = e
 
-                                const imgRef = imageRef.current
-                                const parentNode = imgRef.parentNode.parentNode
-                                const styles = window.getComputedStyle(parentNode)
-                                const offset = Number(styles.getPropertyValue('padding-right').replace('px', ''))
-
-                                setLeftOffset(offset)
-
-                                const {top, left} = imgRef.getBoundingClientRect()
+                                const {top, left} = imageRef.current.getBoundingClientRect()
                                 
-                                if(!isAddingElementSecond && !isMovingElement){
+                                if(!isAddingElementSecond){
 
                                     let newPart = ({
-                                        x: pageX - left + offset,
+                                        Code: 'Plot',
+                                        Title: 'Plot',
+                                        OriginX: 0,
+                                        OriginY:0, 
+                                        Sections:[],
+
+                                        x: pageX - left,
                                         y: pageY - top,
-                                        offsetX: offset,
                                         width: 1,
                                         height: 1,
-                                        correct: !newParts.length
+                                        answer:null
                                     })
 
 
@@ -200,9 +406,10 @@ export function AddDiagramQuestion(){
                                 }
 
                                 if(isAddingElementSecond){
+                                    
                                     let parts = [...newParts]
 
-                                    const newX = pageX - left + offset
+                                    const newX = pageX - left
                                     const newY = pageY - top
 
                                     let Last =  parts[parts.length-1]
@@ -217,24 +424,12 @@ export function AddDiagramQuestion(){
 
                                     setIsAddingElement(false)
                                     setIsAddingElementSecond(false)
+
+                                    setSelectedPartIndex(parts.length - 1)
                                     return
                                 }
 
-                                if(isMovingElement){
-                                    let parts = [...newParts]
-
-                                    const newX = pageX - left + offset
-                                    const newY = pageY - top
-                                        
-                                    parts[movedElement].x = newX
-                                    parts[movedElement].y = newY
-
-                                    setNewParts(parts)
-
-                                    setIsMovingElement(false)
-                                    setMovedElement(null)
-                                    return
-                                }
+                                
                             }}
 
                             onLoad={(img) => {
@@ -245,32 +440,34 @@ export function AddDiagramQuestion(){
                                 setNewImageHeight(img.target.naturalHeight)
                             }}
                         />
-
                         {newParts.map((p, pi) => {
-                            const {x, y, width, height, backgroundImage} = p
+                            const {width, height, OriginX, OriginY, Title, Sections, x, y} = p
 
-                            return( 
+                            const isPlotSelected = (selectedPartIndex === pi)
+
+                            return(
                                 <div
                                     key={pi}
-                                    style={{position:'absolute', left:x, top:y, width: width, height: height}}
-                                    className="clickable-question-add-element"
-
-                                    onMouseEnter={() => setHoverElement(pi)}
-                                    onMouseLeave={() => setHoverElement(null)}
+                                    style={{position:'absolute', top:y, left:x, width: width, height:height}}
                                 >
-                                    {backgroundImage && 
-                                    <img 
-                                        alt="background"
-                                        src={backgroundImage.URL}
-                                        style={{width: width, height: height}}
-                                    />}
-                                    <Space className="hq-full-width" direction="vertical" align="center">
-                                        <p className="default-red default-larger">{pi+1}</p>
-                                    </Space>
+                                    <AddQuestionInteractivePlot 
+                                        style={{width, height}}
+
+                                        OriginX = {OriginX}
+                                        OriginY = {OriginY}
+
+                                        title={Title}
+
+                                        plotIndex={pi}
+                                        plotIsActive={isPlotSelected}
+
+                                        sections={Sections}
+
+                                        isAddingSection={isAddingSection}
+                                    />
                                 </div>
                             )
                         })}
-                        </div>
                     </Col>
                     <Col xs={2}/>
                     <Col>
@@ -279,6 +476,7 @@ export function AddDiagramQuestion(){
                             items={tabs}
                             onChange={(t) => setCurrentSubtab(t)}
                             activeKey={currentSubtab}
+                            className="add-d-q-content-area"
                         />
                     </Col>
                 </Row>

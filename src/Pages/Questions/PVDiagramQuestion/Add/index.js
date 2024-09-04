@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PagesWrapper } from "../../../../PagesWrapper";
-import { Button, Col, message, Row, Space, Steps, Tabs, Tooltip } from "antd";
-import {ScheduleTwoTone, ProjectTwoTone, FrownTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, PlusOutlined, SmileTwoTone, ExclamationCircleOutlined} from '@ant-design/icons';
+import { Button, Col, ColorPicker, Divider, message, Row, Space, Steps, Tabs, Tooltip } from "antd";
+import {ScheduleTwoTone, ProjectTwoTone, FrownTwoTone, CheckCircleFilled, CloseCircleTwoTone, DeleteOutlined, ArrowLeftOutlined, ArrowRightOutlined, EyeOutlined, BorderOutlined, PictureTwoTone, PlusOutlined, SmileTwoTone, ExclamationCircleOutlined} from '@ant-design/icons';
 import { AddQuestionFormSheet } from "../../Shared/AddQuestionFormSheet";
 
 import "./index.css"
@@ -9,6 +9,8 @@ import { UploadImage } from "../../../../Components/UploadImage";
 import TextArea from "antd/es/input/TextArea";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { AddPVDiagramQuestionInteractivePlot } from "../Shared/AddPVDiagramQuestionInteractivePlot";
+import Input from "antd/es/input/Input";
+import { moveElementInArray } from "../../../../services/Auxillary";
 
 export function AddPVDiagramQiestion(){
 
@@ -31,13 +33,21 @@ export function AddPVDiagramQiestion(){
     const [newImageWidth, setNewImageWidth] = useState(0)
     const [newImageHeight, setNewImageHeight] = useState(0)
 
-    const [newPoints, setNewParts] = useState([])
+    const [newPoints, setNewPoints] = useState([])
 
     const [currentSubtab, setCurrentSubtab] = useState(1)
 
     const [questionBody, setQuestionBody] = useState("")
 
     const [isAdding, setIsAdding] = useState(false)
+
+    const [currentPointsTab, setCurrentPointsTab] = useState(0)
+
+    const [selectedHighlightPointIndex, setSelectedHighlightPointIndex] = useState(null)
+
+    const [selectedPointMoveIndex, setSelectedPointMoveIndex] = useState(null)
+
+    const [selectedCPPointMoveIndex, setSelectedCPPointMoveIndex] = useState(null)
 
     const renderAddImage = () => {
         return(
@@ -84,7 +94,212 @@ export function AddPVDiagramQiestion(){
         )
     }
 
+    const renderPointInList = (p, pi) => {
+        const {name, color, borderColor, marginY, marginX} = p
+        const isHighlighted = (pi === selectedHighlightPointIndex)
+
+        const canMoveLeft = (pi !== 0)
+        const canMoveRight = ((pi + 1) !== newPoints.length)
+
+        return(
+            <div
+                key={pi}
+                className="hq-full-width"
+            >
+            <div>
+                <small className="default-gray">Name</small>
+                <Input
+                    value={name}
+                    className="hq-full-width"
+                    onChange={(v) => {
+                        const value = v.target.value
+
+                        let _points = [...newPoints]
+
+                        _points[pi].name = value
+                        setNewPoints(_points)
+                    }}
+
+                    className="add-pv-d-question-tabs"
+                />
+            </div>
+            <br/>
+            <div>
+                <small className="default-gray">Margin-X</small>
+                <Input
+                    value={marginX}
+                    className="hq-full-width"
+                    type="number"
+                    min="0"
+
+                    onChange={(v) => {
+                        const value = v.target.value
+
+                        if(value < 0) return;
+
+                        let _points = [...newPoints]
+
+                        _points[pi].marginX = value
+                        setNewPoints(_points)
+                    }}
+
+                    className="add-pv-d-question-tabs"
+                />
+            </div>
+            <br/>
+            <div>
+                <small className="default-gray">Margin-Y</small>
+                <Input
+                    value={marginY}
+                    className="hq-full-width"
+                    type="number"
+                    min="0"
+
+                    onChange={(v) => {
+                        const value = v.target.value
+
+                        if(value < 0) return;
+
+                        let _points = [...newPoints]
+
+                        _points[pi].marginY = value
+                        setNewPoints(_points)
+                    }}
+
+                    className="add-pv-d-question-tabs"
+                />
+            </div>
+            <br/>
+            <div>
+                <small className="default-gray">Inner color</small>
+                <Space align="center" size="large">
+                    <ColorPicker
+                        value={color}
+                        defaultValue={color} 
+
+                        onChange={(c, h) => {
+                            let _newPoints = [...newPoints]
+
+                            _newPoints[pi].color = h
+                            setNewPoints(_newPoints)
+                        }}
+                        showText = {true}
+                        className="add-pv-d-question-tabs"
+                    />
+                    <p className="highlighted">{color}</p>
+                </Space>
+            </div>
+            <br/>
+            <div>
+                <small className="default-gray">Outer color</small>
+                <Space align="center" size="large">
+                    <ColorPicker
+                        value={borderColor}
+                        defaultValue={borderColor} 
+
+                        onChange={(c, h) => {
+                            let _newPoints = [...newPoints]
+
+                            _newPoints[pi].borderColor = h
+                            setNewPoints(_newPoints)
+                        }}
+                        showText = {true}
+                        className="add-pv-d-question-tabs"
+                    />
+                    <p className="highlighted">{borderColor}</p>
+                </Space>
+            </div>    
+            <br/>
+            <Space>
+                <Space 
+                    size="small" 
+                    className="hq-clickable" 
+                    onClick = {() => {
+                        setSelectedHighlightPointIndex(isHighlighted ? null : pi)
+                    }}
+                >
+                    <EyeOutlined className = {isHighlighted ? "default-title" : ""}/>
+                    <p className="default-gray default-smaller">Highlight</p>
+                </Space> 
+
+                &nbsp;&nbsp;&nbsp;&nbsp;
+
+                <Space 
+                    size="small" 
+                    className="hq-clickable" 
+                    onClick = {() => {
+                        let _points = [...newPoints]
+
+                        _points = _points.filter((pp, ppi) => pi !== ppi)
+
+                        setNewPoints(_points)
+                        setCurrentPointsTab(0)
+                        setSelectedHighlightPointIndex(null)
+                    }}
+                >
+                    <DeleteOutlined />
+                    <p className="default-gray default-smaller">Remove</p>
+                </Space>   
+
+                &nbsp;&nbsp;&nbsp;&nbsp;
+
+                <Space 
+                    size="small" 
+                    className="hq-clickable" 
+                    onClick = {() => {
+                        if(!canMoveLeft) return;
+                        const _movedPoints = moveElementInArray(pi, p, newPoints, true)
+                 
+                        setNewPoints(_movedPoints)
+                        setCurrentPointsTab(pi-1)
+                    }}
+                >
+                    <ArrowLeftOutlined className={canMoveLeft ? "default-title" : ""}/>
+                    <p className="default-gray default-smaller">Move left</p>
+                </Space>  
+
+                &nbsp;&nbsp;&nbsp;&nbsp;
+
+                <Space 
+                    size="small" 
+                    className="hq-clickable" 
+                    onClick = {() => {
+                        if(!canMoveRight) return;
+
+                        const _movedPoints = moveElementInArray(pi, p, newPoints, false)                        
+
+                        setNewPoints(_movedPoints)
+                        setCurrentPointsTab(pi+1)
+                    }}
+                >
+                    <ArrowRightOutlined className={canMoveRight ? "default-title" : ""}/>
+                    <p className="default-gray default-smaller">Move right</p>
+                </Space>   
+            </Space>
+            <Divider/>
+        </div>
+        )
+    }
+
     const renderPointsList = () => {
+        const pointsTabs = newPoints.map(
+            (p, pi) => {
+                const {name, color, borderColor} = p
+
+                return ({
+                    key: pi,
+                    label: 
+                    <Space align="center" size="large"> 
+                        <small className="default-gray">{pi+1}</small> 
+                        <small className="default-gray">{name}</small> 
+                        <BorderOutlined  style={{color:borderColor, backgroundColor:color}}/>
+                    </Space>,
+                    children:
+                     <div>{renderPointInList(p, pi)} </div>
+                })
+            }
+        )
+
         return(
             <div>
                 <Space>
@@ -94,6 +309,16 @@ export function AddPVDiagramQiestion(){
                         icon={<PlusOutlined className="default-green"/>}
 
                         onClick={() => {
+                            if(!Object.is(selectedPointMoveIndex, null)){
+                                api.warning("Please finish moving selected point")
+                                return
+                            }
+
+                            if(!Object.is(selectedCPPointMoveIndex, null)){
+                                api.warning("Please finish moving selected control point point")
+                                return
+                            }
+
                             setIsAdding(!isAdding)
                         }}
                     >
@@ -102,7 +327,16 @@ export function AddPVDiagramQiestion(){
                 </Space>
 
                 <br/>
-                
+                {newPoints.length ? 
+                <Tabs
+                    defaultActiveKey={0}
+                    items={pointsTabs}
+                    onChange={(t) => setCurrentPointsTab(t)}
+                    activeKey={currentPointsTab}
+                    className="add-pv-d-question-tabs"
+                /> : <div/>}
+
+               
             </div>
         )
     }
@@ -162,17 +396,91 @@ export function AddPVDiagramQiestion(){
                 <Row>
                     <Col>
                         <div>
+                            
+                        <AddPVDiagramQuestionInteractivePlot 
+                            style={{width:imageWidth, height:imageHeight, border:'red solid 1px'}}
+                           
+                            isAdding = {isAdding}
+
+                            imageURL = {newImageURL}
+
+                            onAdd= {(p) => {
+                                let _points = [...newPoints]
+                                const {x, y} = p
+
+                                //Update control points                                
+                                if(_points.length){
+
+                                    const lastIndex = _points.length - 1
+                                    _points[lastIndex].cx = (_points[lastIndex].x + x) * 0.5
+                                    _points[lastIndex].cy = (_points[lastIndex].y + y) * 0.5
+                                }
+
+                                _points.push({
+                                    ...p,
+                                    name:'point',
+                                    color:'lightgreen',
+                                    borderColor:'green',
+                                    marginY: 0,
+                                    marginX: 0, 
+                                    cx: x, 
+                                    cy: y
+                                })
+
+                                
+
+                                setNewPoints(_points)
+                                setCurrentPointsTab(_points.length - 1)
+
+                                setIsAdding(false)
+                            }}
+
+                            points={newPoints}
+                            selectedPointIndex = {selectedHighlightPointIndex}
+
+                            onSelectedPointMove = {(pi) => {
+                                setSelectedPointMoveIndex(pi)
+                                setSelectedCPPointMoveIndex(null)
+                            }}
+
+                            selectedPointMoveIndex = {selectedPointMoveIndex}
+
+                            onPointMove = {(p) => {
+                                const {x,y} = p
+                                let _points = [...newPoints]
+
+                                _points[selectedPointMoveIndex].x = x
+                                _points[selectedPointMoveIndex].y = y
+                                
+                                setNewPoints(_points)
+                            }}
+
+                            onSelectedCPPointMove = {(pi) => {
+                                setSelectedPointMoveIndex(null)
+                                setSelectedCPPointMoveIndex(pi)
+                            }}
+
+                            selectedCPPointMoveIndex = {selectedCPPointMoveIndex}
+
+                            onCPPointMove = {(p) => {
+                                const {x,y} = p
+                                let _points = [...newPoints]
+
+                                _points[selectedCPPointMoveIndex].cx = x
+                                _points[selectedCPPointMoveIndex].cy = y
+                                
+                                setNewPoints(_points)
+                            }}
+                        />  
+
                         <img 
                             alt="new-map"
-                            style={{width:imageWidth, height:imageHeight, position:'absolute'}}
+
+                            style={{width:0, height:0}}
+
                             src={newImageURL}
 
                             ref={imageRef}
-
-                            onClick={(e) => {
-                                if(!isAdding) return;
-
-                            }}
 
                             onLoad={(img) => {
 
@@ -182,16 +490,7 @@ export function AddPVDiagramQiestion(){
                                 setNewImageHeight(img.target.naturalHeight)
                             }}
                         />
-                        <AddPVDiagramQuestionInteractivePlot 
-                            style={{width:imageWidth, height:imageHeight, cursor:'crosshair',/* position:'absolute', top:0, left:0,*/ border:'red solid 1px'}}
-                           
-                            isAdding = {isAdding}
-
-                            onAdd= {(p) => {
-
-                                setIsAdding(false)
-                            }}
-                        />  
+                        
                         </div>
                     </Col>
                     <Col xs={2}/>
@@ -199,7 +498,11 @@ export function AddPVDiagramQiestion(){
                         <Tabs
                             defaultActiveKey={1}
                             items={tabs}
-                            onChange={(t) => setCurrentSubtab(t)}
+                            onChange={(t) => {
+                                setCurrentSubtab(t)
+                                setCurrentPointsTab(t === 1 ? -1 : 0)
+                                setSelectedHighlightPointIndex(null)
+                            }}
                             activeKey={currentSubtab}
                             className="add-pv-d-question-tabs"
                         />
