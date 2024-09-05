@@ -139,6 +139,11 @@ const NavigationDrawer = () => {
             label:'Diagram question',
             key:'/add_d_q',
             icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
+        },
+        {
+            label:'PV-Diagram question',
+            key:'/add_pvd_q',
+            icon:<PlusSquareTwoTone  style={{...iconStyle}}/>
         }
         ],
         type:'group'

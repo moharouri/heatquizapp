@@ -266,3 +266,22 @@ export function timeSince(_date) {
     }
     return Math.floor(seconds) + " seconds";
 }
+
+//Function to move elements in array (left / right)
+export const moveElementInArray = (ei, e, array, leftDirection) => {
+  let _newArray = [...array]
+
+  //Remove element
+  _newArray = _newArray.filter((p, pi) => ei !== pi)
+
+  //Re-insert at specific index
+  const newIndex = leftDirection ? (ei - 1) : (ei + 1)
+
+  _newArray = [
+      ..._newArray.slice(0, newIndex),
+      ({...e}),
+      ..._newArray.slice(newIndex)
+  ]
+
+  return _newArray
+}
