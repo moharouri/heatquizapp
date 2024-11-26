@@ -1,0 +1,14 @@
+.pv-question-add-image-container{
+    width: 40vw;
+    height: 20vw;
+}
+
+.pv-question-add-image-inside{
+    width: 39vw;
+    height: 19vw;
+    object-fit: contain;
+}
+
+.add-pv-d-question-tabs{
+    width: 35vw;
+}

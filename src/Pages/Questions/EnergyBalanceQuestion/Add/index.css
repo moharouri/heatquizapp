@@ -1,0 +1,24 @@
+.add-eb-question-correct-field{
+    width: 10vw;
+}
+
+.add-eb-question-direction-field{
+    padding: 0.5vmin;
+    cursor: pointer;
+    border: 1px solid silver;
+}
+
+.add-eb-question-direction-field:hover{
+    background-color: whitesmoke;
+}
+
+.add-eb-question-direction-field-selected{
+    padding:  0.5vmin;
+    cursor: pointer;
+    border: 1px solid lightgreen;
+    background-color: #ebffe6;
+}
+
+.add-eb-question-hide-element{
+    opacity: 0%;
+}
