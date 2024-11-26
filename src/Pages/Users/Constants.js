@@ -1,1 +1,0 @@
-export const MIN_USER_PASSWORD = 6
