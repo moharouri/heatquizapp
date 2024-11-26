@@ -24,7 +24,12 @@ export function KeyboardQuestionEditView({reloadQuestion}){
 
     const [api, contextHolder] = message.useMessage()
 
-    const {keyboardQuestionPlay: question, isLoadingRemoveKeyboardQuestionAnswer, removeKeyboardQuestionAnswer} = useQuestions()
+    const {keyboardQuestionPlay: question, isLoadingRemoveKeyboardQuestionAnswer, removeKeyboardQuestionAnswer,
+        isLoadingAddKeyboardQuestionAnswer,
+        isLoadingEditKeyboardQuestionImage,
+        isLoadingEditKeyboardQuestionLatex,
+        
+    } = useQuestions()
 
     const {Base_ImageURL, Code, Latex, Keyboard, Answers, IsEnergyBalance, DisableDevision} = question
     const {Name: keyboardName} = Keyboard

@@ -38,6 +38,10 @@ export function getDiagramQuestionPlayRequest(Id){
     return GET_REQUEST_API('DiagramQuestion/GetQuestion_PORTAL', Id)
 }
 
+export function getPVDiagramQuestionPlayRequest(Id){
+    return GET_REQUEST_API('PVDiagramQuestion/GetQuestion_PORTAL', Id)
+} 
+
 export function addQuestionStatisticRequest(b){
     return ADD_REQUEST_BODY_API('SimpleClickable/PostStatistic', b)
 }
@@ -178,6 +182,14 @@ export function editEnergyBalanceControlVolumeStatusRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeAsCorrect', b)
 }
 
+export function editEnergyBalanceControlVolumeCommentRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetControlVolumeComment', b)
+}
+
+export function editEnergyBalanceBCICCommentRequest(b){
+    return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/SetBCICComment', b)
+}
+
 export function editEnergyBalanceControlVolumeImageRequest(b){
     return EDIT_REQUEST_FILE_API('EnergyBalanceQuestionUpdated/EditControlVolumePicture', b)
 }
@@ -256,6 +268,11 @@ export function editFBDObjectBodyColorRequest(b){
     return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditOBColor', b)
 }
 
+export function editFBDObjectBodyCommentRequest(b){
+    return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditOBComment', b)
+}
+
+
 export function editFBDVectorTermColorRequest(b){
     return EDIT_REQUEST_BODY_API('FreebodyDiagramQuestion/EditVTColor', b)
 }
@@ -288,5 +305,21 @@ export function removeFBDQuestionVTRequest(b){
     return EDIT_REQUEST_FILE_API('FreebodyDiagramQuestion/DeleteVectorTerm', b)
 }
 
+export function addFBDQuestionRequest(b){
+    return ADD_REQUEST_FILE_API('FreebodyDiagramQuestion/AddQuestionSingleStep', b, true)
+}
+
+//PV Diagram
+export function addPVDiagramQuestionRequest(b){
+    return ADD_REQUEST_FILE_API('PVDiagramQuestion/AddQuestionSingleStep', b, true)
+} 
+
+export function editPVDiagramQuestionGroupInfoRequest(b){
+    return ADD_REQUEST_BODY_API('PVDiagramQuestion/UpdateGroupInfo', b, true)
+} 
+
+export function editPVDiagramQuestionConditionCommentRequest(b){
+    return ADD_REQUEST_FILE_API('PVDiagramQuestion/UpdateConditionComment', b, true)
+} 
 
 

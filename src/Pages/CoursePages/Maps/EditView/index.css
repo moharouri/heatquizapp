@@ -96,3 +96,14 @@
 .assign-relations-element-select-element{
     width: 15vw;
 }
+
+.edit-map-image-container{
+    width: 25vw;
+    height: 35vw;
+}
+
+.edit-map-image-inside{
+    width: 24vw;
+    height: 34vw;
+    object-fit: contain;
+}

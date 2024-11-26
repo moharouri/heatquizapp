@@ -17,6 +17,9 @@ import { AddBCICTerms } from "./AddBCICTerms";
 import { UpdateQuestionLatex } from "./UpdateQuestionLatex";
 import { UpdateQuestionImage } from "./UpdateQuestionImage";
 import { AddControlVolume } from "./AddControlVolume";
+import { UpdateControlVolumeComment } from "./UpdateControlVolumeComment";
+import { UpdateEBTermComment } from "./UpdateEBTermComment";
+import { UpdateBCICComment } from "./UpdateBCICComment";
 
 export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
@@ -58,10 +61,12 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     const [showAddControlVolume, setShowAddControlVolume] = useState(false)
 
     const [showEditCVImage, setShowEditCVImage] = useState(false)
+    const [showEditCVComment, setShowEditCVComment] = useState(false)
     const [selectedCV, setSelectedCV] = useState(null)
 
     const [showEditTermCodeLatex, setShowEditTermCodeLatex] = useState(false)
     const [showEditTermLatexText, setShowEditTermLatexText] = useState(false)
+    const [showEditTermComment, setShowEditTermComment] = useState(false)
     const [showEditTermDirections, setShowEditTermDirections] = useState(false)
 
     const [selectedEBTerm, setSelectedEBTerm] = useState(null)
@@ -78,6 +83,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
     const [showAddConditions, setShowAddConditions] = useState(false)
     const [showAddConditions_IsBC, setShowAddConditions_IsBC] = useState(false)
     const [showAddConditions_SelectedKeyboard, setShowAddConditions_SelectedKeyboard] = useState(null)
+
+    const [showEditBCICComment, setShowEditBCICComment] = useState(false)
+    const [selectedBCIC, setSelectedBCIC] = useState(null)
+    const [IsBoundaryCondition, setIsBoundaryCondition] = useState(false)
 
     useEffect(() => {
         let _offset = 0
@@ -207,10 +216,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
         return({            
-            width: (element.Width)  * (specificedWidth/imageWidth),
-            height: (element.Height)* (specificedHeight/imageHeight),
-            left: (element.X) * (specificedWidth/imageWidth)  - 10,
-            top: (element.Y) * (specificedHeight/imageHeight),
+            width: (element.Width * specificedWidth) / (imageWidth),
+            height: (element.Height * specificedHeight) /( imageHeight),
+            left: (element.X * specificedWidth) / (imageWidth),
+            top: (element.Y * specificedHeight) / (imageHeight),
         })
     }
 
@@ -244,7 +253,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                     dataSource={ControlVolumes.sort((a, b) => a.Id - b.Id)}
 
                     renderItem={(cv, cvi) => {
-                        const {Id, Correct, ImageURL} = cv
+                        const {Id, Correct, ImageURL, Comment} = cv
                         const cvDimesions =  calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height,smallImageWidth, smallImageHeight, cv)
 
                         return(
@@ -260,20 +269,27 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                     &nbsp;
                                     &nbsp;
 
-                                    <div 
-                                        style = {{
-                                            height:smallImageHeight,
-                                            width: smallImageWidth,
-                                            backgroundImage: `url(${FixURL(ImageURL || Base_ImageURL)})`,
-                                            backgroundPosition:'center',
-                                            backgroundRepeat:'no-repeat',
-                                            backgroundSize:'contain',
-                                            border:'1px solid gainsboro'
-                                        }}
-                                    >
-                                        <div style={{...cvDimesions, position:'relative', border:Correct ? '1px dashed #28a745' : '1px dashed gray' }}>
-                                            <div style={{width:'100%', height:'100%', backgroundColor:'#f1f4f8', opacity:'40%'}}></div>
-                                        </div>    
+                                    <div>
+                                        <div 
+                                            style = {{
+                                                height:smallImageHeight,
+                                                width: smallImageWidth,
+                                                backgroundImage: `url(${FixURL(ImageURL || Base_ImageURL)})`,
+                                                backgroundPosition:'center',
+                                                backgroundRepeat:'no-repeat',
+                                                backgroundSize:'contain',
+                                                border:'1px solid gainsboro'
+                                            }}
+                                        >
+                                            <div style={{...cvDimesions, position:'relative', border:Correct ? '1px dashed #28a745' : '1px dashed gray' }}>
+                                                <div style={{width:'100%', height:'100%', backgroundColor:'#f1f4f8', opacity:'40%'}}></div>
+                                            </div>    
+                                        </div>
+                                        {Comment &&
+                                        <div>
+                                          <small className="default-gray">Comment  &nbsp; <i>in summary screen</i></small>   
+                                          <p>{Comment}</p>
+                                        </div>}
                                     </div>
 
                                     <Dropdown
@@ -296,6 +312,14 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                                 label: 'Set/Update image',
                                                 onClick: () => {
                                                     setShowEditCVImage(true)
+                                                    setSelectedCV({...cv, smallImageWidth, smallImageHeight, dimensions:cvDimesions, Base_ImageURL})
+                                                }
+                                            },
+                                            {
+                                                key: 'set_update_comment',
+                                                label: 'Set/Update comment',
+                                                onClick: () => {
+                                                    setShowEditCVComment(true)
                                                     setSelectedCV({...cv, smallImageWidth, smallImageHeight, dimensions:cvDimesions, Base_ImageURL})
                                                 }
                                             },
@@ -328,7 +352,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                         <ControlOutlined className="default-gray hoverable"/>
                                     </Dropdown>
                                 </Space>
-                                <br/>
+                                <Divider/>
                                 <br/>
                             </div>
                         )
@@ -422,21 +446,37 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                     dataSource={EnergyBalanceTerms}
 
                     renderItem={(t, ti) => {
-                        const {Id, IsDummy, Code, Latex, LatexText, Questions} = t
+                        const {Id, IsDummy, Code, Latex, LatexText, Questions, Comment} = t
 
                         return(
                             <div
                                 key={Id}
                                 className="hq-element-container"
                             >
+                                    <p className="edit-eb-question-term-heading1">Balance term <span className="default-title">{ti+1}</span></p>
                                     <Space
                                         className="hq-full-width hq-opposite-arrangement"
                                     >
                                         <Space>
-                                            <p className="default-title">{ti+1}</p>
-                                            {IsDummy ? <Space><p className="default-gray">Dummy term</p>&nbsp;&nbsp;&nbsp;</Space>  : renderItemBox(t)}
-                                            <p className="default-title">{Code}</p>
-                                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                            <div
+                                                className="hq-clickable" 
+                                                onClick = {() => {
+                                                    setShowEditTermDirections(true)
+                                                    setSelectedEBTerm(t)
+                                                }}
+                                            >
+                                                {IsDummy ? <Space><p className="default-gray">Dummy term</p>&nbsp;&nbsp;&nbsp;</Space>
+                                                 : renderItemBox(t)}
+                                            </div>
+                                            <Space 
+                                            className="hq-clickable" 
+                                            onClick = {() => {
+                                                setShowEditTermCodeLatex(true)
+                                                setSelectedEBTerm(t)
+                                            }}>
+                                                <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                                <p className="default-title">{Code}</p>
+                                            </Space>
                                         </Space>
 
                                         <Dropdown
@@ -452,9 +492,17 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                             },
                                             {
                                                 key: 'edit_text',
-                                                label: 'Update LaTeX text',
+                                                label: 'Update instruction for definition',
                                                 onClick: () => {
                                                     setShowEditTermLatexText(true)
+                                                    setSelectedEBTerm(t)
+                                                }
+                                            },
+                                            {
+                                                key: 'edit_comment',
+                                                label: 'Update comment',
+                                                onClick: () => {
+                                                    setShowEditTermComment(true)
                                                     setSelectedEBTerm(t)
                                                 }
                                             },
@@ -521,14 +569,35 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                         <ControlOutlined className="default-gray hoverable"/>
                                     </Dropdown>
                                 </Space>
-                                    
-
                                 <Divider/>
 
-                                <small className="default-gray">
-                                    Optional text
-                                </small>
-                                <p>{LatexText}</p>
+                                <div 
+                                    className="hq-clickable" 
+                                    onClick = {() => {
+                                        setShowEditTermLatexText(true)
+                                        setSelectedEBTerm(t)
+                                    }}
+                                >
+                                    <small className="default-gray">
+                                        Instruction for definition
+                                    </small>
+                                    <LatexRenderer latex={LatexText || ""} />
+                                </div>
+
+                                <Divider/>
+                                <div 
+                                    className="hq-clickable" 
+                                    onClick = {() => {
+                                        setShowEditTermComment(true)
+                                        setSelectedEBTerm(t)
+                                    }}
+                                >
+                                    <small className="default-gray">
+                                        Comment &nbsp; <i>in summary screen</i>
+                                    </small>
+                                    <p>{Comment}</p>
+                                </div>
+                                
 
                                 <Divider/>
                                 {Questions.map((q, qi) => {
@@ -539,23 +608,49 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                                             key={Id}
                                             direction="vertical hq-full-width "
                                         >   
+                                            <p className="edit-eb-question-term-heading2">Question <span className="default-gray">{qi+1}</span></p>
+
                                             <Space
                                                 className="hq-full-width hq-opposite-arrangement"
                                             >
                                                 <Space>
-                                                    <p className="default-gray">{qi+1}</p>
-                                                    {Inflow ? 
-                                                        <div
-                                                        className={"eb-question-view-edit-term-direction-green"}>
-                                                            <span className="eb-question-view-edit-term-word">Inflow</span>
-                                                        </div>
-                                                        :
-                                                        <div 
-                                                        className={"eb-question-view-edit-term-direction-red"}>
-                                                            <span className="eb-question-view-edit-term-word">Outflow</span>
-                                                        </div>}
+                                                    <div
+                                                        className="hq-clickable" 
+                                                        onClick = {() => {
+                                                            let VM = ({...q})
+                                                            VM.Inflow = !q.Inflow
+
+                                                            flipEnergyBalanceEBT_Question_Direction(VM).then(r => handleResponse(r, api, 'Flipped', 1, () => {
+                                                                reloadQuestion()
+                                                            }))
+                                                        }}
+                                                    >
+                                                        <Tooltip
+                                                            color="white"
+                                                            title={<p>Click to flip direction</p>}
+                                                        >
+                                                        {Inflow ? 
+                                                            <div
+                                                            className={"eb-question-view-edit-term-direction-green"}>
+                                                                <span className="eb-question-view-edit-term-word">Inflow</span>
+                                                            </div>
+                                                            :
+                                                            <div 
+                                                            className={"eb-question-view-edit-term-direction-red"}>
+                                                                <span className="eb-question-view-edit-term-word">Outflow</span>
+                                                            </div>}
+                                                        </Tooltip>
+                                                    </div>
                                                     
-                                                    <LatexRenderer latex={"$$" + LatexCode  + "$$"} />
+                                                    <div
+                                                        className="hq-clickable" 
+                                                        onClick = {() => {
+                                                            setShowEditTermQuestionLatex(true)
+                                                            setSelectedEBTermQuestion(q)
+                                                        }}
+                                                    >
+                                                        <LatexRenderer latex={"$$" + LatexCode  + "$$"} />
+                                                    </div>
                                                 </Space>
                                                 <Dropdown
                                                     menu={{
@@ -683,7 +778,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 </Space>
                 <br/>
                 {BoundaryConditionLines.map((a, ai) => {
-                    const {Id} = a
+                    const {Id, Comment} = a
 
                     const answerReduced = a.AnswerElements
                     .sort((c,d) => c.Id > d.Id ? 1 : -1)
@@ -691,8 +786,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
                     
                     return(
-                        <div
+                        <Space
                             key={Id}
+                            direction="vertical"
+                            align="start"
                         >
                             <Space>
                                 <p className="default-gray">{ai+1}</p>
@@ -730,7 +827,30 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
                                 <LatexRenderer latex={"$$" + answerReduced + "$$"} />
                             </Space>
-                        </div>
+                            {Comment && 
+                            <Space size="large" align="center">
+                                <div>
+                                    <small className="default-gray">
+                                        Comment &nbsp; <i>in summary screen</i>
+                                    </small>
+                                    <p>{Comment}</p>
+                                </div>
+                                <Tooltip
+                                    color="white"
+                                    title={<p>Edit comment</p>}
+                                >
+                                    <EditOutlined 
+                                        onClick={() => {
+                                            setShowEditBCICComment(true)
+                                            setSelectedBCIC(a)
+                                            setIsBoundaryCondition(true)
+                                        }}
+                                    />
+                                </Tooltip>
+                            </Space>}
+                            
+                            <Divider/>
+                        </Space>
                     )
                 })}
             </div>
@@ -782,7 +902,7 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 </Space>
                 <br/>
                 {InitialConditionLines.map((a, ai) => {
-                    const {Id} = a
+                    const {Id, Comment} = a
 
                     const answerReduced = a.AnswerElements
                     .sort((c,d) => c.Id > d.Id ? 1 : -1)
@@ -790,8 +910,10 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
                     
                     return(
-                        <div
+                        <Space
                             key={Id}
+                            direction="vertical"
+                            align="start"
                         >
                             <Space>
                                 <p className="default-gray">{ai+1}</p>
@@ -828,7 +950,29 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
                                 <LatexRenderer latex={"$$" + answerReduced + "$$"} />
                             </Space>
-                        </div>
+                            {Comment && 
+                            <Space size="large" align="center">
+                                <div>
+                                    <small className="default-gray">
+                                        Comment &nbsp; <i>in summary screen</i>
+                                    </small>
+                                    <p>{Comment}</p>
+                                </div>
+                                <Tooltip
+                                    color="white"
+                                    title={<p>Edit comment</p>}
+                                >
+                                    <EditOutlined 
+                                        onClick={() => {
+                                            setShowEditBCICComment(true)
+                                            setSelectedBCIC(a)
+                                            setIsBoundaryCondition(false)
+                                        }}
+                                    />
+                                </Tooltip>
+                            </Space>}
+                            <Divider/>
+                        </Space>
                     )
                 })}
             </div>
@@ -932,7 +1076,13 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
                 onClose={() => setShowEditTermLatexText(false)}
                 ebTerm={selectedEBTerm}
                 reloadQuestion = {() => reloadQuestion()}
+            />
 
+            <UpdateEBTermComment
+                open={showEditTermComment}
+                onClose={() => setShowEditTermComment(false)}
+                ebTerm={selectedEBTerm}
+                reloadQuestion = {() => reloadQuestion()}
             />
 
             <UpdateEBTermDirections 
@@ -1007,6 +1157,23 @@ export function EnergyBalanceQuestionEditView({reloadQuestion}){
 
                 question={question}
                 reloadQuestion={() => reloadQuestion()}
+            />
+
+            <UpdateControlVolumeComment 
+                open={showEditCVComment}
+                onClose={() => setShowEditCVComment(false)}
+                controlVolume={selectedCV}
+
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <UpdateBCICComment 
+                open={showEditBCICComment}
+                onClose={() => setShowEditBCICComment(false)}
+                condition={selectedBCIC}
+                isBoundaryCondition={IsBoundaryCondition}
+
+                reloadQuestion = {() => reloadQuestion()}
             />
         </div>
     )

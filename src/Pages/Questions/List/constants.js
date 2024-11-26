@@ -21,6 +21,7 @@ export const MULTIPLE_CHOICE_QUESTION_PARAMETER  = +3
 export const ENERGY_BALANCE_QUESTION_PARAMETER  = +5
 export const FBD_QUESTION_PARAMETER  = +6
 export const DIAGRAM_QUESTION_PARAMETER  = +7
+export const PV_DIAGRAM_QUESTION_PARAMETER  = +8
 
 export const QUESTION_TYPES_SEARCH_NAMES = [
     {
@@ -46,5 +47,9 @@ export const QUESTION_TYPES_SEARCH_NAMES = [
     {
         value:DIAGRAM_QUESTION_PARAMETER,
         label:'Diagram question'
+    },
+    {
+        value:PV_DIAGRAM_QUESTION_PARAMETER,
+        label:'PV-Diagram question'
     }
 ]

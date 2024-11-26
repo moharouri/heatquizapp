@@ -43,6 +43,7 @@
 
 .eb-question-term-answer-zone{
     border-bottom: 1px solid lightblue;
+    min-width: 40vw;
 }
 
 .eb-question-bc-ic-line{

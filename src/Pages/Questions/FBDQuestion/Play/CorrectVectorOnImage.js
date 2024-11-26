@@ -5,7 +5,7 @@ import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent"
 import Xarrow from "react-xarrows";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 
-export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
+export function CorrectVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
 
     const canvasRef = React.createRef()
 
@@ -288,7 +288,7 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                             backgroundPosition:'center',
                             backgroundRepeat:'no-repeat',
                             backgroundSize:'contain',
-                            border:'1px solid gainsboro'
+                            border:'1px solid green',
                         }}
 
                         width = {newImageWidth}
@@ -336,11 +336,11 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                     return(     
                            <div>
                                 <div
-                                    key={Id}
+                                    key={"correct-" + Id}
                                     style={{position:'absolute', left: leftOffset + left , top: topOffset + top}}
                                 >
                                     <div
-                                    id={"B_START_" + Id}
+                                    id={"correct-" +"B_START_" + Id}
                                     style={{left:width/2, top: height/2, position:'relative', width: 0, height:0}}
                                     >
                                     </div>
@@ -349,7 +349,7 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                                 {momentsLatex 
                                 &&
                                 <div
-                                    key={Id}
+                                    key={"correct-" +Id}
                                     style={{position:'absolute', left: leftOffset + left , top: topOffset + top}}
                                 >
                                     <div style={{left:width/2, top: height/2, position:'relative'}} >
@@ -360,7 +360,7 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                                 {momentsLatex 
                                 &&
                                 <div
-                                    key={Id}
+                                    key={"correct-" +Id}
                                     style={{position:'absolute', left: leftOffset + left , top: topOffset + top}}
                                 >
                                     <div style={{left:width/2 - 10, top: height/2 - 10, position:'relative'}} >
@@ -385,9 +385,9 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                                
                                     return(
                                         <div
-                                            key={ki}
+                                            key={"correct-" +ki}
                                             style={{position:'absolute', left: _left, top: _top}}
-                                            id={"VT_END_" + k}
+                                            id={"correct-" +"VT_END_" + k}
                                         >
                                         </div>
                                     )
@@ -420,7 +420,7 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
 
                                     return(
                                         <div
-                                            key={ki}
+                                            key={"correct-" +ki}
                                             style={{position:'absolute', left: _left, top: _top}}
                                         >
                                             <LatexRenderer latex={"$$" + latexReduced + "$$"}/>
@@ -440,9 +440,9 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                                     }
 
                                     return(<Xarrow
-                                            key={Id}
-                                            start={"B_START_" + Id}
-                                            end={"VT_END_" + k}
+                                            key={"correct-" +Id}
+                                            start={"correct-" +"B_START_" + Id}
+                                            end={"correct-" +"VT_END_" + k}
                                             strokeWidth={2}
                                             headSize={4}
                                             startAnchor="auto"

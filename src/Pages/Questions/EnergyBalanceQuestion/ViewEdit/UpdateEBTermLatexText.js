@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {Button, Drawer, Form, message } from "antd";
+import {Button, Drawer, Form, message, Space } from "antd";
 import {ArrowLeftOutlined } from '@ant-design/icons';
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import TextArea from "antd/es/input/TextArea";
@@ -23,9 +23,11 @@ export function UpdateEBTermLatexText({open, onClose, ebTerm, reloadQuestion}) {
         }
     }, [open])
 
+    const {Code, Latex} = ebTerm
+
     return(
         <Drawer
-        title="Update EB Term LaTeX Text"
+        title="Update EB Term Instruction for Definition"
         width={'50%'}
         onClose={onClose}
         open={open}
@@ -36,6 +38,11 @@ export function UpdateEBTermLatexText({open, onClose, ebTerm, reloadQuestion}) {
         footer={<div/>}
     >   
         {contextHolder}
+        <Space>
+            <LatexRenderer latex={"$$" + Latex + "$$"}/>
+            <p className="default-title">{Code}</p>
+        </Space>
+        <br/>
         <Form>
             <Form.Item>
                 <small className="default-gray">LaTeX text</small>
@@ -46,8 +53,8 @@ export function UpdateEBTermLatexText({open, onClose, ebTerm, reloadQuestion}) {
                         setNewLatex(value)
                     }}
                 />
+                <small className="default-gray">You can remove the instruction by adding an empty text</small>
             </Form.Item>
-            <br/>
             <small className="default-gray">LaTeX rendering</small>
             <LatexRenderer latex={newLatex}/>
         </Form> 
@@ -60,13 +67,6 @@ export function UpdateEBTermLatexText({open, onClose, ebTerm, reloadQuestion}) {
             loading={isLoadingEditEnergyBalanceTermCodeLatexText}
 
             onClick={() => {
-                if(!newLatex.trim()){
-                    api.destroy()
-                    api.warning("Please add values for code and LaTeX")
-
-                    return
-                }
-
                 const VM = ({
                     ...ebTerm,
                     LatexText: newLatex

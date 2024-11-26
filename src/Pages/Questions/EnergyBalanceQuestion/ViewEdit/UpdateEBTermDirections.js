@@ -153,8 +153,8 @@ export function UpdateEBTermDirections({open, onClose, ebTerm, reloadQuestion}) 
         <br/>
         <Space>
             {renderItemBox(ebTerm)}
-            <p className="default-title">{Code}</p>
             <LatexRenderer latex={"$$" + Latex + "$$"}/>
+            <p className="default-title">{Code}</p>
         </Space>
         <br/>
         <br/>

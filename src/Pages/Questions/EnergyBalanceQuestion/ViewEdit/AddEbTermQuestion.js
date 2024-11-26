@@ -190,8 +190,8 @@ export function AddEbTermQuestion({open, onClose, ebTerm, reloadQuestion}) {
 
         footer={
         <Space>
-            <p className="default-title">{ebTerm.Code}</p>
             <LatexRenderer latex={"$$" + ebTerm.Latex + "$$"}/>
+            <p className="default-title">{ebTerm.Code}</p>
         </Space>}
     >   
         {contextHolder}
@@ -206,8 +206,6 @@ export function AddEbTermQuestion({open, onClose, ebTerm, reloadQuestion}) {
             </Form.Item>
             <LatexRenderer latex={"$$" + newLatex + "$$"}/>
         </Form> 
-
-        <br/>
         <Tabs 
             items={[{
                 key:1,

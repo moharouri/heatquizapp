@@ -4,16 +4,17 @@ import {Col, Divider, List, Row, Skeleton, Space, Steps, Tooltip, message } from
 import { ErrorComponent } from "../../../../Components/ErrorComponent";
 import { FixURL } from "../../../../services/Auxillary";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
-import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION } from "./Constants";
+import { CENTER_DIRECTION, EAST_DIRECTION, NORTH_DIRECTION, SOUTH_DIRECTION, WEST_DIRECTION, FIRST_CLICK, SECOND_CLICK, THIRD_CLICK } from "./Constants";
 import Xarrow from "react-xarrows";
-import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
+import { CloseCircleFilled, CheckCircleFilled, SmileTwoTone, FrownTwoTone} from '@ant-design/icons';
 
 import './Play.css'
 import { Keyboard } from "../../../../Components/Keyboard";
-import { checkKeyboardAnswerIsCorrect, validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
+import { checkKeyboardAnswerIsCorrect, checkKeyboardAnswerIsCorrectEnergyBalanceQuestionTermsOnly, validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { NextButton } from "../../../../Components/NextButton";
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { CommentInPlayComponent } from "../../../../Components/CommentInPlayComponent/CommentInPlayComponent";
 
 export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextAction, mapKey}){
 
@@ -173,10 +174,10 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0) => {
         return({            
-            width: (element.Width)  * (specificedWidth/imageWidth),
-            height: (element.Height)* (specificedHeight/imageHeight),
-            left: (element.X) * (specificedWidth/imageWidth)  - 10,
-            top: (element.Y) * (specificedHeight/imageHeight),
+            width: (element.Width * specificedWidth) / (imageWidth),
+            height: (element.Height * specificedHeight) /( imageHeight),
+            left: (element.X * specificedWidth) / (imageWidth),
+            top: (element.Y * specificedHeight) / (imageHeight),
         })
     }
 
@@ -270,21 +271,60 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
         const directions = Object.keys(termsContainer)
 
+        //Helper moves
+        let shouldFlipDirection = false
+        let shouldRemove = false
+        let newCounter = FIRST_CLICK
+
+
         for(let d of directions){
             container[d] = termsContainer[d].filter(a => a.Id !== t.Id)
         }
 
         if(originalTerm){
-            container[direction].push({...originalTerm, Questions: t.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}}))})
+            const isSameDirection = checkIfTermInDirection(t, direction)
+
+            if(isSameDirection){
+                if(originalTerm.clickCounter === FIRST_CLICK){
+                    shouldFlipDirection = true
+                    newCounter = SECOND_CLICK
+                }
+                else if(originalTerm.clickCounter === SECOND_CLICK){
+                    shouldRemove = true
+                }
+                
+            }
+            else{
+                newCounter = FIRST_CLICK
+            }
+
+            if(shouldRemove){
+                removeTermFromBalance(t)
+                return;
+            }
+
+            container[direction].push({
+                ...originalTerm,
+                Questions: t.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}})),
+                Inflow: shouldFlipDirection ? !originalTerm.Inflow : originalTerm.Inflow,
+                IsSource: shouldFlipDirection ? !originalTerm.IsSource : originalTerm.IsSource,
+                clickCounter: newCounter
+            })
+
         }
         else{
-            container[direction].push({...t, Inflow: true, IsSource: true, Questions: t.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}}))})
-
+            container[direction].push({
+                ...t,
+                Questions: t.Questions.map((q) => ({...q, AddedAnswer:{List:[], echoNumber:0}})),
+                Inflow: true,
+                IsSource: true,
+                clickCounter: FIRST_CLICK
+            })
         }
 
         setTermsContainer(container)
 
-        setSelectedTerm(null)
+        setSelectedTerm(null)        
     }
 
     const removeTermFromBalance = (t) => {
@@ -416,13 +456,13 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                         <div 
                         onClick={() => flipTermSign(t, currentDirection, includedTerm.IsSource)}
                         className={"hq-clickable " + (!includedTerm.IsSource ? "eb-question-term-direction-inactive" : "eb-question-term-direction-neutral")}>
-                            <span className="eb-question-term-word">Source</span>
+                            <span className="eb-question-term-word">Source term</span>
                         </div>
 
                         <div 
                         onClick={() => flipTermSign(t, currentDirection, includedTerm.IsSource)}
                         className={"hq-clickable " + (includedTerm.IsSource ? "eb-question-term-direction-inactive" : "eb-question-term-direction-neutral")}>
-                            <span className="eb-question-term-word">Unsteady flow </span>
+                            <span className="eb-question-term-word">Unsteady term </span>
                         </div>
                     </div>
                     :
@@ -1091,7 +1131,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                             align="center"
                         >
                             <p className="default-title">{finalScore}</p>
-                            <p className="default-gray default-small">final score</p>
+                            <p className="default-gray default-small">Final score</p>
                         </Space>
                         {PDFURL && 
                         <ViewSolutionComponent 
@@ -1227,9 +1267,22 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
             //Check solution
             const solutionsValidity = existingAddedTerm.Questions.map((q, qi) => {
-                const {answerStatus} = checkKeyboardAnswerIsCorrect(q.AddedAnswer, t.Questions[qi].Answers)
+                const originalQuestion = t.Questions.filter(qq => qq.Id === q.Id)[0]
 
-                return answerStatus
+                //Check if it flipped or not
+                const {Inflow: originalFlowDirection} = q
+                const {Inflow: existingFlowDirection} = existingAddedTerm
+
+                const isFlipped = (originalFlowDirection ^ existingFlowDirection) // true if one of them is true and the other is false (T + F pr F + T)
+
+                const {answerStatus} = 
+                checkKeyboardAnswerIsCorrectEnergyBalanceQuestionTermsOnly
+                (
+                q.AddedAnswer,
+                t.Questions[qi].Answers,
+                )
+
+                return ({answerStatus, isFlipped})
             })
 
 
@@ -1249,7 +1302,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
             r = r + (directionCorrect ? 1 : 0) // direction
 
-            r = r + solutionsValidity.filter(a => a).length // correct definitions
+            r = r + solutionsValidity.filter(a => a.answerStatus).length // correct definitions
 
             return r
         }, 0)
@@ -1298,18 +1351,19 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
     const renderDefineSpecificTerm = () => {
 
-        const {Latex, LatexText, Questions} = selectedTermDefine
+        const {LatexText, Questions} = selectedTermDefine
 
         if(Questions.length > 1){
             const question = Questions[selectedTermDefineIndex]
 
-            const {Keyboard: keyboard, LatexCode} = question
+            const {LatexCode: qCode, Keyboard: keyboard} = question
 
-            console.log(question)
-            
+            let _latexCode = qCode
+            if(_latexCode.trim().at(-1) !== '=') _latexCode += ' =';
+
             const list = question.AddedAnswer
 
-            const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+            const reducedLatex ="\\textcolor{#0275d8}{"+ _latexCode + "}" + " " + list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || ''
 
             const answerValidity = validateKeyboardAnswer(list)
             return(
@@ -1349,22 +1403,15 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                         })}
                     </Row>
 
-                    <Space size={"large"} align="start">
-                        <Space direction="vertical" align="start">
-                            <p className="default-gray">Define:</p>
-
-                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
-                            <LatexRenderer latex={"$$" + LatexCode + "$$"}/>
-                        </Space>
-
+                    <div size={"large"} align="start">
                         {LatexText &&
                         <Space direction="vertical" align="start">
-                            <p className="default-gray">Help</p>
-                            <p className="default-gray">{LatexText}</p>
+                            <p className="default-gray">Instruction</p>
+                            <LatexRenderer latex={LatexText} />
                         </Space>}
-                    </Space>
+                        <br/>
+                    </div>
 
-                    <br/>
                     <div className="eb-question-term-answer-zone">
                         {reducedLatex && 
                         <LatexRenderer 
@@ -1391,33 +1438,31 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
             const {Keyboard: keyboard, LatexCode} = question
 
+            let _latexCode = LatexCode
+            if(_latexCode.trim().at(-1) !== '=') _latexCode += ' =';
+
             const list = question.AddedAnswer
 
             const answerValidity = validateKeyboardAnswer(list)
 
-            const reducedLatex = list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+            const reducedLatex ="\\textcolor{#0275d8}{"+ _latexCode + "}" + " " + list.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || ''
+
 
             return(
                 <div>
-                    <Space size={"large"} align="start">
-                        <Space direction="vertical" align="start">
-                            <p className="default-gray">Define:</p>
-
-                            <LatexRenderer latex={"$$" + Latex + "$$"}/>
-                            <LatexRenderer latex={"$$" + LatexCode + "$$"}/>
-                        </Space>
-
+                    <div size={"large"} align="start">
                         {LatexText &&
                         <Space direction="vertical" align="start">
-                            <p className="default-gray">Help</p>
-                            <p className="default-gray">{LatexText}</p>
+                            <p className="default-gray">Instruction</p>
+                            <LatexRenderer latex={LatexText} />
                         </Space>}
-                    </Space>
+                        <br/>
+                    </div>
 
-                    <br/>
-                    <div className="eb-question-term-answer-zone">
+                    <div>
                         {reducedLatex && 
                         <LatexRenderer 
+                            className="eb-question-term-answer-zone"
                             latex={"$$"+reducedLatex+"$$"}
                         />}
                     </div>
@@ -1784,7 +1829,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
 
         const correctCV = ControlVolumes.filter(a => a.Correct)[0]
         
-        const {ImageURL} = correctCV
+        const {ImageURL, Comment} = correctCV
 
         const smallImageWidth = window.innerWidth * 0.20
         const smallImageHeight =(Base_ImageURL_Height/Base_ImageURL_Width)*smallImageWidth
@@ -1825,6 +1870,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                         >
                             <i className="default-red hq-clickable">-1</i>
                         </Tooltip>}
+                {Comment && <CommentInPlayComponent comment={Comment}/>}
             </Space>
         )
     }
@@ -1863,32 +1909,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                
                             </Divider>
                             <Space size={'large'} align="start">
-                                <div>
-                                    <p className="default-green">Correct terms</p>
-                                    {BoundaryConditionLines.map((a, ai) => {
-                                        const {Id} = a
-
-                                        const answerReduced = a.AnswerElements
-                                        .sort((c,d) => c.Id > d.Id ? 1 : -1)
-                                        .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
-                                        
-                                        return(
-                                            <div
-                                                key={Id}
-                                            >
-                                                <Space>
-                                                    <p className="default-gray">{ai+1}</p>
-
-                                                    <LatexRenderer latex={"$$" + answerReduced + "$$"} />
-                                                </Space>
-                                            </div>    
-                                        )
-                                    })}
-                                </div>
-
-                                <Col xs={6} />
-
-                                <div>
+                            <div>
                                     <p className="default-title">Your solution</p>
                                     {newListBC.map((a, ai) => {
                                         const status = newListBCValidation[ai]
@@ -1913,21 +1934,11 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                         )
                                     })}
                                 </div>
-                            </Space>
-                        </div> : <div/>}
-
-                        {InitialConditionLines.length ? 
-                            <div className="hq-full-width">
-                            <Divider orientation="left">
-                                <Space size={'large'}>
-                                    <span className="default-gray hq-normal-font-weight">Initial conditions</span> <span className="default-title hq-normal-font-weight">{ICScore}</span>
-                                </Space>
-                            </Divider>
-                            <Space size={'large'} align="start">
+                                <Col xs={6} />
                                 <div>
                                     <p className="default-green">Correct terms</p>
-                                    {InitialConditionLines.map((a, ai) => {
-                                        const {Id} = a
+                                    {BoundaryConditionLines.map((a, ai) => {
+                                        const {Id, Comment} = a
 
                                         const answerReduced = a.AnswerElements
                                         .sort((c,d) => c.Id > d.Id ? 1 : -1)
@@ -1941,13 +1952,24 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                                     <p className="default-gray">{ai+1}</p>
 
                                                     <LatexRenderer latex={"$$" + answerReduced + "$$"} />
+                                                    {Comment && <CommentInPlayComponent comment={Comment} />}
                                                 </Space>
                                             </div>    
                                         )
                                     })}
                                 </div>
+                                
+                            </Space>
+                        </div> : <div/>}
 
-                                <Col xs={6} />
+                        {InitialConditionLines.length ? 
+                            <div className="hq-full-width">
+                            <Divider orientation="left">
+                                <Space size={'large'}>
+                                    <span className="default-gray hq-normal-font-weight">Initial conditions</span> <span className="default-title hq-normal-font-weight">{ICScore}</span>
+                                </Space>
+                            </Divider>
+                            <Space size={'large'} align="start">
 
                                 <div>
                                     <p className="default-title">Your solution</p>
@@ -1976,6 +1998,32 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                     })}
                                 </div>
 
+                                <Col xs={6} />
+                                
+                                <div>
+                                    <p className="default-green">Correct terms</p>
+                                    {InitialConditionLines.map((a, ai) => {
+                                        const {Id, Comment} = a
+
+                                        const answerReduced = a.AnswerElements
+                                        .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                        .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+                                        
+                                        return(
+                                            <div
+                                                key={Id}
+                                            >
+                                                <Space>
+                                                    <p className="default-gray">{ai+1}</p>
+
+                                                    <LatexRenderer latex={"$$" + answerReduced + "$$"} />
+
+                                                    {Comment && <CommentInPlayComponent comment={Comment} />}
+                                                </Space>
+                                            </div>    
+                                        )
+                                    })}
+                                </div>
                             </Space>
                         </div> : <div/>}
 
@@ -1989,21 +2037,20 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                         </Divider>
                         <Space size={'large'}>
                             <div>
+                                <p className="default-title">Your solution</p>
+                                <LatexRenderer latex={"$$" + equation + "$$"}/>
+                            </div>
+
+                            <Col xs={24} />
+                            
+                            <div>
                                 <p className="default-green">Correct energy balance</p>
                                 <Space>
                                     <LatexRenderer latex={"$$" + correctEB + "$$"}/>
-                                    <Tooltip
-                                        color="white"
-                                        title={<p>This only one possible combination, term signs can be positive (+) or negative (-)</p>}
-                                    >
-                                        <ExclamationCircleOutlined className="default-title hq-clickable"/>
-                                    </Tooltip>
+                                    <CommentInPlayComponent 
+                                        comment={"This only one possible combination, term signs can be positive (+) or negative (-)"}
+                                    />
                                 </Space>
-                            </div>
-                            <Col xs={24} />
-                            <div>
-                                <p className="default-title">Your solution</p>
-                                <LatexRenderer latex={"$$" + equation + "$$"}/>
                             </div>
                         </Space>
 
@@ -2016,7 +2063,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                             </Space>
                         </Divider>
                         {mandatoryTermsNotIncluded.map((t, ti) => {
-                            const {Id, Latex, Questions} = t
+                            const {Id, Latex, Questions, Comment} = t
 
                             return(
                                 <div key={Id}>
@@ -2032,6 +2079,8 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                         >
                                             <i className="default-red hq-clickable">-2</i>
                                         </Tooltip>
+                                        {Comment && <CommentInPlayComponent comment={Comment} />}
+
                                     </Space>
 
                                     <br/>
@@ -2081,8 +2130,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                         })}
 
                         {mandatoryTermsIncluded.map((t, ti) => {
-                            const {Id, Latex, Questions, directionCorrect, solutionsValidity} = t
-                            
+                            const {Id, Latex, Questions, directionCorrect, solutionsValidity, Comment} = t
                             return(
                                 <div key={Id}>
                                     <div className="hq-element-container">
@@ -2116,6 +2164,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                                 <i className="default-green hq-clickable">+1</i>
                                             </Tooltip>
                                         </Space>
+                                        {Comment && <CommentInPlayComponent comment={Comment} />}
                                     </Space>
 
                                     <br/>
@@ -2125,6 +2174,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                         const reducedLatex = AddedAnswer.List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
                                         const answerValidity = solutionsValidity[qi]
+                                        const {answerStatus, isFlipped} = answerValidity
 
                                         return(
                                             <div
@@ -2139,9 +2189,13 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                                         <div>
                                                             {Answers.map((a, ai) => {
 
-                                                                const answerReduced = a.AnswerElements
+                                                                let answerReduced = a.AnswerElements
                                                                 .sort((c,d) => c.Id > d.Id ? 1 : -1)
                                                                 .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                                                                if(isFlipped){
+                                                                    answerReduced = "-(" + answerReduced + ")"
+                                                                }
 
                                                                 return(
                                                                     <div
@@ -2160,9 +2214,9 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                                         <div>
                                                             <Space>
                                                             <LatexRenderer latex={"$$" + reducedLatex + "$$"}/>
-                                                            {answerValidity ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
+                                                            {answerStatus ? <CheckCircleFilled className="default-green"/> : <CloseCircleFilled className="default-red"/>}
                                                             
-                                                            {answerValidity ?
+                                                            {answerStatus ?
                                                             <Tooltip
                                                                     color="white"
                                                                     title={<p>Definition correct</p>}
@@ -2195,7 +2249,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                         })}
 
                         {dummyTerms.map((t, ti) => {
-                            const {Id, Latex} = t
+                            const {Id, Latex, Comment} = t
 
                             return(
                                 <div key={Id}>
@@ -2210,6 +2264,7 @@ export function EnergyBalanceQuestionPlay({Id, deadLoad, onUpdateSeriesPlayEleme
                                         >
                                             <i className="default-red hq-clickable">-1</i>
                                         </Tooltip>
+                                        {Comment && <CommentInPlayComponent comment={Comment} />}
                                     </Space>
                                     <br/>
                                     <small className="default-red eb-question-red-background">You added this <u>dummy</u> term to energy balance</small>

@@ -18,6 +18,8 @@ import { AddVectorTerm } from "./AddVectorTerm";
 import { UpdateQuestionImage } from "./UpdateQuestionImage";
 import { AddBodyObject } from "./AddBodyObject";
 import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
+import { UpdateOBComment } from "./UpdateOBComment";
+import { UpdateVTComment } from "./UpdateVTComment";
 
 export function FBDQuestionEditView({reloadQuestion}){
 
@@ -45,6 +47,7 @@ export function FBDQuestionEditView({reloadQuestion}){
 
     const [showEditTermCodeLatex, setShowEditTermCodeLatex] = useState(false)
     const [showEditTermLatexText, setShowEditTermLatexText] = useState(false)
+    const [showEditTermComment, setShowEditTermComment] = useState(false)
     const [showEditTermAssociation, setShowEditTermAssociation] = useState(false)
     const [showEditTermColor, setShowEditTermColor] = useState(false)
     const [showEditTermAngle, setShowEditTermAngle] = useState(false)
@@ -53,6 +56,7 @@ export function FBDQuestionEditView({reloadQuestion}){
 
 
     const [showEditOBColor, setShowEditOBColor] = useState(false)
+    const [showEditOBComment, setShowEditOBComment] = useState(false)
     const [selectedOB, setSelectedOB] = useState(null)
 
     const [showAddVT, setShowAddVT] = useState(false)
@@ -175,7 +179,7 @@ export function FBDQuestionEditView({reloadQuestion}){
                 <List 
                     dataSource={ObjectBodies}
                     renderItem={(o, oi) => {
-                        const {Id, Color} = o
+                        const {Id, Color, Comment} = o
 
                         const dimesions =  calculateCPdimensions(Base_ImageURL_Width, Base_ImageURL_Height,smallImageWidth, smallImageHeight, o)
 
@@ -217,6 +221,14 @@ export function FBDQuestionEditView({reloadQuestion}){
                                                 }
                                             },
                                             {
+                                                key: 'edit_comment',
+                                                label: 'Update comment',
+                                                onClick: () => {
+                                                    setShowEditOBComment(true)
+                                                    setSelectedOB({...o, dimesions, smallImageWidth, smallImageHeight, Base_ImageURL})
+                                                }
+                                            },
+                                            {
                                                 key: 'delete_ob',
                                                 label: 
                                                 <Popconfirm
@@ -243,8 +255,12 @@ export function FBDQuestionEditView({reloadQuestion}){
                                         <ControlOutlined className="default-gray hoverable"/>
                                     </Dropdown>
                                 </Space>
-                                <br/>
-                                <br/>
+                                {Comment &&
+                                <div>
+                                    <small className="default-gray">Comment  &nbsp; <i>in summary screen</i></small>   
+                                    <p>{Comment}</p>
+                                </div>}
+                                <Divider/>
                             </div>
                         )
                     }}
@@ -284,7 +300,7 @@ export function FBDQuestionEditView({reloadQuestion}){
 
                     renderItem={(vt, vti) => {
 
-                        const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, Clockwise, BodyObjectId} = vt
+                        const {Id, Code, ArrowColor, Latex, LatexText, Keyboard, Answers, Linear, Angle, Clockwise, BodyObjectId, Comment} = vt
 
                         const OB = ObjectBodies.filter(a => a.Id === BodyObjectId)[0]
 
@@ -365,6 +381,14 @@ export function FBDQuestionEditView({reloadQuestion}){
                                                 }
                                             },
                                             {
+                                                key: 'edit_comment',
+                                                label: 'Update comment',
+                                                onClick: () => {
+                                                    setShowEditTermComment(true)
+                                                    setSelectedVTTerm(vt)
+                                                }
+                                            },
+                                            {
                                                 key: 'edit_association',
                                                 label: 'Update association',
                                                 onClick: () => {
@@ -418,30 +442,43 @@ export function FBDQuestionEditView({reloadQuestion}){
                                             <ControlOutlined className="default-gray hoverable"/>
                                         </Dropdown>
                                 </Space>
+                                
+                                <Divider/>
+
+                                <small className="default-gray">
+                                    Comment &nbsp; <i>in summary screen</i>
+                                </small>
+                                <p>{Comment}</p>
+
                                 <Divider />
+
                                 <small className="default-gray">
                                     Optional text
-                                </small>
-                                <p>{LatexText}</p>
-                                <Divider />
-                                <Space>
-                                    <InsertRowAboveOutlined />
-                                    <p> {Keyboard.Name} </p>
-                                </Space>
-                                {Answers.map((a, ai) => {
-                                    const answerReduced = a.AnswerElements
-                                    .sort((c,d) => c.Id > d.Id ? 1 : -1)
-                                    .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+                                </small>                                
+                                <LatexRenderer latex={LatexText || ""} />
 
-                                    return(
-                                        <div
-                                            key={ai}
-                                            style={{width:'fit-content'}}
-                                        >
-                                            <LatexRenderer latex={"$$" + answerReduced + "$$"}/>
-                                        </div>
-                                    )
-                                })}
+                                {Keyboard &&
+                                <div>
+                                    <Divider />
+                                    <Space>
+                                        <InsertRowAboveOutlined />
+                                        <p> {Keyboard.Name} </p>
+                                    </Space>
+                                    {Answers.map((a, ai) => {
+                                        const answerReduced = a.AnswerElements
+                                        .sort((c,d) => c.Id > d.Id ? 1 : -1)
+                                        .reduce((a,b) => a += ' ' + (b.TextPresentation || (b.Value === '*' ? '\\cdot': b.Value)), '')
+
+                                        return(
+                                            <div
+                                                key={ai}
+                                                style={{width:'fit-content'}}
+                                            >
+                                                <LatexRenderer latex={"$$" + answerReduced + "$$"}/>
+                                            </div>
+                                        )
+                                    })}    
+                                </div>}
                             </div>
                         )
                     }}
@@ -609,6 +646,23 @@ export function FBDQuestionEditView({reloadQuestion}){
                 onClose={() => setShowAddOB(false)}
 
                 question={question}
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <UpdateOBComment 
+                open={showEditOBComment}
+                onClose={() => setShowEditOBComment(false)}
+
+                OB={selectedOB}
+                reloadQuestion = {() => reloadQuestion()}
+            />
+
+            <UpdateVTComment 
+                open={showEditTermComment}
+                onClose={() => setShowEditTermComment(false)}
+
+                VT={selectedVTTerm}
+
                 reloadQuestion = {() => reloadQuestion()}
             />
         </div>

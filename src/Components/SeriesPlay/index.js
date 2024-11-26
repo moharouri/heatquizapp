@@ -5,7 +5,7 @@ import { red, green } from '@ant-design/colors';
 import { getRandomSeriesElements } from "./Functions";
 import { convertSecondsToHHMMSS, goToQuestionViewEdit, goToSeriesViewEdit } from "../../services/Auxillary";
 
-import { CLICKABLE_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
+import { CLICKABLE_QUESTION_PARAMETER, DIAGRAM_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, PV_DIAGRAM_QUESTION_PARAMETER } from "../../Pages/Questions/List/constants";
 import { ClickableQuestionPlay } from "../../Pages/Questions/ClickableQuestion/Play";
 import { KeyboardQuestionPlay } from "../../Pages/Questions/KeyboardQuestion/Play";
 import { MultipleChoiceQuestion } from "../../Pages/Questions/MultipleChoiceQuestion/Play";
@@ -20,12 +20,13 @@ import { SendFeedback } from "../../Pages/StudentFeedback/SendFeedback";
 import { useAuth } from "../../contexts/AuthContext";
 import { ViewSolutionComponent } from "../ViewSolutionComponent";
 import { ErrorComponent } from "../ErrorComponent";
-import { ImageModal } from "../ImageModal";
 import { DisplayClickableQuestionAnswers } from "./DisplayClickableQuestionAnswers";
 import { EnergyBalanceQuestionPlay } from "../../Pages/Questions/EnergyBalanceQuestion/Play";
 import { CurrentQuestionTypeNotSupported } from "./CurrentQuestionTypeNotSupported";
 import { FBDQuestionPlay } from "../../Pages/Questions/FBDQuestion/Play";
-var timer
+import { DiagramQuestionPlay } from "../../Pages/Questions/DiagramQuestion/Play";
+import { PVDiagramQuestionPlay } from "../../Pages/Questions/PVDiagramQuestion/Play";
+import { Timer } from "../Timer/Timer";
 
 export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapName, mapElementName}){
     
@@ -49,7 +50,8 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
     const [currentIndex, setCurrentIndex] = useState(0)
     const [playedElements, setPlayedElements] = useState([])
 
-    const [playTime, setPlayTime] = useState(0)
+    const [startTime, setStartTime] = useState(0)
+    const [stopTimer, setStopTimer] = useState(false)
 
     const [showFinalPage, setShowFinalPage] = useState(false)
 
@@ -65,6 +67,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
         getSeries(Code)
         setSeriesElements([])
         setCurrentIndex(0)
+        setStopTimer(false)
 
         setShowFinalPage(false)
     }
@@ -98,13 +101,17 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                 setTopOffset(baseDivCurrent.getBoundingClientRect().top)
             }
 
-
+            setStartTime(Date.now())
             //Set a 1 second interval timer
-            timer = setInterval(() => {
+            /*timer = setInterval(() => {
                 setPlayTime(seconds => seconds + 1)
               }, 1000);
 
-              return () => clearInterval(timer);
+              return () => clearInterval(timer);timer = setInterval(() => {
+                setPlayTime(seconds => seconds + 1)
+              }, 1000);
+
+              return () => clearInterval(timer);*/
 
            
         }
@@ -113,7 +120,7 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
     useEffect(() => {
         //Stop timer
         if(playedElements.length === seriesElements.length){
-            clearInterval(timer)
+            if(playedElements.length) setStopTimer(true);
         }
     }, [playedElements])
 
@@ -138,7 +145,9 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             }
 
             statData.append('SuccessRate', playedElements.filter(a => a.Correct).length+"/"+playedElements.length)
-            statData.append('TotalTime', playTime)
+            const totalTime = 0.001 * (Date.now() - startTime)
+            console.log(totalTime)
+            statData.append('TotalTime', totalTime)
             statData.append('OnMobile',  false)
 
             postSeriesStatistic(statData)
@@ -397,6 +406,28 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
 
                 mapKey={mapKey}
             />,
+
+            [DIAGRAM_QUESTION_PARAMETER]: () => 
+            <DiagramQuestionPlay 
+                Id={Id}
+                onUpdateSeriesPlayElements = {updateSeriesPlayElements}
+                
+                nextAction = {() => goNext()}
+
+                mapKey={mapKey}
+            />,
+
+            [PV_DIAGRAM_QUESTION_PARAMETER]: () => 
+            <PVDiagramQuestionPlay 
+                Id={Id} 
+
+                onUpdateSeriesPlayElements = {updateSeriesPlayElements}
+                
+                nextAction = {() => goNext()}
+
+                mapKey={mapKey}
+            />,
+
         }
 
         const playQuestionRender = selectionList[Type]
@@ -417,15 +448,16 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             <Space 
                 size={'large'}
             >
-                <ImageModal
+                <div
                     URL={Base_ImageURL}
+                    id = {Code}
                 >
                     <img 
                         src={Base_ImageURL}
                         alt={Code}
                         className="series-play-final-page-item-img"
                     />
-                </ImageModal>
+                </div>
 
                 <div>
                     <LatexRenderer 
@@ -494,15 +526,17 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             <Space 
                 size={'large'}
             >
-                <ImageModal
+                <div
                     URL={Base_ImageURL}
+                    id = {Code}
+
                 >
                     <img 
                         src={Base_ImageURL}
                         alt={Code}
                         className="series-play-final-page-item-img"
                     />
-                </ImageModal>
+                </div>
                 
                 <div>
                     <LatexRenderer 
@@ -571,16 +605,19 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
         return(
             <Space 
                 size={'large'}
+                align="start"
             >
-                <ImageModal
+                <div
                     URL={Base_ImageURL}
+                    id = {Code}
+
                 >
                     <img 
                         src={Base_ImageURL}
                         alt={Code}
                         className="series-play-final-page-item-img"
                     />
-                </ImageModal>
+                </div>
 
                 {QuestionText && <div>
                     <LatexRenderer 
@@ -590,6 +627,70 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
             </Space>
             )
 
+    }
+
+    const renderDiagramQuestionFinalPage = (index) => {
+        const element = playedElements[index]
+
+        const {Question} = element
+        const {Code, Base_ImageURL, QuestionText} = Question
+
+        return(
+            <Space 
+                size={'large'}
+                align="start"
+            >
+                <div
+                    URL={Base_ImageURL}
+                    id = {Code}
+
+                >
+                    <img 
+                        src={Base_ImageURL}
+                        alt={Code}
+                        className="series-play-final-page-item-img"
+                    />
+                </div>
+
+                {QuestionText && <div>
+                    <LatexRenderer 
+                        latex={QuestionText}
+                    />
+                </div>}
+            </Space>
+            )
+    } 
+
+    const renderPVDiagramQuestionFinalPage = (index) => {
+        const element = playedElements[index]
+
+        const {Question} = element
+        const {Code, Base_ImageURL, QuestionText} = Question
+
+        return(
+            <Space 
+                size={'large'}
+                align="start"
+            >
+                <div
+                    URL={Base_ImageURL}
+                    id = {Code}
+
+                >
+                    <img 
+                        src={Base_ImageURL}
+                        alt={Code}
+                        className="series-play-final-page-item-img"
+                    />
+                </div>
+
+                {QuestionText && <div>
+                    <LatexRenderer 
+                        latex={QuestionText}
+                    />
+                </div>}
+            </Space>
+            )
     }
 
     const elementActionList = (index) => [
@@ -682,7 +783,9 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                 [MULTIPLE_CHOICE_QUESTION_PARAMETER]: (index) => renderMultipleChoiceQuestionFinalPage(index),
                 [KEYBOARD_QUESTION_PARAMETER]: (index) =>  renderKeyboardQuestionFinalPage(index),
                 [CLICKABLE_QUESTION_PARAMETER]: (index) =>  renderClickableQuestionFinalPage(index),
-                [ENERGY_BALANCE_QUESTION_PARAMETER]: (index) => renderEnergyBalanceQuestionFinalPage(index)
+                [ENERGY_BALANCE_QUESTION_PARAMETER]: (index) => renderEnergyBalanceQuestionFinalPage(index),
+                [DIAGRAM_QUESTION_PARAMETER]: (index) => renderDiagramQuestionFinalPage(index),
+                [PV_DIAGRAM_QUESTION_PARAMETER]: (index) => renderPVDiagramQuestionFinalPage(index)
     
             })[type]
 
@@ -875,9 +978,8 @@ export function SeriesPlay({Code, onExitSeries, onFinishPlaySeries, mapKey, mapN
                 className="series-play-top-header"
                 size={'large'}>
                     <p>{Code}</p>
-                    <div>
-                        <p>{convertSecondsToHHMMSS(playTime)}</p>
-                    </div>
+                    
+                    <Timer stop={stopTimer}/>
                     <Progress 
                     
                     percent={progress} 

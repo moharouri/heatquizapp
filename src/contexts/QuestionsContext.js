@@ -1,7 +1,7 @@
 import React, { useContext} from "react"
 
 import { useAsyncFn } from "../hooks/useAsync"
-import { GetQuestionStatisticsRequest, addClickableQuestionPartsRequest, addClickableQuestionRequest, addEnergyBalanceBCRequest, addEnergyBalanceControlVolumeRequest, addEnergyBalanceEBT_Question_Request, addEnergyBalanceEBT_Request, addEnergyBalanceICRequest, addEnergyBalanceQuestionRequest, addFBDQuestionOBRequest, addFBDQuestionVTRequest, addKeyboardQuestionAnswerRequest, addKeyboardQuestionRequest, addMultipleChoiceQuestionChoiceRequest, addMultipleChoiceQuestionRequest, addQuestionPDFStatisticRequest, addQuestionSolutionRequest, addQuestionStatisticRequest, copyQuestionRequest, deleteClickableQuestionPartRequest, editClickableQuestionAnswerRequest, editClickableQuestionImageRequest, editEnergyBalanceBCKeyboardRequest, editEnergyBalanceControlVolumeImageRequest, editEnergyBalanceControlVolumeStatusRequest, editEnergyBalanceEBT_Direction_Request, editEnergyBalanceEBT_Question_Latex_Request, editEnergyBalanceICKeyboardRequest, editEnergyBalanceImageRequest, editEnergyBalanceLatexRequest, editEnergyBalanceTermCodeLatexTextRequest, editFBDArrowLengthRequest, editFBDObjectBodyColorRequest, editFBDQuestionBodyRequest, editFBDQuestionImageRequest, editFBDVectorTermAssociationRequest, editFBDVectorTermColorRequest, editFBDVectorTermRequest, editKeyboardQuestionImageRequest, editKeyboardQuestionLatexRequest, editMultipleChoiceQuestionAdditionalInfoRequest, editMultipleChoiceQuestionChoiceRequest, editMultipleChoiceQuestionImageRequest, editMultipleChoiceQuestionLatexRequest, editQuestionBasicInfoRequest, flipEnergyBalanceEBT_Question_Direction_Request, getClickableQuestionPlayRequest, getDiagramQuestionPlayRequest, getEnergyBalanceQuestionPlayRequest, getFBDQuestionPlayRequest, getKeyboardQuestionPlayRequest, getKeyboardQuestionWrongAnswersRequest, getMultipleChoiceQuestionPlayRequest, getQuestionMedianTimeRequest, getQuestionRelationsRequest, removeEnergyBalanceBCRequest, removeEnergyBalanceControlVolumeRequest, removeEnergyBalanceEBT_Question_Request, removeEnergyBalanceEBT_Request, removeEnergyBalanceICRequest, removeFBDQuestionOBRequest, removeFBDQuestionVTRequest, removeKeyboardQuestionAnswerRequest, removeMultipleChoiceQuestionChoiceImageRequest, removeMultipleChoiceQuestionChoiceLatexRequest, removeMultipleChoiceQuestionChoiceRequest, removeQuestionSolutionRequest, searchQuestionsByIdsRequest, searchQuestionsRequest } from "../services/Questions"
+import { GetQuestionStatisticsRequest, addClickableQuestionPartsRequest, addClickableQuestionRequest, addEnergyBalanceBCRequest, addEnergyBalanceControlVolumeRequest, addEnergyBalanceEBT_Question_Request, addEnergyBalanceEBT_Request, addEnergyBalanceICRequest, addEnergyBalanceQuestionRequest, addFBDQuestionOBRequest, addFBDQuestionVTRequest, addKeyboardQuestionAnswerRequest, addKeyboardQuestionRequest, addMultipleChoiceQuestionChoiceRequest, addMultipleChoiceQuestionRequest, addQuestionPDFStatisticRequest, addQuestionSolutionRequest, addQuestionStatisticRequest, copyQuestionRequest, deleteClickableQuestionPartRequest, editClickableQuestionAnswerRequest, editClickableQuestionImageRequest, editEnergyBalanceBCKeyboardRequest, editEnergyBalanceControlVolumeImageRequest, editEnergyBalanceControlVolumeStatusRequest, editEnergyBalanceEBT_Direction_Request, editEnergyBalanceEBT_Question_Latex_Request, editEnergyBalanceICKeyboardRequest, editEnergyBalanceImageRequest, editEnergyBalanceLatexRequest, editEnergyBalanceTermCodeLatexTextRequest, editFBDArrowLengthRequest, editFBDObjectBodyColorRequest, editFBDQuestionBodyRequest, editFBDQuestionImageRequest, editFBDVectorTermAssociationRequest, editFBDVectorTermColorRequest, editFBDVectorTermRequest, editKeyboardQuestionImageRequest, editKeyboardQuestionLatexRequest, editMultipleChoiceQuestionAdditionalInfoRequest, editMultipleChoiceQuestionChoiceRequest, editMultipleChoiceQuestionImageRequest, editMultipleChoiceQuestionLatexRequest, editQuestionBasicInfoRequest, flipEnergyBalanceEBT_Question_Direction_Request, getClickableQuestionPlayRequest, getDiagramQuestionPlayRequest, getEnergyBalanceQuestionPlayRequest, getFBDQuestionPlayRequest, getKeyboardQuestionPlayRequest, getKeyboardQuestionWrongAnswersRequest, getMultipleChoiceQuestionPlayRequest, getQuestionMedianTimeRequest, getQuestionRelationsRequest, removeEnergyBalanceBCRequest, removeEnergyBalanceControlVolumeRequest, removeEnergyBalanceEBT_Question_Request, removeEnergyBalanceEBT_Request, removeEnergyBalanceICRequest, removeFBDQuestionOBRequest, removeFBDQuestionVTRequest, removeKeyboardQuestionAnswerRequest, removeMultipleChoiceQuestionChoiceImageRequest, removeMultipleChoiceQuestionChoiceLatexRequest, removeMultipleChoiceQuestionChoiceRequest, removeQuestionSolutionRequest, searchQuestionsByIdsRequest, searchQuestionsRequest, addPVDiagramQuestionRequest, getPVDiagramQuestionPlayRequest, editEnergyBalanceControlVolumeCommentRequest, editEnergyBalanceBCICCommentRequest, addFBDQuestionRequest, editFBDObjectBodyCommentRequest, editPVDiagramQuestionGroupInfoRequest, editPVDiagramQuestionConditionCommentRequest } from "../services/Questions"
 
 const Context = React.createContext()
 
@@ -35,9 +35,11 @@ export function QuestionsProvider ({children}){
     //FBD question
     const {value: FBDQuestionPlay, error:errorGetFBDQuestionPlay, loading:isLoadingFBDQuestionPlay, execute:getFBDQuestionPlay} = useAsyncFn((Id) => getFBDQuestionPlayRequest(Id)) 
 
-     //Diagram question
-     const {value: DiagramQuestionPlay, error:errorGetDiagramQuestionPlay, loading:isLoadingDiagramQuestionPlay, execute:getDiagramQuestionPlay} = useAsyncFn((Id) => getDiagramQuestionPlayRequest(Id)) 
-
+    //Diagram question
+    const {value: DiagramQuestionPlay, error:errorGetDiagramQuestionPlay, loading:isLoadingDiagramQuestionPlay, execute:getDiagramQuestionPlay} = useAsyncFn((Id) => getDiagramQuestionPlayRequest(Id)) 
+    
+    //PV Diagram
+    const {value: PVDiagramQuestionPlay, error:errorGetPVDiagramQuestionPlay, loading:isLoadingPVDiagramQuestionPlay, execute:getPVDiagramQuestionPlay} = useAsyncFn((Id) => getPVDiagramQuestionPlayRequest(Id)) 
 
     //Question relations 
     const {value: questionRelations, error:errorGetQuestionRelations, loading:isLoadingGetQuestionRelations, execute:getQuestionRelations} = useAsyncFn((Id) => getQuestionRelationsRequest(Id)) 
@@ -59,7 +61,6 @@ export function QuestionsProvider ({children}){
     const {value: editQuestionSolutionResult, error:errorEditQuestionSolution, loading:isLoadingEditQuestionSolution, execute:editQuestionSolution} = useAsyncFn((b) => addQuestionSolutionRequest(b)) 
     const {value: removeQuestionSolutionResult, error:errorRemoveQuestionSolution, loading:isLoadingRemoveQuestionSolution, execute:removeQuestionSolution} = useAsyncFn((b) => removeQuestionSolutionRequest(b)) 
 
-
     //Multiple choice edit question actions
     const {value: editMultipleChoiceQuestionLatexResult, error:errorEditMultipleChoiceQuestionLatex, loading:isLoadingEditMultipleChoiceQuestionLatex, execute:editMultipleChoiceQuestionLatex} = useAsyncFn((b) => editMultipleChoiceQuestionLatexRequest(b)) 
     const {value: editMultipleChoiceQuestionAdditionalInfoResult, error:errorEditMultipleChoiceQuestionAdditionalInfo, loading:isLoadingEditMultipleChoiceQuestionAdditionalInfo, execute:editMultipleChoiceQuestionAdditionalInfo} = useAsyncFn((b) => editMultipleChoiceQuestionAdditionalInfoRequest(b)) 
@@ -72,7 +73,6 @@ export function QuestionsProvider ({children}){
     const {value: removeMultipleChoiceQuestionChoiceImageResult, error:errorRemoveMultipleChoiceQuestionChoiceImage, loading:isLoadingRemoveMultipleChoiceQuestionChoiceImage, execute:removeMultipleChoiceQuestionChoiceImage} = useAsyncFn((b) => removeMultipleChoiceQuestionChoiceImageRequest(b)) 
 
     const {value: addMultipleChoiceQuestionResult, error:errorAddMultipleChoiceQuestion, loading:isLoadingAddMultipleChoiceQuestion, execute:addMultipleChoiceQuestion} = useAsyncFn((b) => addMultipleChoiceQuestionRequest(b)) 
-
 
     //Keyboard question edit actions
     const {value: addKeyboardQuestionAnswerResult, error:errorAddKeyboardQuestionAnswer, loading:isLoadingAddKeyboardQuestionAnswer, execute:addKeyboardQuestionAnswer} = useAsyncFn((b) => addKeyboardQuestionAnswerRequest(b)) 
@@ -97,6 +97,8 @@ export function QuestionsProvider ({children}){
 
     const {value:addEnergyBalanceControlVolumeResult, error:errorAddEnergyBalanceControlVolume, loading:isLoadingAddEnergyBalanceControlVolume, execute:addEnergyBalanceControlVolume} = useAsyncFn((b) => addEnergyBalanceControlVolumeRequest(b))
     const {value: editEnergyBalanceControlVolumeStatusResult, error:errorEditEnergyBalanceControlVolumeStatus, loading:isLoadingEditEnergyBalanceControlVolumeStatus, execute:editEnergyBalanceControlVolumeStatus} = useAsyncFn((b) => editEnergyBalanceControlVolumeStatusRequest(b))
+    const {value: editEnergyBalanceControlVolumeCommentResult, error:errorEditEnergyBalanceControlVolumeComment, loading:isLoadingEditEnergyBalanceControlVolumeComment, execute:editEnergyBalanceControlVolumeComment} = useAsyncFn((b) => editEnergyBalanceControlVolumeCommentRequest(b))
+    const {value: editEnergyBalanceBCICCommentResult, error:errorEditEnergyBalanceBCICComment, loading:isLoadingEditEnergyBalanceBCICComment, execute:editEnergyBalanceBCICComment} = useAsyncFn((b) => editEnergyBalanceBCICCommentRequest(b))
     const {value: editEnergyBalanceControlVolumeImageResult, error:errorEditEnergyBalanceControlVolumeImage, loading:isLoadingEditEnergyBalanceControlVolumeImage, execute:editEnergyBalanceControlVolumeImage} = useAsyncFn((b) => editEnergyBalanceControlVolumeImageRequest(b))
     const {value: removeEnergyBalanceControlVolumeResult, error:errorRemoveEnergyBalanceControlVolume, loading:isLoadingRemoveEnergyBalanceControlVolume, execute:removeEnergyBalanceControlVolume} = useAsyncFn((b) => removeEnergyBalanceControlVolumeRequest(b))
 
@@ -126,6 +128,8 @@ export function QuestionsProvider ({children}){
     const {value: editFBDQuestionImageResult, error:errorEditFBDQuestionImage, loading:isLoadingEditFBDQuestionImage, execute: editFBDQuestionImage} = useAsyncFn((b) => editFBDQuestionImageRequest(b))
     const {value: editFBDQuestionBodyResult, error:errorEditFBDQuestionBody, loading:isLoadingEditFBDQuestionBody, execute:editFBDQuestionBody} = useAsyncFn((b) => editFBDQuestionBodyRequest(b))
     const {value: editFBDObjectBodyColorResult, error:errorEditFBDObjectBodyColor, loading:isLoadingEditFBDObjectBodyColor, execute:editFBDObjectBodyColor} = useAsyncFn((b) => editFBDObjectBodyColorRequest(b))
+    const {value: editFBDObjectBodyCommentResult, error:errorEditFBDObjectBodyComment, loading:isLoadingEditFBDObjectBodyComment, execute:editFBDObjectBodyComment} = useAsyncFn((b) => editFBDObjectBodyCommentRequest(b))
+
     const {value: editFBDVectorTermColorResult, error:errorEditFBDVectorTermColor, loading:isLoadingEditFBDVectorTermColor, execute:editFBDVectorTermColor} = useAsyncFn((b) => editFBDVectorTermColorRequest(b))
     const {value:editFBDVectorTermResult, error:errorEditFBDVectorTerm, loading:isLoadingEditFBDVectorTerm, execute:editFBDVectorTerm} = useAsyncFn((b) => editFBDVectorTermRequest(b))
     const {value:editFBDVectorTermAssociationResult, error:errorEditFBDVectorTermAssociation, loading:isLoadingEditFBDVectorTermAssociation, execute:editFBDVectorTermAssociation} = useAsyncFn((b) => editFBDVectorTermAssociationRequest(b))
@@ -135,10 +139,17 @@ export function QuestionsProvider ({children}){
 
     const {value:addFBDQuestionVTResult, error:errorAddFBDQuestionVT, loading:isLoadingAddFBDQuestionVT, execute:addFBDQuestionVT} = useAsyncFn((b) => addFBDQuestionVTRequest(b))
     const {value:removeFBDQuestionVTResult, error:errorRemoveFBDQuestionVT, loading:isLoadingRemoveFBDQuestionVT, execute:removeFBDQuestionVT} = useAsyncFn((b) => removeFBDQuestionVTRequest(b))
+    const {value: addFBDQuestionResult, error:errorAddFBDQuestion, loading:isLoadingAddFBDQuestion, execute:addFBDQuestion} = useAsyncFn((b) => addFBDQuestionRequest(b)) 
 
+    //addPVDiagramQuestionRequest
+    const {value:addPVDiagramQuestionResult, error:errorAddPVDiagramQuestion, loading:isLoadingAddPVDiagramQuestion, execute:addPVDiagramQuestion} = useAsyncFn((b) => addPVDiagramQuestionRequest(b))
+    const {value:editPVDiagramQuestionGroupInfoResult, error:errorEditPVDiagramQuestionGroupInfo, loading:isLoadingEditPVDiagramQuestionGroupInfo, execute:editPVDiagramQuestionGroupInfo} = useAsyncFn((b) => editPVDiagramQuestionGroupInfoRequest(b))
+    const {value:editPVDiagramQuestionConditionCommentResult, error:errorEditPVDiagramQuestionConditionComment, loading:isLoadingEditPVDiagramQuestionConditionComment, execute:editPVDiagramQuestionConditionComment} = useAsyncFn((b) => editPVDiagramQuestionConditionCommentRequest(b))
 
     //Question median time statistics
     const {value: getQuestionMedianTimeResult, error:errorGetQuestionMedianTime, loading:isLoadingGetQuestionMedianTime, execute:getQuestionMedianTime} = useAsyncFn((Id) => getQuestionMedianTimeRequest(Id)) 
+
+
 
     return(
         <Context.Provider value = {{
@@ -317,7 +328,7 @@ export function QuestionsProvider ({children}){
             editClickableQuestionImage,
 
             //Energy balance question
-            addEnergyBalanceQuestion,
+            addEnergyBalanceQuestionResult,
             isLoadingAddEnergyBalanceQuestion,
             errorAddEnergyBalanceQuestion,
             addEnergyBalanceQuestion,
@@ -341,6 +352,17 @@ export function QuestionsProvider ({children}){
             editEnergyBalanceControlVolumeStatus,
             errorEditEnergyBalanceControlVolumeStatus,
             isLoadingEditEnergyBalanceControlVolumeStatus,
+
+            editEnergyBalanceControlVolumeCommentResult,
+            editEnergyBalanceControlVolumeComment,
+            errorEditEnergyBalanceControlVolumeComment,
+            isLoadingEditEnergyBalanceControlVolumeComment,
+
+            editEnergyBalanceBCICCommentResult,
+            editEnergyBalanceBCICComment,
+            errorEditEnergyBalanceBCICComment,
+            isLoadingEditEnergyBalanceBCICComment,
+
 
             editEnergyBalanceControlVolumeImageResult,
             errorEditEnergyBalanceControlVolumeImage,
@@ -443,6 +465,11 @@ export function QuestionsProvider ({children}){
             isLoadingEditFBDObjectBodyColor,
             editFBDObjectBodyColor,
 
+            editFBDObjectBodyCommentResult,
+            errorEditFBDObjectBodyComment,
+            isLoadingEditFBDObjectBodyComment,
+            editFBDObjectBodyComment,
+
             editFBDVectorTermColorResult,
             errorEditFBDVectorTermColor,
             isLoadingEditFBDVectorTermColor,
@@ -477,6 +504,11 @@ export function QuestionsProvider ({children}){
             errorRemoveFBDQuestionVT,
             isLoadingRemoveFBDQuestionVT,
             removeFBDQuestionVT,
+
+            addFBDQuestion, 
+            addFBDQuestionResult,
+            isLoadingAddFBDQuestion,
+            errorAddFBDQuestion,
             
             //Diagram question
             DiagramQuestionPlay,
@@ -487,7 +519,28 @@ export function QuestionsProvider ({children}){
             isLoadingGetQuestionMedianTime,
             getQuestionMedianTimeResult,
             errorGetQuestionMedianTime,
-            getQuestionMedianTime
+            getQuestionMedianTime,
+
+            //PV Diagram
+            PVDiagramQuestionPlay,
+            isLoadingPVDiagramQuestionPlay,
+            errorGetPVDiagramQuestionPlay,
+            getPVDiagramQuestionPlay,
+
+            addPVDiagramQuestion,
+            addPVDiagramQuestionResult,
+            isLoadingAddPVDiagramQuestion,
+            errorAddPVDiagramQuestion,
+
+            editPVDiagramQuestionGroupInfo,
+            isLoadingEditPVDiagramQuestionGroupInfo,
+            editPVDiagramQuestionGroupInfoResult,
+            errorEditPVDiagramQuestionGroupInfo,
+
+            editPVDiagramQuestionConditionComment,
+            isLoadingEditPVDiagramQuestionConditionComment,
+            editPVDiagramQuestionConditionComment,
+            errorEditPVDiagramQuestionConditionComment
         }}>
             {children}
         </Context.Provider>

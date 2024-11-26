@@ -114,6 +114,8 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
         setFinalScore(score)
         setShowScore(true)
 
+        if(showSolution) setShowCorrectSolution(true);
+
         const isCorrect = status.length === status.filter(a => a).length
 
         if(onUpdateSeriesPlayElements){
@@ -271,16 +273,6 @@ export function ClickableQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements,
                 
                 {showScore &&
                 <Row gutter={[4,4]} className="hq-question-action-line">
-                    <Col>
-                        {showSolution && !showCorrectSolution &&
-                        <Button
-                            size="small"
-                            onClick={() => setShowCorrectSolution(true)}
-                        >
-                            Show correct solution
-                        </Button>}
-                    </Col>
-
                     <Col>
                         {PDFURL && 
                         <ViewSolutionComponent 

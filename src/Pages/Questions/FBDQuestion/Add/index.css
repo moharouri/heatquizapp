@@ -3,9 +3,14 @@
 }
 
 .add-fbd-vt-term-type{
-    width: 20vmin;
+    width: 12vw;
 }
 
 .add-fbd-input{
     width: 40vmin;
+}
+
+.add-fbd-item-in-list{
+    width: 40vw;
+    justify-content: space-between;
 }

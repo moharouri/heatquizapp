@@ -4,6 +4,7 @@ import { FixURL, getUniqueValues } from "../../../../services/Auxillary"
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent"
 import Xarrow from "react-xarrows";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
+import { drawRectangle } from "../../DiagramQuestion/Shared/Functions";
 
 export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
 
@@ -55,17 +56,17 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
     const calculateCPdimensions = (imageWidth, imageHeight,specificedWidth, specificedHeight, element, Offset=0, fake) => {
         if(!fake){
             return({            
-                width: (element.Width)  * (specificedWidth/imageWidth),
-                height: (element.Height)* (specificedHeight/imageHeight),
-                left: (element.X + Offset) * (specificedWidth/imageWidth),
-                top: (element.Y) * (specificedHeight/imageHeight),
+                width: (element.Width * specificedWidth)/imageWidth,
+                height: (element.Height * specificedHeight) /imageHeight,
+                left: (element.X * specificedWidth) /imageWidth,
+                top: (element.Y * specificedHeight) /imageHeight,
             })
         }
         else{
             return({            
                 width: (element.Width) ,
                 height: (element.Height),
-                left: (element.X + Offset),
+                left: (element.X),
                 top: (element.Y),
             })
         }
@@ -170,7 +171,7 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
         let point = computePointInCanvas(e)
 
         if(Linear){
-            setShowSelectAngle(true)
+            setShowSelectAngle(snippedBox)
 
             setAngleX(point.x)
             setAngleY(point.y)
@@ -306,7 +307,7 @@ export function DropVectorOnImage({question, addedVTs, selectedVT, onDropVT}){
                 >
                     <VectorDirectionComponent 
                         onUpdateAngle={(angle) => {
-                            onDropVT(selectedVT, angle, angleX, angleY, snippedBox)
+                            onDropVT(selectedVT, angle, angleX, angleY, showSelectAngle)
                             setShowSelectAngle(false)
                         }}  
 

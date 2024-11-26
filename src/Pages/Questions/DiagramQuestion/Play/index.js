@@ -390,7 +390,7 @@ export function DiagramQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, n
                         align="center"
                     >
                         <p className="default-title">{score}</p>
-                        <p className="default-gray default-small">final score</p>
+                        <p className="default-gray default-small">Final score</p>
                     </Space>
                     {PDFURL && 
                         <ViewSolutionComponent
@@ -419,7 +419,7 @@ export function DiagramQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, n
                             className="hq-clickable"
                         >
                             <PauseOutlined className="default-large default-red"/>
-                            <p className="default-smaller default-gray">animation</p>
+                            <p className="default-smaller default-gray">Animation</p>
                         </div>
                         :
                         <div 
@@ -430,7 +430,7 @@ export function DiagramQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, n
                             className="hq-clickable"
                         >
                             <CaretRightOutlined className="default-large default-green"/>
-                            <p className="default-smaller default-gray">animation</p>
+                            <p className="default-smaller default-gray">Animation</p>
                         </div>}
                     </Space>
                     {hasMultiPlots &&

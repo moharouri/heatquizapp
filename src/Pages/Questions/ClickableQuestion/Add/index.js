@@ -91,7 +91,7 @@ export function AddClickableQuestion(){
                     <Col>
                         <div>
                             <img 
-                            alt="new-map"
+                            alt="q-image"
                             style={{width:imageWidth, height:imageHeight, cursor:'crosshair'}}
                             src={newImageURL}
 

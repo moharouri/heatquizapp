@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 
 import { SLIDER_POINT_RAD } from "./Constants";

@@ -14,28 +14,35 @@ import { FBD_QUESTION_PLAY_FAKE_BOX_WIDTH_HEIGHT } from "./Constants";
 import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
 import { NextButton } from "../../../../Components/NextButton";
 import { ViewSolutionComponent } from "../../../../Components/ViewSolutionComponent";
+import { CorrectVectorOnImage } from "./CorrectVectorOnImage";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextAction, mapKey}){
 
-    const {FBDQuestionPlay, errorGetFBDQuestionPlay, isLoadingFBDQuestionPlay, getFBDQuestionPlay,} = useQuestions()
+    const {FBDQuestionPlay, errorGetFBDQuestionPlay, isLoadingFBDQuestionPlay, getFBDQuestionPlay, postQuestionStatistic} = useQuestions()
 
+    const {currentPlayerKey} = useAuth()
+    
     const [currentTab, setCurrentTab] = useState(0)
 
     const [addedVTs, setAddedVTs] = useState([])
     const [addedVTsValidation, setAddedVTsValidation] = useState([])
     const [finalScore, setFinalScore] = useState(0)
+    const [correct, setCorrect] = useState(false)
 
     const [allVectors, setAllVectores] = useState([])
     const [allAnswerableVectors, setAllAnswerableVectors] = useState([])
     const [allAddedAnswerableVectors, setAllAddedAnswerableVectores] = useState([])
-
 
     const [selectedVTDrop, setSelectedVTDrop] = useState(null)
     const [selectedVT, setSelectedVT] = useState(null)
 
     const [checkAnswer, setCheckAnswer] = useState(false)
 
+    const [startTime, setStartTime] = useState(0)
+
     const [api, contextHolder] = message.useMessage()
+    
 
     const loadData = () => {
         getFBDQuestionPlay(Id)
@@ -43,14 +50,36 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
     }
 
     useEffect(() => {
-        loadData()
+        if(!deadLoad) loadData();
 
         setAddedVTsValidation([])
     }, [Id])
 
     useEffect(() => {
         if(checkAnswer){
+            if(onUpdateSeriesPlayElements){
 
+                const finalStatus = ({
+                    Correct: correct,
+                    Score: finalScore,
+                    Answers: [],
+                    Time: Date.now() - startTime,
+                    Question: FBDQuestionPlay
+                })
+    
+                onUpdateSeriesPlayElements(finalStatus)
+            }
+    
+            const statsVM = ({
+                QuestionId: FBDQuestionPlay.Id,
+                Player: currentPlayerKey,
+                Correct: correct,
+                TotalTime: Math.trunc(0.001 * (Date.now() - startTime)),
+                Key: mapKey,
+                Score: finalScore
+            })
+            
+            postQuestionStatistic(statsVM)
         }
     }, [checkAnswer])
 
@@ -65,6 +94,7 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
 
             setAllAnswerableVectors(answerableVTs)
 
+            setStartTime(Date.now())
         }
     }, [FBDQuestionPlay])
 
@@ -189,6 +219,10 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
 
 
         setFinalScore(posPoints + "/" + totalPoints)
+
+        const isCorrect = (posPoints === totalPoints)
+
+        setCorrect(isCorrect)
     }
 
     const validateFinalPage = () => {
@@ -563,11 +597,13 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
     }
 
     const renderFinalPage = () => {
-        const {PDFURL} = FBDQuestionPlay
+        const {PDFURL, ObjectBodies} = FBDQuestionPlay
 
         const drawingScore = getDrawingScore()
 
         const DDScores = getDirectionDefinitionScore()
+
+        const VTs = ObjectBodies.map(a => a.VectorTerms.map(t => ({...t, ObjectBody: a}))).flat()
 
         return(
             <div 
@@ -578,13 +614,6 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
            
             <Space size={"large"} align="start">
                 <div>
-                    {/*<DropVectorOnImage 
-                        question={FBDQuestionPlay} 
-                                            
-                        onDropVT = {(vt, a, x, y, sBox) => {}}
-
-                        addedVTs={allVectors}
-                    />*/}
                     <DropVectorOnImage 
                         question={FBDQuestionPlay} 
                                             
@@ -592,8 +621,7 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
 
                         addedVTs={addedVTs}
                     />
-                    <p className="default-green">Correct drawing</p>
-
+                    <p className="default-title">Your drawing</p>
                     <br/>
                     {checkAnswer && 
                     <Space align="start">
@@ -620,14 +648,23 @@ export function FBDQuestionPlay({Id, deadLoad, onUpdateSeriesPlayElements, nextA
                 </div>
 
                 <div>
-                    <DropVectorOnImage 
+                    {/*<DropVectorOnImage 
                         question={FBDQuestionPlay} 
                                             
                         onDropVT = {(vt, a, x, y, sBox) => {}}
 
-                        addedVTs={addedVTs}
+                        addedVTs={allVectors}
+                    />*/}
+                    <CorrectVectorOnImage 
+                        question={FBDQuestionPlay} 
+                                            
+                        onDropVT = {(vt, a, x, y, sBox) => {}}
+
+                        addedVTs={VTs}
                     />
-                    <p className="default-title">Your drawing</p>
+                    <p className="default-green">Correct drawing</p>
+
+                    
                 </div>
 
                 <div style={{overflowY:'scroll', height: window.innerHeight * 0.60, width: 0.4*window.innerWidth}}>

@@ -4,6 +4,7 @@ import './index.css'
 import { useState } from "react";
 import { useEffect } from "react";
 import { Drawer, Space } from "antd";
+import { ZoomableImage } from "./ZoomableImage";
 
 export function ImageModal({URL, children}){
 
@@ -20,16 +21,26 @@ export function ImageModal({URL, children}){
                 open={showModal}
                 onClose={() => setShowModal(false)}
                 width={'90%'}
-                closable={false}
             >
                 <Space direction="vertical" align="center" className="hq-full-width">
-                    <img 
+                    {/*<img 
                         alt={URL}
                         src={URL}
                         className="image-model-img"
                     />
                     <br/>
-                    <p className="default-gray">Magnified image</p>
+                    <p className="default-gray">Magnified image</p>*/}
+                    <ZoomableImage 
+                        image = {{
+                            url: URL,
+                            name: URL,
+                            source: {
+                                type:'image',
+                                url:  URL,
+                                buildPyramid: false
+                            }
+                        }}
+                    />
                 </Space>
             </Drawer>
         )

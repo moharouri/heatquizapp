@@ -53,8 +53,12 @@ p{
 }
 
 .course-view-map-img{
-    height: 40vh;
+    height: 25vw;
     width: 100%;
     object-fit: contain;
     cursor: pointer;
+}
+
+.map-title{
+    max-width: 25vw;
 }

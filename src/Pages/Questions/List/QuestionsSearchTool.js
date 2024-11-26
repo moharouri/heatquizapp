@@ -5,7 +5,7 @@ import { useTopics } from "../../../contexts/TopicsContext";
 import { useLevelsOfDifficulty } from "../../../contexts/LevelOfDifficultyContext";
 
 import './List.css'
-import { CLICKABLE_QUESTION_PARAMETER, DIAGRAM_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, QUESTION_SEARCH_CRITERIAS, QUESTION_SEARCH_CRITERIA_MEDIAN_TIME, QUESTION_SEARCH_CRITERIA_PLAY_STATS, QUESTION_SEARCH_CRITERIA_QUESTION_TYPES, QUESTION_TYPES_SEARCH_NAMES } from "./constants";
+import { CLICKABLE_QUESTION_PARAMETER, DIAGRAM_QUESTION_PARAMETER, ENERGY_BALANCE_QUESTION_PARAMETER, FBD_QUESTION_PARAMETER, KEYBOARD_QUESTION_PARAMETER, MULTIPLE_CHOICE_QUESTION_PARAMETER, PV_DIAGRAM_QUESTION_PARAMETER, QUESTION_SEARCH_CRITERIAS, QUESTION_SEARCH_CRITERIA_MEDIAN_TIME, QUESTION_SEARCH_CRITERIA_PLAY_STATS, QUESTION_SEARCH_CRITERIA_QUESTION_TYPES, QUESTION_TYPES_SEARCH_NAMES } from "./constants";
 import { useQuestions } from "../../../contexts/QuestionsContext";
 import { GetPagesArray } from "../../../services/Auxillary";
 
@@ -226,6 +226,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             ShowEBQuestions: selectedQuestionTypes.map(a => a.value).includes(ENERGY_BALANCE_QUESTION_PARAMETER),
             ShowFreebodyDiagramQuestions:  selectedQuestionTypes.map(a => a.value).includes(FBD_QUESTION_PARAMETER),
             ShowDiagramQuestions:  selectedQuestionTypes.map(a => a.value).includes(DIAGRAM_QUESTION_PARAMETER),
+            ShowPVDiagramQuestions:  selectedQuestionTypes.map(a => a.value).includes(PV_DIAGRAM_QUESTION_PARAMETER),
             
             SearchBasedOnMedianTime: selectedSearchCriteria.value === QUESTION_SEARCH_CRITERIA_MEDIAN_TIME.value,
 
@@ -267,6 +268,7 @@ export function QuestionsSearchTool({onSetFirstIndex}){
             ShowEBQuestions: true,
             ShowFreebodyDiagramQuestions: true,
             ShowDiagramQuestions: true,
+            ShowPVDiagramQuestions: true,
             
             SearchBasedOnMedianTime: false,
 

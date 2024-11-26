@@ -6,16 +6,24 @@ import {ScheduleTwoTone, CheckCircleFilled, CloseCircleTwoTone, PictureTwoTone, 
 import { UploadImage } from "../../../../Components/UploadImage";
 import { LatexRenderer } from "../../../../Components/LatexRenderer";
 import { FBD_VECTOR_LINEAR, FBD_VECTOR_ROTATIONAL } from "../Shared/Constants";
-import './index.css'
+
 import { AssignAnswersToVectorTerm } from "./AssignAnswersToVectorTerm";
 import { VectorDirectionComponent } from "../Shared/VectorDirectionComponent";
 import { MomentDirectionComponent } from "../Shared/MomentDirectionComponent";
 import { validateKeyboardAnswer } from "../../KeyboardQuestion/Functions";
 import { UploadPDF } from "../../../../Components/UploadPDF";
+import { AddCommentComponent } from "../../../../Components/AddCommentComponent.js/AddCommentComponent";
+import { calculateCPdimensions } from "../ViewEdit/Functions";
+
+import './index.css'
+import { useQuestions } from "../../../../contexts/QuestionsContext";
+import { handleResponse } from "../../../../services/Auxillary";
 
 const { TextArea } = Input;
 
 export function AddFBDQuestion(){
+
+    const {addFBDQuestion, isLoadingAddFBDQuestion,} = useQuestions()
 
     const [api, contextHolder] = message.useMessage()
 
@@ -116,15 +124,17 @@ export function AddFBDQuestion(){
                 dataSource={newParts}
 
                 renderItem={(p, pi) => {
-                    const {Color} = p
+                    const {Color, Comment} = p
 
                     const isHovered = (![null, undefined].includes(hoverElement)) && hoverElement === pi
 
                     return(
                         <div
                             key={pi}
-                            className={"hq-full-width " + (isHovered ? "highlighted" : "") }>
+                            className="hq-full-width add-fbd-item-in-list">
                                 <Space>
+                                    <p className={"default-gray default-large " +  (isHovered ? "highlighted" : "")}>{pi+1}</p>
+
                                     &nbsp;
                                     <Tooltip 
                                         title={<p>Click to remove body</p>}
@@ -150,6 +160,9 @@ export function AddFBDQuestion(){
 
                                                 _newParts = _newParts.filter((a, ai) => ai !== pi)
 
+                                                //Conform Ids
+                                                _newParts = _newParts.map((a, ai) =>({...a, Id: (ai + 1)}))
+
                                                 if(_newParts.length === 1){
                                                     _newParts[0].correct = true
                                                 }
@@ -159,14 +172,32 @@ export function AddFBDQuestion(){
                                             }}
                                         />
                                     </Tooltip>
-                                    &nbsp;
-                                    <p className="default-gray">{pi+1}</p>
-                                    &nbsp;
-                                    &nbsp;
-                                    &nbsp;
                                     
+                                    &nbsp;
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>Click to move</p>}
+                                    >
+                                        <DragOutlined style={{color:'blue', cursor:'pointer'}} onClick={() => {
+                                            if(isAddingElementSecond){
+                                                api.destroy()
+                                                api.warning("Please finish adding")
+                                                return
+                                            }
+
+                                            if(isMovingElement){
+                                                setIsMovingElement(false)
+                                                setMovedElement(null)
+                                                return
+                                            }
+
+                                            setIsMovingElement(true)
+                                            setMovedElement(pi)
+                                        }}/>
+                                    </Tooltip>
+                                    &nbsp;
                                     <Space>
-                                            <ColorPicker
+                                        <ColorPicker
                                                 value={Color}
 
                                                 defaultValue={Color} 
@@ -183,35 +214,19 @@ export function AddFBDQuestion(){
                                             />
                                             <p className="highlighted">{Color}</p>
                                        </Space>
+                                       
                                        &nbsp;
-                                       &nbsp;
-                                       &nbsp;
-                                       &nbsp;
-                                       &nbsp;
-                                       &nbsp;
-                                
-                                <Tooltip
-                                    color="white"
-                                    title={<p>Click to move</p>}
-                                >
-                                    <DragOutlined style={{color:'blue', cursor:'pointer'}} onClick={() => {
-                                        if(isAddingElementSecond){
-                                            api.destroy()
-                                            api.warning("Please finish adding")
-                                            return
-                                        }
+                                       <AddCommentComponent 
+                                        className = "add-fbd-input"
+                                        value={Comment}
+                                        onChange={(v) => {
+                                            let _newParts = [...newParts]
 
-                                        if(isMovingElement){
-                                            setIsMovingElement(false)
-                                            setMovedElement(null)
-                                            return
-                                        }
+                                            _newParts[pi].Comment = v.target.value
 
-                                        setIsMovingElement(true)
-                                        setMovedElement(pi)
-                                    }}/>
-                                </Tooltip>
-                                
+                                            setNewParts(_newParts)
+                                        }}
+                                    />    
                             </Space>
                         <Divider />
                     </div>
@@ -228,117 +243,163 @@ export function AddFBDQuestion(){
                 dataSource={VTs}
 
                 renderItem={(vt, vti) => {
-                    const {Code, Latex, LatexText, Keyboard, Answers, Color, Type, Angle, Clockwise, ObjectBody} = vt 
+                    const {Code, Latex, Comment, LatexText, Keyboard, Answers, Color, Type, Angle, Clockwise, ObjectBody} = vt 
+
+                    const imageWidth = 0.35*window.innerWidth
+                    const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)
+
+                    const smallImageWidth = 0.075 * window.innerWidth;
+                    const smallImageHeight = smallImageWidth * (imageHeight / imageWidth);
+
+                    let dimesions = null
+
+                    if(ObjectBody){
+                        dimesions =  calculateCPdimensions(imageWidth, imageHeight, smallImageWidth, smallImageHeight, ({
+                            X: ObjectBody.x,
+                            Y: ObjectBody.y,
+                            Width: ObjectBody.width,
+                            Height: ObjectBody.height,
+                        }))
+                    }
+
+                   
 
                     return(
-                        <Space
-                            className="hq-full-width"
+                        <div
                             key={vti}
-                            direction="vertical"
-                            align="start"
+                            className="add-fbd-item-in-list"
                         >
-                            <Space>
-                                &nbsp;
-                                <Tooltip 
-                                    title={<p>Click to remove term</p>}
-                                    color="white"
-                                >
-                                        <CloseCircleFilled 
-                                            style={{cursor:'pointer', color:'red'}}
+                                <Space direction="vertical">
+                                    <Space>
+                                    &nbsp;
+                                    <Tooltip 
+                                        title={<p>Click to remove term</p>}
+                                        color="white"
+                                    >
+                                            <CloseCircleFilled 
+                                                style={{cursor:'pointer', color:'red'}}
 
-                                            onClick={() => {
-                                                
+                                                onClick={() => {
+                                                    
+
+                                                    let _terms = [...VTs]
+
+                                                    _terms = _terms.filter((a, ai) => ai !== vti)
+
+                                                    setVTs(_terms)
+
+                                                }}
+                                            />
+                                        </Tooltip>
+                                        &nbsp;
+                                        <p className="default-gray">{vti+1}</p>
+
+                                        <Input 
+                                            type="text"
+                                            value={Code}
+                                            className="add-fbd-input"
+                                            placeholder="Term code (must be unique)"
+                                            onChange={(v) => {
+                                                const value = v.target.value
 
                                                 let _terms = [...VTs]
 
-                                                _terms = _terms.filter((a, ai) => ai !== vti)
+                                                _terms[vti].Code = value
 
                                                 setVTs(_terms)
-
                                             }}
                                         />
-                                    </Tooltip>
-                                    &nbsp;
-                                    <p className="default-gray">{vti+1}</p>
+                                    </Space>
+                                    <Space>
+                                        &nbsp;
+                                        <div className="add-fbd-question-hide-element">
+                                            <Tooltip>
+                                            <CloseCircleFilled />
+                                            </Tooltip>
+                                        </div>
+                                        &nbsp;
+                                        <p className="default-white">{vti+1}</p>
+                                        <Input 
+                                            type="text"
+                                            value={Latex}
+                                            className="add-fbd-input"
+                                            placeholder="Latex code (must be unique)"
+                                            onChange={(v) => {
+                                                const value = v.target.value
 
-                                    <Input 
-                                        type="text"
-                                        value={Code}
-                                        className="add-fbd-input"
-                                        placeholder="Term code (must be unique)"
-                                        onChange={(v) => {
-                                            const value = v.target.value
+                                                let _terms = [...VTs]
 
-                                            let _terms = [...VTs]
+                                                _terms[vti].Latex = value
 
-                                            _terms[vti].Code = value
+                                                setVTs(_terms)
+                                            }}
+                                        />
 
-                                            setVTs(_terms)
-                                        }}
-                                    />
+                                        <LatexRenderer latex={"$$" + Latex + "$$"}/>
+                                    </Space>
+                                    <Space>
+                                        &nbsp;
+                                        <div className="add-fbd-question-hide-element">
+                                            <Tooltip>
+                                            <CloseCircleFilled />
+                                            </Tooltip>
+                                        </div>
+                                        &nbsp;
+                                        <p className="default-white">{vti+1}</p>
+                                        <Input 
+                                            type="text"
+                                            value={Comment}
+                                            className="add-fbd-input"
+                                            placeholder="Comment"
+                                            onChange={(v) => {
+                                                const value = v.target.value
+
+                                                let _terms = [...VTs]
+
+                                                _terms[vti].Comment = value
+
+                                                setVTs(_terms)
+                                            }}
+                                        />
+
+                                    </Space>
+                                    <Space>
+                                        &nbsp;
+                                        <div className="add-fbd-question-hide-element">
+                                            <Tooltip>
+                                            <CloseCircleFilled />
+                                            </Tooltip>
+                                        </div>
+                                        &nbsp;
+                                        <p className="default-white">{vti+1}</p>
+                                        <div>
+                                        <Space>
+                                                <p className="default-gray">Color</p>
+                                                <ColorPicker
+                                                    value={Color}
+
+                                                    defaultValue={Color} 
+
+                                                    onChange={(c, h) => {
+                                                        let _terms = [...VTs]
+
+                                                        _terms[vti].Color = h
+
+                                                        setVTs(_terms)
+                                                    }}
+
+                                                    showText = {true}
+                                                />
+                                                <p className="highlighted">{Color}</p>
+                                        </Space>
+
+                                        </div>
+                                    
+                                    </Space>
                                 </Space>
-                                <Space>
-                                    &nbsp;
-                                    <div className="add-fbd-question-hide-element">
-                                        <Tooltip>
-                                        <CloseCircleFilled />
-                                        </Tooltip>
-                                    </div>
-                                    &nbsp;
-                                    <p className="default-white">{vti+1}</p>
-                                    <Input 
-                                        type="text"
-                                        value={Latex}
-                                        className="add-fbd-input"
-                                        placeholder="Latex code (must be unique)"
-                                        onChange={(v) => {
-                                            const value = v.target.value
 
-                                            let _terms = [...VTs]
+                                <Divider/>
 
-                                            _terms[vti].Latex = value
-
-                                            setVTs(_terms)
-                                        }}
-                                    />
-
-                                    <LatexRenderer latex={"$$" + Latex + "$$"}/>
-                                </Space>
-                                <Space>
-                                    &nbsp;
-                                    <div className="add-fbd-question-hide-element">
-                                        <Tooltip>
-                                        <CloseCircleFilled />
-                                        </Tooltip>
-                                    </div>
-                                    &nbsp;
-                                    <p className="default-white">{vti+1}</p>
-                                    <div>
-                                       <Space>
-                                            <p className="default-gray">Color</p>
-                                            <ColorPicker
-                                                value={Color}
-
-                                                defaultValue={Color} 
-
-                                                onChange={(c, h) => {
-                                                    let _terms = [...VTs]
-
-                                                    _terms[vti].Color = h
-
-                                                    setVTs(_terms)
-                                                }}
-
-                                                showText = {true}
-                                            />
-                                            <p className="highlighted">{Color}</p>
-                                       </Space>
-
-                                    </div>
-                                   
-                                </Space>
-
-                                <br/>
                                 <p className="default-gray">Latex text (optional)</p>
                                 <TextArea 
                                     value={LatexText}
@@ -355,20 +416,22 @@ export function AddFBDQuestion(){
                                     className="add-fbd-input"
                                     />
                                 <LatexRenderer latex={LatexText || ""}/>
-                                <br/>
-                                <p className="default-gray">Answers</p>
-                                <p className="hq-clickable hoverable-plus highlighted"
-                                    onClick={() => {
-                                        setShowAddVTAnswers(true)
-                                        setSelectedVTIndex(vti)
-                                        setSelectedVT(vt)
-                                    }}
-                                >Set keyboard/answers</p>
-                                {Keyboard && 
-                                <Space>
-                                    <InsertRowAboveOutlined />
-                                    <p> {Keyboard.Name} </p>
-                                </Space>}
+                                <Divider/>
+                                <Space size="large">
+                                    <p className="default-gray">Answers (optional)</p>
+                                    <p className="hq-clickable hoverable-plus highlighted"
+                                        onClick={() => {
+                                            setShowAddVTAnswers(true)
+                                            setSelectedVTIndex(vti)
+                                            setSelectedVT(vt)
+                                        }}
+                                    >Set keyboard/answers</p>
+                                    {Keyboard && 
+                                    <Space>
+                                        <InsertRowAboveOutlined />
+                                        <p> {Keyboard.Name} </p>
+                                    </Space>}
+                                </Space>
                                 {Answers.map((ans, ans_i) => {
                                                 const {List} = ans 
                                                 const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
@@ -405,8 +468,10 @@ export function AddFBDQuestion(){
                                                     </div>
                                                 )
                                             })}
+
+                            <Divider/>
                             <p className="default-gray">Type</p>
-                            <Space size={"large"} align="center">
+                            <Space size={"large"} align="start">
                                 <Select 
                                     value={Type}
                                     onChange={(v) => {
@@ -450,28 +515,72 @@ export function AddFBDQuestion(){
                                 />}
                             </Space>
                             <p className="default-gray">Association</p>
-                            <Select 
-                                value={(ObjectBody || {}).Id}
-                                onChange={(v) => {
-                                    let _terms = [...VTs]
+                            <Space align="start">
+                                <Select 
+                                    value={(ObjectBody || {}).Id}
+                                    onChange={(v) => {
+                                        let _terms = [...VTs]
 
-                                    const ob = newParts[v]
+                                        const ob = newParts.filter(p => p.Id === v)[0]
+                                        _terms[vti].ObjectBody = ob
 
-                                    _terms[vti].ObjectBody = ob
+                                        setVTs(_terms)                                
+                                    }}
 
-                                    setVTs(_terms)                                
-                                }}
+                                    className="add-fbd-vt-term-type"
+                                >
+                                    {newParts.map((p, pi) => {
+                                        const {Color: obColor, Id} = p                                      
 
-                                className="add-fbd-vt-term-type"
-                            >
-                                {newParts.map((p, pi) => {
-                                    return(
-                                        <Select.Option value={pi}>Object #{pi+1}</Select.Option>
-                                    )
-                                })}
-                                
-                            </Select>
-                        </Space>
+                                        const dimesions =  calculateCPdimensions(imageWidth, imageHeight, smallImageWidth, smallImageHeight, ({
+                                            X: p.x,
+                                            Y: p.y,
+                                            Width: p.width,
+                                            Height: p.height,
+                                        }))
+                                        
+                                        return(
+                                            <Select.Option value={Id}>
+                                            <div 
+                                                style = {{
+                                                    height:smallImageHeight,
+                                                    width: smallImageWidth,
+                                                    backgroundImage: `url(${newImageURL})`,
+                                                    backgroundPosition:'center',
+                                                    backgroundRepeat:'no-repeat',
+                                                    backgroundSize:'contain',
+                                                    border:'1px solid gainsboro'
+                                                }}
+                                            >
+                                                <div style={{...dimesions, position:'relative', border:'1px solid #28a745' }}>
+                                                    <div style={{width:'100%', height:'100%', backgroundColor:obColor,}}></div>
+                                                </div>    
+                                            </div>
+                                        </Select.Option>
+                                        )
+                                    })}
+                                    
+                                </Select>
+                                {ObjectBody && 
+                                <div 
+                                    style = {{
+                                        height:smallImageHeight,
+                                        width: smallImageWidth,
+                                        backgroundImage: `url(${newImageURL})`,
+                                        backgroundPosition:'center',
+                                        backgroundRepeat:'no-repeat',
+                                        backgroundSize:'contain',
+                                        border:'1px solid gainsboro'
+                                    }}
+                                >
+                                    <div style={{...dimesions, position:'relative', border:'1px solid #28a745' }}>
+                                        <div style={{width:'100%', height:'100%', backgroundColor:ObjectBody.Color,}}></div>
+                                    </div>    
+                                </div>
+                                }
+                                {ObjectBody && <p className="default-gray">Object #{ObjectBody.Id}</p>}
+                            </Space>
+                        </div>
                     )
                 }}
             />
@@ -580,13 +689,15 @@ export function AddFBDQuestion(){
                             if(!isAddingElementSecond){
 
                                 let newPart = ({
+                                    Id: newParts.length + 1,
                                     x: pageX - left + offset,
                                     y: pageY - top,
                                     offsetX: offset,
                                     width: 1,
                                     height: 1,
                                     correct: !newParts.length,
-                                    Color: '#00FF00',
+                                    Color: '#00ff0029',
+                                    Comment: ''
                                 })
 
 
@@ -728,9 +839,10 @@ export function AddFBDQuestion(){
                                         Code:'',
                                         Latex:'',
                                         LatexText:'',
+                                        Comment:'',
                                         Color: '#00FF00',
 
-                                        ObjectBody:[],
+                                        ObjectBody:null,
 
                                         Keyboard: null,
                                         Answers:[],
@@ -811,17 +923,20 @@ export function AddFBDQuestion(){
 
                 Color: cp.Color,
 
+                Comment: cp.Comment,
+
                 VectorTerms: VTs
                 .filter((t) => t.ObjectBody.Id === cp.Id)
                 .map((t,ti) => ({
                     Code: t.Code,
-                    LaTex: t.LaTeXCode,
-                    LaTexText: t.LaTeXText, 
+                    Latex: t.Latex,
+                    Comment: t.Comment,
+                    LatexText: t.LatexText, 
                     ArrowColor: t.Color,
 
                     KeyboardId: t.Keyboard.Id,
 
-                    Linear: t.Type.Type == FBD_VECTOR_LINEAR,
+                    Linear: t.Type === FBD_VECTOR_LINEAR,
                     Angle: t.Angle,
                     Clockwise: t.Clockwise,
 
@@ -840,6 +955,8 @@ export function AddFBDQuestion(){
         })))
 
         data.append('ObjectBodies',JSON.stringify(OBs_VM))
+
+        addFBDQuestion(data).then(r => handleResponse(r, api, 'Added Successfully', 1))
 
     }
 
@@ -874,7 +991,7 @@ export function AddFBDQuestion(){
                             type="primary"
                             size="small" 
                             onClick={addQuestionClick}
-                            loading={false}
+                            loading={isLoadingAddFBDQuestion}
                         >
                             Add question
                         </Button>
@@ -909,24 +1026,27 @@ export function AddFBDQuestion(){
     }
 
     const validateQuestionContent = () => {
-        if(!questionBody.trim()) return "Add question body"
+        if(!questionBody.trim()) return "Add question body";
 
-        if(!newParts.length) return "Please add at least one object body"
+        if(!newParts.length) return "Please add at least one object body";
 
-        if(!VTs.length) return "Please add terms"
+        if(!VTs.length) return "Please add terms";
 
-        if(VTs.filter(a => !a.Code.trim()).length) return "Atleast one terms has no code"
-        if(VTs.filter(a => !a.Latex.trim()).length) return "Atleast one terms has no LaTeX code"
+        if(VTs.filter(a => !a.Code.trim()).length) return "Atleast one terms has no code";
+        if(VTs.filter(a => !a.Latex.trim()).length) return "Atleast one terms has no LaTeX code";
 
-        if(VTs.filter(a => !a.Keyboard).length) return "Atleast one terms has no a question with no Keyboard"
+        /*if(VTs.filter(a => !a.Keyboard).length) return "Atleast one terms has no a question with no Keyboard"
         if(VTs.filter(a =>!a.Answers.length).length) return "Atleast one terms has no  answers"
         if(VTs.filter(a =>a.Answers.filter(x => validateKeyboardAnswer(x)).length).length) return "Atleast one terms has invalid answer(s)"
+        */
 
-        if(VTs.filter(a => !a.ObjectBody).length) return "Atleast one terms has no association"
+        //In case answers are added
+        if(VTs.filter(a => a.Keyboard && !a.Answers.length).length) return "Atleast one terms has no  answers";
+        if(VTs.filter(a =>a.Keyboard && a.Answers.filter(x => validateKeyboardAnswer(x)).length).length) return "Atleast one terms has invalid answer(s)";
 
+        if(VTs.filter(a => !a.ObjectBody).length) return "Atleast one terms has no association";
 
         return null
-
     }
 
     const selectImageValidation = validateAddImage()

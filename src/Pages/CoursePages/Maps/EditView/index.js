@@ -5,7 +5,7 @@ import { useMaps } from "../../../../contexts/MapsContext";
 import { useEffect } from "react";
 import { Alert, Button, Col, Collapse, Divider, Dropdown, Input, List, Modal, Popconfirm, Row, Skeleton, Space, Spin, Tabs, Tooltip, message } from "antd";
 import { FixURL, beautifyDate, beautifyNumber, handleResponse } from "../../../../services/Auxillary";
-import { FilePdfOutlined, LinkOutlined, PlusOutlined, AimOutlined, SelectOutlined, TrophyOutlined, EyeOutlined, ClockCircleOutlined, DashboardOutlined, CaretRightOutlined, EditOutlined, BlockOutlined, NodeExpandOutlined , DeleteOutlined, NodeIndexOutlined} from '@ant-design/icons';
+import { FilePdfOutlined, LinkOutlined, PictureOutlined, PlusOutlined, AimOutlined, PrinterOutlined, SelectOutlined, TrophyOutlined, EyeOutlined, ClockCircleOutlined, DashboardOutlined, CaretRightOutlined, EditOutlined, BlockOutlined, NodeExpandOutlined , DeleteOutlined, NodeIndexOutlined} from '@ant-design/icons';
 
 import './index.css'
 import { useState } from "react";
@@ -23,6 +23,9 @@ import { AssignBadgesToElement } from "./AssignBadgesToElement";
 import { AttachMapToElement } from "./AttachMapToElement";
 import { AssignClickImagesListGroup } from "./AssignClickImagesListGroup";
 import { ReassignMap } from "./ReassignMap";
+
+import { MapPDFModal } from "../../Shared/MapPDFModal";
+import { EditMapImage } from "./EditMapImage";
 
 export function MapEditView(){
 
@@ -71,6 +74,7 @@ export function MapEditView(){
     const [showEditMapModal, setShowEditMapModal] = useState(false)
     const [showAddBadgeSystemModal, setShowAddBadgeSystemModal] = useState(false)
     const [showReassignMapModal, setShowReassignMapModal] = useState(false)
+    const [showEditMapImage, setShowEditMapImage] = useState(false)
 
     const [showPlaySeriesModal, setShowPlaySeriesModal] = useState(false)
     const [selectedSeries, setSelectedSeries] = useState({Code:''})
@@ -106,6 +110,7 @@ export function MapEditView(){
     const [showAddBadgeEntity, setShowAddBadgeEntity] = useState(false)
     const [showAssignBadgesElement, setShowAssignBadgesElement] = useState(false)
 
+    const [showExportMap, setShowExportMap] = useState(false)
 
     const [api, contextHolder] = message.useMessage()
 
@@ -148,6 +153,12 @@ export function MapEditView(){
                                     }
                                 },
                                 {
+                                    key:'edit_map_image',
+                                    label:'Update map image',
+                                    icon: <PictureOutlined style={{color:'green'}}/> ,
+                                    onClick: () => setShowEditMapImage(true)
+                                },
+                                {
                                     key:'copy_map',
                                     label:'Copy map',
                                     icon: <BlockOutlined  /> ,
@@ -184,6 +195,12 @@ export function MapEditView(){
                                     label:'Assign map pop-up icons to elements',
                                     icon: <AimOutlined/> ,
                                     onClick: () => setShowAssignClickImagesListGroup(true)
+                                },
+                                {
+                                    key:'export_map_as_pdf',
+                                    label:'Export map as pdf',
+                                    icon: <PrinterOutlined /> ,
+                                    onClick: () => setShowExportMap(true)
                                 }],
                                 title:"Actions"
                             }}
@@ -521,6 +538,14 @@ export function MapEditView(){
                                                 setNewTitle(Title)
                                                 setShowEditTitle(true)
                                                 setEditBadgeSystem(false)
+                                            }
+                                        },
+                                        {
+                                            key:'redraw_element',
+                                            label:'Redraw Element',
+                                            icon:<EditOutlined />,
+                                            onClick: () => {
+                                                
                                             }
                                         },
                                         {
@@ -1441,6 +1466,13 @@ export function MapEditView(){
                 reloadMap = {() => loadData()}
             />
 
+            <EditMapImage 
+                open={showEditMapImage}
+                onClose={() => setShowEditMapImage(false)}
+                map={mapExtended}
+                reloadMap = {() => loadData()}
+            />
+
             <AddBadgeSystem 
                 open={showAddBadgeSystemModal}
                 onClose={() => setShowAddBadgeSystemModal(false)}
@@ -1576,6 +1608,13 @@ export function MapEditView(){
 
                 map={mapExtended}
                 reloadMap={() => loadData()}
+            />
+
+            <MapPDFModal
+                open={showExportMap}
+                onClose={() => setShowExportMap(false)}
+
+                map={mapExtended}
             />
 
             {editTitleModal()}

@@ -4,10 +4,7 @@ const Algebrite = require('algebrite')
 
 //Function check if the answer is the correct answer
 export const checkKeyboardAnswerIsCorrect = (answer, possibleAnswers, isEnergyBalance) => {
-    console.log(answer)
     let currentAnswer = answer.List.reduce((b,a) => b += a.char, '')
-    console.log(currentAnswer)
-    console.log(possibleAnswers)
 
     let _possibleAnswers = possibleAnswers
     .sort((a,b) => a.Id > b.Id ? 1 : -1)
@@ -30,13 +27,8 @@ export const checkKeyboardAnswerIsCorrect = (answer, possibleAnswers, isEnergyBa
                         
             correct = (SafeSimplify(`(${KEquivalent_Answer})-(${CEquivalent_Answer})`)) === '0'
 
-            console.log(KEquivalent_Answer, CEquivalent_Answer, "correct1 =" + correct, SafeSimplify(`(${KEquivalent_Answer})-(${CEquivalent_Answer})`))
-
             if(!correct){
                 correct = (SafeSimplify(`(${KEquivalent_Answer})+(${CEquivalent_Answer})`)) === '0'
-
-                console.log(KEquivalent_Answer, CEquivalent_Answer, "correct2 =" + correct, SafeSimplify(`(${KEquivalent_Answer})+(${CEquivalent_Answer})`))
-
             }
         }
         else{
@@ -46,6 +38,42 @@ export const checkKeyboardAnswerIsCorrect = (answer, possibleAnswers, isEnergyBa
         return({
             correct: correct, 
             index: i
+        })
+    })
+
+    let finaCorrect = false
+
+    for(let a of _possibleAnswers){
+        finaCorrect = finaCorrect || a.correct
+    }
+
+    return({
+        answerStatus: finaCorrect,
+        possibleAnswers: _possibleAnswers.filter(a => a.correct).map((a) => a.index),
+    })
+
+}
+
+export const checkKeyboardAnswerIsCorrectEnergyBalanceQuestionTermsOnly = (answer, possibleAnswers, isFlipped) => {
+    let currentAnswer = answer.List.reduce((b,a) => b += a.char, '')
+
+    let _possibleAnswers = possibleAnswers
+    .sort((a,b) => a.Id > b.Id ? 1 : -1)
+    .map((a, i) => {
+        let correct = false
+
+        if(!isFlipped){
+            // A - B =? 0
+            correct = (SafeSimplify(`(${a.AnswerElements.reduce((b,a) => b += a.IsInteger ? a.TextPresentation : a.Value, '')})-(${currentAnswer})`)) === '0'
+        }
+        else{
+            // -A - B =? 0 => A + B =? 0
+            correct = (SafeSimplify(`(${a.AnswerElements.reduce((b,a) => b += a.IsInteger ? a.TextPresentation : a.Value, '')})+(${currentAnswer})`)) === '0'
+        }
+        
+        return({
+            correct: correct, 
+            index: i,
         })
     })
 

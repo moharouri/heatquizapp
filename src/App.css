@@ -49,6 +49,10 @@
     color: #0275d8;
 }
 
+.default-underline{
+    text-decoration: underline;
+}
+
 .default-title{
     color: #0275d8;
     width: fit-content;
@@ -99,6 +103,11 @@
 .default-smaller{
     font-size: smaller;
 }
+
+.default-smallest{
+    font-size: x-small;
+}
+
 
 .default-medium{
     font-size: medium;
@@ -259,4 +268,16 @@
 
 .hq-question-action-line{
     min-width: 300px;
+}
+
+.hq-shortened-text{
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.div.is-disabled{
+    pointer-events: none;
+    opacity: 0.7;
 }

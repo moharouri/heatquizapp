@@ -95,9 +95,9 @@ export function CourseView(){
                         gutter: 16,
                         xs: 1,
                         sm: 2,
-                        md: 4,
-                        lg: 4,
-                        xl: 6,
+                        md: 3,
+                        lg: 3,
+                        xl: 3,
                         xxl: 3,
                     }}
                     dataSource={Course.CourseMaps}
@@ -125,23 +125,26 @@ export function CourseView(){
                         return(
                             <List.Item>
                                 <div className="map-box">
-                                    <Space 
-                                        direction="vertical"
-                                        className="map-box-internal">
-                                        <Space>
+                                    <div className="map-box-internal">
+                                        <Space align="start">
                                             <p>{mi+1}</p>
 
-                                            <Dropdown
-                                                menu={{
-                                                        items:mapActionsDropdownList,
-                                                        title:'Actions'
-                                                    }}
-                                            >
-                                                	<p className="hoverable-plus">{m.Title}</p>
-                                            </Dropdown>
+                                            <div>
+                                                <Dropdown
+                                                    menu={{
+                                                            items:mapActionsDropdownList,
+                                                            title:'Actions'
+                                                        }}
+                                                >
+                                                        <p 
+                                                        title={m.Title}
+                                                        className="hoverable-plus hq-shortened-text map-title">{m.Title}</p>
+                                                </Dropdown>
+                                                <p>{m.DateCreated.substring(0,10)}</p>
+                                            </div>
                                         </Space>
-                                        <p>{m.DateCreated.substring(0,10)}</p>
-                                    </Space>
+                                        
+                                    </div>
                                     <img 
                                         src={m.LargeMapURL}
                                         alt={m.Title}

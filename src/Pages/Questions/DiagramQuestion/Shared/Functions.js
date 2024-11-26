@@ -128,7 +128,7 @@ export const drawLine = (ctx, x1, y1, x2, y2, color, width=1,  dashed = false) =
     ctx.lineTo(x2, y2);
 
     ctx.strokeStyle = color;
-    ctx.lineWidth = width 
+    ctx.lineWidth = width;
 
     if(dashed) ctx.setLineDash([5, 3])
 
@@ -141,7 +141,8 @@ export const drawCircle = (ctx, x,y, r, color, fillColor) => {
     ctx.arc(x, y, r, 0, 2 * Math.PI);
 
     ctx.strokeStyle = color|| '#007399';
-    ctx.fillStyle = fillColor|| '#007399'
+    ctx.fillStyle = fillColor|| '#007399';
+    ctx.lineWidth = 1 
 
     ctx.fill();
     ctx.stroke();
@@ -185,10 +186,10 @@ export const drawCurveOneCP = (
     ctx,
     x1,y1, x2, y2,
     cx, cy,
-    color, width = 1) => 
+    color, width) => 
 {
-    ctx.lineWidth = width 
-    ctx.strokeStyle = color || '#006080';
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
     
     ctx.beginPath();
     ctx.moveTo(x1, y1);

@@ -15,6 +15,7 @@ import { AssignAnswersToQuestion } from "./AssignAnswersToQuestion";
 import { UploadPDF } from "../../../../Components/UploadPDF";
 import { useQuestions } from "../../../../contexts/QuestionsContext";
 import { handleResponse } from "../../../../services/Auxillary";
+import { AddCommentComponent } from "../../../../Components/AddCommentComponent.js/AddCommentComponent";
 const { TextArea } = Input;
 
 export function AddEnergyBalanceQuestion(){
@@ -121,12 +122,13 @@ export function AddEnergyBalanceQuestion(){
                     dataSource={newParts}
 
                     renderItem={(p, pi) => {
-                        const {correct} = p
+                        const {correct, comment} = p
                         return(
                             <div
                             key={pi}
                             className="hq-full-width">
                                 <Space>
+                                    <p className="default-red default-large">{pi+1}</p>
                                     &nbsp;
                                     <Tooltip 
                                         title={<p>Click to remove control volume</p>}
@@ -162,8 +164,32 @@ export function AddEnergyBalanceQuestion(){
                                         />
                                     </Tooltip>
                                     &nbsp;
-                                    <p className="default-gray">{pi+1}</p>
-                                        
+                                    <Tooltip
+                                        color="white"
+                                        title={<p>Click to move</p>}
+                                    >
+                                        <DragOutlined style={{color:'blue', cursor:'pointer'}} onClick={() => {
+                                            if(isAddingElementSecond){
+                                                api.destroy()
+                                                api.warning("Please finish adding")
+                                                return
+                                            }
+
+                                            if(isMovingElement){
+                                                setIsMovingElement(false)
+                                                setMovedElement(null)
+                                                return
+                                            }
+
+                                            setIsMovingElement(true)
+                                            setMovedElement(pi)
+                                        }}/>
+                                    </Tooltip>
+                                    &nbsp;    
+                                <Tooltip
+                                    color="white"
+                                    title={<p>Click to set as correct</p>}
+                                >
                                     <div className="add-eb-question-correct-field">
                                     <p
                                         onClick={() => {
@@ -179,29 +205,19 @@ export function AddEnergyBalanceQuestion(){
                                             {correct ? "Correct" : "Incorrect"}
                                     </p>
                                 </div>
-                                
-                                <Tooltip
-                                    color="white"
-                                    title={<p>Click to move</p>}
-                                >
-                                    <DragOutlined style={{color:'blue', cursor:'pointer'}} onClick={() => {
-                                        if(isAddingElementSecond){
-                                            api.destroy()
-                                            api.warning("Please finish adding")
-                                            return
-                                        }
-
-                                        if(isMovingElement){
-                                            setIsMovingElement(false)
-                                            setMovedElement(null)
-                                            return
-                                        }
-
-                                        setIsMovingElement(true)
-                                        setMovedElement(pi)
-                                    }}/>
                                 </Tooltip>
-                                
+                                &nbsp;    
+                                <AddCommentComponent 
+                                    className = "add-eb-question-comment-input"
+                                    value={comment}
+                                    onChange={(v) => {
+                                        let _newParts = [...newParts]
+
+                                        _newParts[pi].comment = v.target.value
+
+                                        setNewParts(_newParts)
+                                    }}
+                                />                                
                             </Space>
                         <Divider />
                     </div>
@@ -251,7 +267,7 @@ export function AddEnergyBalanceQuestion(){
                     dataSource={ebTerms}
                     
                     renderItem={(t, ti) => {
-                        const {Code, Latex, LatexText, North, South, East, West, Center, IsDummy, Questions} = t 
+                        const {Code, Latex, LatexText, North, South, East, West, Center, IsDummy, Questions, comment} = t 
                         return(
                             <Space
                                 key={ti}
@@ -327,8 +343,31 @@ export function AddEnergyBalanceQuestion(){
 
                                     <LatexRenderer latex={"$$" + Latex + "$$"}/>
                                 </Space>
+                                <Space>
+                                    &nbsp;
+                                    <div className="add-eb-question-hide-element">
+                                        <Tooltip>
+                                        <CloseCircleFilled />
+                                        </Tooltip>
+                                    </div>
+                                    &nbsp;
+                                    <p className="default-white">{ti+1}</p>
+                                    <AddCommentComponent 
+                                        className = "add-eb-question-comment-input"
+                                        value={comment}
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...ebTerms]
+
+                                            _terms[ti].comment = value
+
+                                            setEbTerms(_terms)
+                                        }}
+                                    />
+                                </Space>
                                 <br/>
-                                <p className="default-gray">Latex text (optional)</p>
+                                <p className="default-gray">Instruction for definition (optional)</p>
                                 <TextArea 
                                     value={LatexText}
                                     onChange={(v) => {
@@ -392,7 +431,8 @@ export function AddEnergyBalanceQuestion(){
                                             _terms[ti].Questions.push({
                                                 Latex:'',
                                                 Keyboard: null,
-                                                Answers: []
+                                                Answers: [],
+                                                Inflow: true
                                             })
 
                                             setEbTerms(_terms)
@@ -401,10 +441,10 @@ export function AddEnergyBalanceQuestion(){
 
                                 </Space>
                                 {Questions.map((q, qi) => {
-                                    const {Keyboard, Latex, Answers} = q
+                                    const {Keyboard, Latex, Answers, Inflow} = q
 
                                     return(
-                                        <div key={qi}>
+                                        <div key={qi} className="add-eb-question-term-question">
                                             <Space>
                                                 &nbsp;
                                                 <Tooltip 
@@ -427,6 +467,34 @@ export function AddEnergyBalanceQuestion(){
                                                     </Tooltip>
                                                     &nbsp;
                                                     <p className="default-gray">{qi+1}</p>
+                                                    &nbsp;
+                                                    
+                                                    <div
+                                                        onClick={(v) => {
+                                                            let _terms = [...ebTerms]
+
+                                                            _terms[ti].Questions[qi].Inflow = true
+
+                                                            setEbTerms(_terms)
+                                                        }}
+                                                        className={"hq-clickable " + (!Inflow ? "eb-question-term-direction-inactive" : "eb-question-term-direction-green")}>
+                                                            <span className="eb-question-term-word">Inflow</span>
+                                                        </div>
+
+                                                        <div 
+                                                        onClick={(v) => {
+                                                            let _terms = [...ebTerms]
+
+                                                            _terms[ti].Questions[qi].Inflow = false
+
+                                                            setEbTerms(_terms)
+                                                        }}
+                                                        className={"hq-clickable " + (Inflow ? "eb-question-term-direction-inactive" : "eb-question-term-direction-red")}>
+                                                            <span className="eb-question-term-word">Outflow</span>
+                                                    </div>
+                                                    &nbsp;
+                                                    &nbsp;
+
                                                     <Input 
                                                         type="text"
                                                         value={Latex}
@@ -445,61 +513,65 @@ export function AddEnergyBalanceQuestion(){
 
                                                     <LatexRenderer latex={"$$" + Latex + "$$"}/>
                                                                     
-                                                </Space>
-
-                                                    
+                                            </Space>
+                                            <br/> 
+                                            <br/>                                                    
+                                            <Space size="large" align="start">
                                                 <p className="hq-clickable hoverable-plus"
-                                                        onClick={() => {
-                                                            setShowAddQAnswers(true)
-                                                            setSelectedQuestion(q)
-                                                            setSelectedBCTermIndex(ti)
-                                                            setSelectedBCQuestionIndex(qi)
-                                                        }}
-                                                    >Set answers</p>
-
-                                            {Keyboard && 
-                                            <Space>
-                                                <InsertRowAboveOutlined />
-                                                <p> {Keyboard.Name} </p>
-                                            </Space>}
-
-                                            {Answers.map((ans, ans_i) => {
-                                                const {List} = ans 
-                                                const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
-                        
-                                                return(
-                                                    <div
-                                                        key={ans_i}
-                                                        className="hq-full-width"
+                                                    onClick={() => {
+                                                        setShowAddQAnswers(true)
+                                                        setSelectedQuestion(q)
+                                                        setSelectedBCTermIndex(ti)
+                                                        setSelectedBCQuestionIndex(qi)
+                                                    }}
                                                     >
-                                                        <Space>
-                                                            &nbsp;
-                                                            <Tooltip 
-                                                                title={<p>Click to remove answer</p>}
-                                                                color="white"
+                                                    Set answers
+                                                </p>
+                                                
+                                                <div>
+                                                {Keyboard && 
+                                                <Space>
+                                                    <InsertRowAboveOutlined />
+                                                    <p> {Keyboard.Name} </p>
+                                                </Space>}
+                                                <br/>
+                                                {Answers.map((ans, ans_i) => {
+                                                        const {List} = ans 
+                                                        const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
+                                
+                                                        return(
+                                                            <div
+                                                                key={ans_i}
+                                                                className="hq-full-width"
                                                             >
-                                                                <CloseCircleFilled 
-                                                                    style={{cursor:'pointer', color:'red'}}
-                        
-                                                                    onClick={() => {
-                                                                        let _terms = [...ebTerms]
-                        
-                                                                        _terms[ti].Questions[qi].Answers = 
-                                                                        _terms[ti].Questions[qi].Answers.filter((a, ai) => ans_i !== ai)
+                                                                <Space>
+                                                                    <Tooltip 
+                                                                        title={<p>Click to remove answer</p>}
+                                                                        color="white"
+                                                                    >
+                                                                        <CloseCircleFilled 
+                                                                            style={{cursor:'pointer', color:'red'}}
+                                
+                                                                            onClick={() => {
+                                                                                let _terms = [...ebTerms]
+                                
+                                                                                _terms[ti].Questions[qi].Answers = 
+                                                                                _terms[ti].Questions[qi].Answers.filter((a, ai) => ans_i !== ai)
 
-                                                                        setEbTerms(_terms)
-                                                                    }}
-                                                                />
-                                                            </Tooltip>
-                                                            &nbsp;
-                                                            <p>{ans_i+1}</p>
-                                                            &nbsp;
-                                                            <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
-                                                        </Space>
-                                                    </div>
-                                                )
-                                            })}
-                                            
+                                                                                setEbTerms(_terms)
+                                                                            }}
+                                                                        />
+                                                                    </Tooltip>
+                                                                    &nbsp;
+                                                                    <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
+                                                                </Space>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </Space>
+
+                                           
                                         </div>
                                     )
                                 })}
@@ -549,7 +621,7 @@ export function AddEnergyBalanceQuestion(){
                     dataSource={bcTerms}
 
                     renderItem={(bc, bci) => {
-                        const {List} = bc 
+                        const {List, comment} = bc 
                         const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
                         return(
@@ -580,6 +652,19 @@ export function AddEnergyBalanceQuestion(){
                                     &nbsp;
                                     <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
                                 </Space>
+                                <AddCommentComponent 
+                                        className = "add-eb-question-comment-input"
+                                        value={comment}
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...bcTerms]
+
+                                            _terms[bci].comment = value
+
+                                            setBCTerms(_terms)
+                                        }}
+                                    />
                             </div>
                         )
                     }}
@@ -625,7 +710,7 @@ export function AddEnergyBalanceQuestion(){
                     dataSource={icTerms}
 
                     renderItem={(bc, bci) => {
-                        const {List} = bc 
+                        const {List, comment} = bc 
 
                         const reducedLatex = List.reduce((a,b) => a += ' ' + (b.code === '*' ? '\\cdot': b.code), '') || '-'
 
@@ -657,6 +742,19 @@ export function AddEnergyBalanceQuestion(){
                                     &nbsp;
                                     <LatexRenderer latex={"$$" +  reducedLatex + "$$"} />
                                 </Space>
+                                <AddCommentComponent 
+                                        className = "add-eb-question-comment-input"
+                                        value={comment}
+                                        onChange={(v) => {
+                                            const value = v.target.value
+
+                                            let _terms = [...icTerms]
+
+                                            _terms[bci].comment = value
+
+                                            setICTerms(_terms)
+                                        }}
+                                    />
                             </div>
                         )
                     }}
@@ -682,6 +780,7 @@ export function AddEnergyBalanceQuestion(){
 
         if(ebTerms.filter(a => !a.Code.trim()).length) return "Atleast one terms has no code"
         if(ebTerms.filter(a => !a.Latex.trim()).length) return "Atleast one terms has no LaTeX code"
+        if(!ebTerms.filter(a => !a.IsDummy).length) return "Atleast one non-dummy term should exist"
 
         if(ebTerms.filter(a => !a.Questions.length).length) return "Atleast one terms has no questions"
         if(ebTerms.filter(a => a.Questions.filter(q => !q.Latex.trim()).length).length) return "Atleast one terms has no a question with no LaTeX code"
@@ -1060,7 +1159,6 @@ export function AddEnergyBalanceQuestion(){
 
         const imageWidth = 0.35*window.innerWidth
         const imageHeight = ((newImageHeight*imageWidth)/newImageWidth)       
-        
 
         //Meta data
         const data = new FormData()
@@ -1087,7 +1185,8 @@ export function AddEnergyBalanceQuestion(){
             Width: Math.trunc(cp.width),
             Height: Math.trunc(cp.height),
             
-            Correct: cp.correct
+            Correct: cp.correct,
+            Comment: cp.comment
         })))
 
         data.append('ControlVolumes',JSON.stringify(CVs_VM))
@@ -1096,7 +1195,8 @@ export function AddEnergyBalanceQuestion(){
         const EBTerms_VM = (ebTerms.map((t) => ({
             Code: t.Code,
             Latex: t.Latex,
-            LatexText: t.LatexText, 
+            LatexText: t.LatexText,
+            Comment: t.comment,
 
             Questions: t.Questions.map((q) => ({
                 LatexCode: q.Latex,
@@ -1127,18 +1227,37 @@ export function AddEnergyBalanceQuestion(){
 
         //BCs
         if(BCKeyboard){
-            data.append('BoundryConditionsKeyboardId', BCKeyboard.Id)
-            const BCs_VM = bcTerms
+            data.append('BoundaryConditionsKeyboardId', BCKeyboard.Id)
+            const BCs_VM = bcTerms.map((t) => ({
+                Comment: t.comment,
+                AnswerElements: t.List.map((e,i) => (
+                    {
+                        NumericKeyId: e.NumericKeyId,
+                        ImageId: e.ImageId,
+                        Value:e.char,
+                        Order: i
+                    }
+            ))
+        }))
+
             data.append('BoundaryConditions',JSON.stringify(BCs_VM))
-    
         }
    
         //ICs
         if(ICKeyboard){
             data.append('InitialConditionsKeyboardId', ICKeyboard.Id)
-            const ICs_VM = icTerms
+            const ICs_VM = icTerms.map((t) => ({
+                Comment: t.comment,
+                AnswerElements: t.List.map((e,i) => (
+                    {
+                        NumericKeyId: e.NumericKeyId,
+                        ImageId: e.ImageId,
+                        Value:e.char,
+                        Order: i
+                    }
+            ))
+        }))
             data.append('InitialConditions',JSON.stringify(ICs_VM))
-    
         }
 
         addEnergyBalanceQuestion(data)
@@ -1184,6 +1303,8 @@ export function AddEnergyBalanceQuestion(){
             </Space>
         )
     }
+
+    console.log(bcTerms)
 
     const onChange = (newStep) => {setCurrentTab(newStep)}
 

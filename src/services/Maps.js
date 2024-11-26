@@ -137,6 +137,10 @@ export function removeBadgeSystemRequest(b){
     return EDIT_REQUEST_FILE_API('CourseMap/RemoveBadgeGroup/', b)
 }
 
+export function editMapImageRequest(b){
+    return EDIT_REQUEST_FILE_API('CourseMap/EditMapImage/', b)
+}
+
 export function getMapPlayStatisticsRequest_LS(Id){
     const results_LS = localStorage.getItem(MAP_LS_STORAGE_NAME + Id)
 
